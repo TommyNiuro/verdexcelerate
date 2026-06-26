@@ -8,14 +8,16 @@ function useCountUp(target: number, duration = 1500) {
   const [value, setValue] = useState(0)
   useEffect(() => {
     const start = performance.now()
+    let raf = 0
     function tick(now: number) {
       const elapsed = now - start
       const progress = Math.min(elapsed / duration, 1)
       const ease = 1 - Math.pow(1 - progress, 4)
       setValue(Math.round(ease * target))
-      if (progress < 1) requestAnimationFrame(tick)
+      if (progress < 1) raf = requestAnimationFrame(tick)
     }
-    requestAnimationFrame(tick)
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
   }, [target, duration])
   return value
 }
@@ -43,20 +45,75 @@ function CountCard({
 }
 
 const COUNTRIES_ORDER = ['co', 'cr', 'gt', 'hn', 'sv', 'pa'] as const
+type CountryKey = typeof COUNTRIES_ORDER[number]
 
-const COUNTRY_DATA = {
-  co: { name: 'Colombia',    flag: '🇨🇴', total: 1024, startupPct: 68, investorPct: 15, esoPct: 8 },
-  cr: { name: 'Costa Rica',  flag: '🇨🇷', total: 487,  startupPct: 42, investorPct: 12, esoPct: 6 },
-  gt: { name: 'Guatemala',   flag: '🇬🇹', total: 389,  startupPct: 30, investorPct: 8,  esoPct: 5 },
-  hn: { name: 'Honduras',    flag: '🇭🇳', total: 341,  startupPct: 26, investorPct: 7,  esoPct: 4 },
-  sv: { name: 'El Salvador', flag: '🇸🇻', total: 318,  startupPct: 22, investorPct: 6,  esoPct: 3 },
-  pa: { name: 'Panama',      flag: '🇵🇦', total: 288,  startupPct: 20, investorPct: 8,  esoPct: 3 },
+const COUNTRY_DATA: Record<CountryKey, {
+  name: string; flag: string; total: number
+  startupPct: number; investorPct: number; esoPct: number
+  startups: number; investors: number; femLead: number
+  phase: string; phaseCls: string; inversionM: number; cobertura: number
+}> = {
+  co: { name: 'Colombia',    flag: '🇨🇴', total: 1024, startupPct: 68, investorPct: 15, esoPct: 8, startups: 486, investors: 127, femLead: 18, phase: 'Maduro',      phaseCls: 'phase-maduro',      inversionM: 68, cobertura: 84 },
+  cr: { name: 'Costa Rica',  flag: '🇨🇷', total: 487,  startupPct: 42, investorPct: 12, esoPct: 6, startups: 198, investors: 64,  femLead: 22, phase: 'Emergente',   phaseCls: 'phase-emergente',   inversionM: 28, cobertura: 79 },
+  gt: { name: 'Guatemala',   flag: '🇬🇹', total: 389,  startupPct: 30, investorPct: 8,  esoPct: 5, startups: 147, investors: 38,  femLead: 14, phase: 'Crecimiento', phaseCls: 'phase-crecimiento', inversionM: 17, cobertura: 71 },
+  hn: { name: 'Honduras',    flag: '🇭🇳', total: 341,  startupPct: 26, investorPct: 7,  esoPct: 4, startups: 132, investors: 29,  femLead: 12, phase: 'Crecimiento', phaseCls: 'phase-crecimiento', inversionM: 12, cobertura: 68 },
+  sv: { name: 'El Salvador', flag: '🇸🇻', total: 318,  startupPct: 22, investorPct: 6,  esoPct: 3, startups: 118, investors: 31,  femLead: 16, phase: 'Crecimiento', phaseCls: 'phase-crecimiento', inversionM: 12, cobertura: 66 },
+  pa: { name: 'Panama',      flag: '🇵🇦', total: 288,  startupPct: 20, investorPct: 8,  esoPct: 3, startups: 162, investors: 42,  femLead: 20, phase: 'Emergente',   phaseCls: 'phase-emergente',   inversionM: 10, cobertura: 74 },
 }
 const MAX_TOTAL = 1024
 
+const REGIONAL = { actores: 2847, startups: 1243, inversion: 147, cobertura: 78 }
+
 export default function DashboardPage() {
-  const [activeFilter, setActiveFilter] = useState('all')
+  const [activeFilter, setActiveFilter] = useState<'all' | CountryKey>('all')
   const [notifOpen, setNotifOpen] = useState(false)
+  const [notifRead, setNotifRead] = useState(false)
+
+  const view = activeFilter === 'all' ? null : COUNTRY_DATA[activeFilter]
+  const stats = view
+    ? { actores: view.total, startups: view.startups, inversion: view.inversionM, cobertura: view.cobertura }
+    : REGIONAL
+
+  const cards = [
+    {
+      label: 'Actores mapeados', target: stats.actores,
+      delta: view ? `${view.flag} ${view.name}` : '+312 este mes',
+      deltaClass: view ? 'delta-neutral' : 'delta-up', iconClass: 'teal',
+      sparkPath: 'M0 35 Q10 30 20 28 T40 22 T60 18 T80 10 T100 5',
+      sparkFill: 'M0 35 Q10 30 20 28 T40 22 T60 18 T80 10 T100 5 V40 H0Z',
+      sparkColor: 'var(--accent)',
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>,
+    },
+    {
+      label: 'Startups AgrifoodTech', target: stats.startups,
+      delta: view ? `${view.phase}` : '+89 nuevas',
+      deltaClass: view ? 'delta-neutral' : 'delta-up', iconClass: 'blue',
+      sparkPath: 'M0 30 Q15 28 25 24 T50 20 T75 12 T100 8',
+      sparkFill: 'M0 30 Q15 28 25 24 T50 20 T75 12 T100 8 V40 H0Z',
+      sparkColor: '#3b82f6',
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>,
+    },
+    {
+      label: view ? 'Inversion estimada' : 'Inversion total rastreada', target: stats.inversion, prefix: '$', suffix: 'M',
+      delta: 'USD acumulado', deltaClass: 'delta-neutral', iconClass: 'purple',
+      sparkPath: 'M0 32 Q20 30 30 25 T55 22 T80 15 T100 10',
+      sparkFill: 'M0 32 Q20 30 30 25 T55 22 T80 15 T100 10 V40 H0Z',
+      sparkColor: '#8b5cf6',
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>,
+    },
+    {
+      label: 'Cobertura digital', target: stats.cobertura, suffix: '%',
+      delta: view ? 'cobertura del pais' : '+5pp vs. mes pasado',
+      deltaClass: view ? 'delta-neutral' : 'delta-up', iconClass: 'amber',
+      sparkPath: 'M0 28 Q10 26 20 24 T45 20 T65 16 T85 12 T100 8',
+      sparkFill: 'M0 28 Q10 26 20 24 T45 20 T65 16 T85 12 T100 8 V40 H0Z',
+      sparkColor: '#f59e0b',
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+    },
+  ]
+
+  // Rows visible in chart/table according to filter
+  const visibleCountries = activeFilter === 'all' ? COUNTRIES_ORDER : [activeFilter]
 
   return (
     <AppLayout title="Dashboard comparativo">
@@ -77,44 +134,46 @@ export default function DashboardPage() {
             <span className="live-dot"></span>
             <span>En vivo</span>&nbsp;&mdash; pipeline activo
           </div>
-          <div className="search-box" tabIndex={0} onClick={() => window.dispatchEvent(new Event('verdex:cmdk'))}>
+          <div className="search-box" tabIndex={0} role="button"
+            onClick={() => window.dispatchEvent(new Event('verdex:cmdk'))}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') window.dispatchEvent(new Event('verdex:cmdk')) }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             Buscar actores, paises...
             <kbd>&#8984;K</kbd>
           </div>
           <div style={{position:'relative'}}>
-            <button className="icon-btn" onClick={() => setNotifOpen(o => !o)}>
+            <button className="icon-btn" onClick={() => setNotifOpen(o => !o)} aria-label="Notificaciones">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-              <span className="notif-dot"></span>
+              {!notifRead && <span className="notif-dot"></span>}
             </button>
             {notifOpen && (
               <div className="notif-panel open">
                 <div className="notif-panel-header">
                   <div style={{display:'flex',alignItems:'center',gap:8}}>
                     <span className="notif-panel-title">Notificaciones</span>
-                    <span className="notif-panel-count">5</span>
+                    {!notifRead && <span className="notif-panel-count">5</span>}
                   </div>
-                  <span className="notif-mark-read" onClick={() => setNotifOpen(false)}>Marcar leidas</span>
+                  <span className="notif-mark-read" style={{cursor:'pointer'}} onClick={() => setNotifRead(true)}>Marcar leidas</span>
                 </div>
                 <div className="notif-list">
                   {[
-                    {color:'green',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,text:<><strong>312 actores</strong> clasificados automaticamente por IA</>,time:'hace 2 horas'},
-                    {color:'blue',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,text:<>Scraper <strong>F6S</strong> completo: 48 startups nuevas en Costa Rica</>,time:'hace 4 horas'},
-                    {color:'amber',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,text:<><strong>23 registros</strong> pendientes de validacion humana (confidence &lt; 0.6)</>,time:'hace 6 horas'},
-                    {color:'green',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>,text:<>Pipeline de dedup ejecutado: <strong>17 duplicados</strong> fusionados</>,time:'hace 8 horas'},
-                    {color:'blue',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>,text:<>Autorregistro: <strong>AgroTech SV</strong> solicito inclusion desde El Salvador</>,time:'hace 12 horas'},
+                    {color:'green',href:'/gobernanza',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,text:<><strong>312 actores</strong> clasificados automaticamente por IA</>,time:'hace 2 horas'},
+                    {color:'blue',href:'/fuentes',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,text:<>Scraper <strong>F6S</strong> completo: 48 startups nuevas en Costa Rica</>,time:'hace 4 horas'},
+                    {color:'amber',href:'/gobernanza',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,text:<><strong>23 registros</strong> pendientes de validacion humana (confidence &lt; 0.6)</>,time:'hace 6 horas'},
+                    {color:'green',href:'/fuentes',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>,text:<>Pipeline de dedup ejecutado: <strong>17 duplicados</strong> fusionados</>,time:'hace 8 horas'},
+                    {color:'blue',href:'/configuracion',icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>,text:<>Autorregistro: <strong>AgroTech SV</strong> solicito inclusion desde El Salvador</>,time:'hace 12 horas'},
                   ].map((n,i) => (
-                    <div key={i} className="notif-item unread">
+                    <a key={i} href={n.href} className={`notif-item${notifRead ? '' : ' unread'}`} style={{textDecoration:'none',color:'inherit',cursor:'pointer'}} onClick={() => setNotifOpen(false)}>
                       <div className={`notif-icon ${n.color}`}>{n.icon}</div>
                       <div className="notif-body"><div className="notif-text">{n.text}</div><div className="notif-time">{n.time}</div></div>
-                    </div>
+                    </a>
                   ))}
                 </div>
                 <div className="notif-panel-footer"><a href="/gobernanza">Ver historial completo</a></div>
               </div>
             )}
           </div>
-          <button className="icon-btn" onClick={() => window.location.href='/configuracion'}>
+          <button className="icon-btn" onClick={() => window.location.href='/configuracion'} aria-label="Exportar / configuracion" title="Exportar datos">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </button>
         </div>
@@ -132,53 +191,34 @@ export default function DashboardPage() {
             { key: 'hn',  label: '🇭🇳 Honduras' },
             { key: 'pa',  label: '🇵🇦 Panama' },
           ].map(({ key, label }) => (
-            <div key={key} className={`chip${activeFilter === key ? ' active' : ''}`} onClick={() => setActiveFilter(key)}>
+            <div key={key} className={`chip${activeFilter === key ? ' active' : ''}`} onClick={() => setActiveFilter(key as 'all' | CountryKey)}>
               {label}
             </div>
           ))}
+          {activeFilter !== 'all' && (
+            <div className="chip" style={{marginLeft:'auto',color:'var(--accent)'}} onClick={() => setActiveFilter('all')}>
+              ✕ Limpiar filtro
+            </div>
+          )}
         </div>
 
         {/* ── Stats row ── */}
         <div className="stats-row">
-          <CountCard
-            label="Actores mapeados" target={2847}
-            delta="+312 este mes" deltaClass="delta-up" iconClass="teal"
-            sparkPath="M0 35 Q10 30 20 28 T40 22 T60 18 T80 10 T100 5"
-            sparkFill="M0 35 Q10 30 20 28 T40 22 T60 18 T80 10 T100 5 V40 H0Z"
-            sparkColor="var(--accent)"
-            icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>}
-          />
-          <CountCard
-            label="Startups AgrifoodTech" target={1243}
-            delta="+89 nuevas" deltaClass="delta-up" iconClass="blue"
-            sparkPath="M0 30 Q15 28 25 24 T50 20 T75 12 T100 8"
-            sparkFill="M0 30 Q15 28 25 24 T50 20 T75 12 T100 8 V40 H0Z"
-            sparkColor="#3b82f6"
-            icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>}
-          />
-          <CountCard
-            label="Inversion total rastreada" target={147} prefix="$" suffix="M"
-            delta="USD acumulado" deltaClass="delta-neutral" iconClass="purple"
-            sparkPath="M0 32 Q20 30 30 25 T55 22 T80 15 T100 10"
-            sparkFill="M0 32 Q20 30 30 25 T55 22 T80 15 T100 10 V40 H0Z"
-            sparkColor="#8b5cf6"
-            icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>}
-          />
-          <CountCard
-            label="Cobertura digital" target={78} suffix="%"
-            delta="+5pp vs. mes pasado" deltaClass="delta-up" iconClass="amber"
-            sparkPath="M0 28 Q10 26 20 24 T45 20 T65 16 T85 12 T100 8"
-            sparkFill="M0 28 Q10 26 20 24 T45 20 T65 16 T85 12 T100 8 V40 H0Z"
-            sparkColor="#f59e0b"
-            icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>}
-          />
+          {cards.map((c) => (
+            <CountCard
+              key={c.label + activeFilter}
+              label={c.label} target={c.target} prefix={c.prefix} suffix={c.suffix}
+              delta={c.delta} deltaClass={c.deltaClass} iconClass={c.iconClass}
+              sparkPath={c.sparkPath} sparkFill={c.sparkFill} sparkColor={c.sparkColor} icon={c.icon}
+            />
+          ))}
         </div>
 
         {/* ── Country chart + Coverage donuts ── */}
         <div className="grid-2-1">
           <div className="panel anim-fade-up delay-5">
             <div className="panel-header">
-              <span className="panel-title">Actores por pais</span>
+              <span className="panel-title">Actores por pais{view ? ` · ${view.name}` : ''}</span>
               <div className="legend">
                 <div className="legend-item"><div className="legend-dot" style={{background:'linear-gradient(135deg,var(--accent),var(--accent-light))'}}></div> Startups</div>
                 <div className="legend-item"><div className="legend-dot" style={{background:'rgba(27,42,74,.6)'}}></div> Inversores</div>
@@ -192,8 +232,15 @@ export default function DashboardPage() {
                 const sw = (c.startupPct  * totalPct).toFixed(1) + '%'
                 const iw = (c.investorPct * totalPct).toFixed(1) + '%'
                 const ew = (c.esoPct      * totalPct).toFixed(1) + '%'
+                const dimmed = activeFilter !== 'all' && activeFilter !== key
                 return (
-                  <div key={key} className="country-row">
+                  <div
+                    key={key}
+                    className={`country-row${activeFilter === key ? ' is-active' : ''}`}
+                    style={{ cursor:'pointer', opacity: dimmed ? 0.3 : 1, transition:'opacity .25s' }}
+                    onClick={() => setActiveFilter(activeFilter === key ? 'all' : key)}
+                    title={`Filtrar por ${c.name}`}
+                  >
                     <div className="flag">
                       <span className="flag-emoji">{c.flag}</span>
                       {c.name}
@@ -260,12 +307,19 @@ export default function DashboardPage() {
               <table className="data-table">
                 <thead><tr><th>Pais</th><th>Fase</th><th className="num-col">Startups</th><th className="num-col">Inv.</th><th className="num-col">Lid. fem.</th></tr></thead>
                 <tbody>
-                  <tr><td style={{fontWeight:600}}>🇨🇴 Colombia</td><td><span className="phase-badge phase-maduro">Maduro</span></td><td className="num-col">486</td><td className="num-col">127</td><td className="num-col">18%</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇨🇷 Costa Rica</td><td><span className="phase-badge phase-emergente">Emergente</span></td><td className="num-col">198</td><td className="num-col">64</td><td className="num-col">22%</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇬🇹 Guatemala</td><td><span className="phase-badge phase-crecimiento">Crecimiento</span></td><td className="num-col">147</td><td className="num-col">38</td><td className="num-col">14%</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇭🇳 Honduras</td><td><span className="phase-badge phase-crecimiento">Crecimiento</span></td><td className="num-col">132</td><td className="num-col">29</td><td className="num-col">12%</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇸🇻 El Salvador</td><td><span className="phase-badge phase-crecimiento">Crecimiento</span></td><td className="num-col">118</td><td className="num-col">31</td><td className="num-col">16%</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇵🇦 Panama</td><td><span className="phase-badge phase-emergente">Emergente</span></td><td className="num-col">162</td><td className="num-col">42</td><td className="num-col">20%</td></tr>
+                  {visibleCountries.map((key) => {
+                    const c = COUNTRY_DATA[key]
+                    return (
+                      <tr key={key} style={{cursor:'pointer'}} title={`Ver perfil de ${c.name}`}
+                        onClick={() => window.location.href='/pais'}>
+                        <td style={{fontWeight:600}}>{c.flag} {c.name}</td>
+                        <td><span className={`phase-badge ${c.phaseCls}`}>{c.phase}</span></td>
+                        <td className="num-col">{c.startups}</td>
+                        <td className="num-col">{c.investors}</td>
+                        <td className="num-col">{c.femLead}%</td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -278,18 +332,18 @@ export default function DashboardPage() {
             </div>
             <div className="panel-body-flush">
               {[
-                {dot:'dot-green',text:<><strong>312 actores</strong> clasificados automaticamente por Gemini 2.5 Flash</>,time:'hace 2h'},
-                {dot:'dot-blue', text:<>Scraper <strong>F6S</strong> completo &mdash; 48 nuevas startups en Costa Rica</>,time:'hace 4h'},
-                {dot:'dot-yellow',text:<><strong>23 registros</strong> pendientes de validacion humana (confidence &lt; 0.6)</>,time:'hace 6h'},
-                {dot:'dot-green',text:<>Pipeline de dedup ejecutado &mdash; <strong>17 duplicados</strong> fusionados</>,time:'hace 8h'},
-                {dot:'dot-blue', text:<>Autorregistro: <strong>AgroTech SV</strong> solicito inclusion desde El Salvador</>,time:'hace 12h'},
-                {dot:'dot-green',text:<>Memo de cobertura actualizado &mdash; Chapman N&#770; = 2,980 startups estimadas</>,time:'hace 1d'},
-              ].map(({dot,text,time},i) => (
-                <div key={i} className="activity-item">
+                {dot:'dot-green',href:'/gobernanza',text:<><strong>312 actores</strong> clasificados automaticamente por Gemini 2.5 Flash</>,time:'hace 2h'},
+                {dot:'dot-blue', href:'/fuentes',text:<>Scraper <strong>F6S</strong> completo &mdash; 48 nuevas startups en Costa Rica</>,time:'hace 4h'},
+                {dot:'dot-yellow',href:'/gobernanza',text:<><strong>23 registros</strong> pendientes de validacion humana (confidence &lt; 0.6)</>,time:'hace 6h'},
+                {dot:'dot-green',href:'/fuentes',text:<>Pipeline de dedup ejecutado &mdash; <strong>17 duplicados</strong> fusionados</>,time:'hace 8h'},
+                {dot:'dot-blue', href:'/configuracion',text:<>Autorregistro: <strong>AgroTech SV</strong> solicito inclusion desde El Salvador</>,time:'hace 12h'},
+                {dot:'dot-green',href:'/brechas',text:<>Memo de cobertura actualizado &mdash; Chapman N&#770; = 2,980 startups estimadas</>,time:'hace 1d'},
+              ].map(({dot,href,text,time},i) => (
+                <a key={i} href={href} className="activity-item" style={{textDecoration:'none',color:'inherit',cursor:'pointer'}}>
                   <div className={`activity-dot ${dot}`}></div>
                   <div className="activity-text">{text}</div>
                   <div className="activity-time">{time}</div>
-                </div>
+                </a>
               ))}
             </div>
           </div>
@@ -303,23 +357,23 @@ export default function DashboardPage() {
           </div>
           <div className="insights-grid">
             {[
-              { cls:'insight-green', icn:'ig', color:'var(--success)',
+              { cls:'insight-green', icn:'ig', href:'/pais',
                 icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
                 text:<><strong>Colombia</strong> lidera con 36% de actores. Su ecosistema maduro genera efecto de red.</> },
-              { cls:'insight-blue', icn:'ib', color:'#3b82f6',
+              { cls:'insight-blue', icn:'ib', href:'/pais',
                 icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
                 text:<><strong>Costa Rica</strong> muestra el mayor crecimiento mensual (+18%). 48 startups nuevas este mes.</> },
-              { cls:'insight-amber', icn:'ia', color:'var(--warning)',
+              { cls:'insight-amber', icn:'ia', href:'/brechas',
                 icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
                 text:<>Brecha de genero: solo 29% liderazgo femenino. Meta TOR: 40%.</> },
-              { cls:'insight-red', icn:'ir', color:'var(--danger)',
+              { cls:'insight-red', icn:'ir', href:'/gobernanza',
                 icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>,
                 text:<>23 registros con confianza &lt; 0.6 requieren validacion humana urgente.</> },
-            ].map(({ cls, icn, icon, text }) => (
-              <div key={cls} className={`insight-item ${cls}`}>
+            ].map(({ cls, icn, icon, text, href }) => (
+              <a key={cls} href={href} className={`insight-item ${cls}`} style={{textDecoration:'none',color:'inherit',cursor:'pointer'}}>
                 <div className={`insight-icon ${icn}`}>{icon}</div>
                 <div className="insight-text">{text}</div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
@@ -332,21 +386,21 @@ export default function DashboardPage() {
           </div>
           <div className="pipeline-flow">
             {([
-              { name:'Scraping',        count:48,   status:'running',  label:'Activo'   },
-              { name:'Clasificacion IA', count:312,  status:'running',  label:'Activo'   },
-              { name:'Deduplicacion',   count:17,   status:'complete', label:'Completo' },
-              { name:'Validacion',      count:23,   status:'running',  label:'Activo'   },
-              { name:'Publicacion',     count:2847, status:'complete', label:'Completo' },
-            ] as const).map(({ name, count, status, label }, i) => (
+              { name:'Scraping',        count:48,   status:'running',  label:'Activo',   href:'/fuentes' },
+              { name:'Clasificacion IA', count:312,  status:'running',  label:'Activo',   href:'/gobernanza' },
+              { name:'Deduplicacion',   count:17,   status:'complete', label:'Completo', href:'/gobernanza' },
+              { name:'Validacion',      count:23,   status:'running',  label:'Activo',   href:'/gobernanza' },
+              { name:'Publicacion',     count:2847, status:'complete', label:'Completo', href:'/directorio' },
+            ] as const).map(({ name, count, status, label, href }, i) => (
               <span key={name} style={{display:'contents'}}>
-                <div className="pipeline-stage">
+                <a className="pipeline-stage" href={href} style={{textDecoration:'none',color:'inherit',cursor:'pointer'}} title={`Ir a ${name}`}>
                   <div className="pipeline-stage-status">
                     <div className={`status-dot ${status}`}></div>
                     {label}
                   </div>
                   <div className="pipeline-stage-name">{name}</div>
                   <div className="pipeline-stage-count">{count.toLocaleString()}</div>
-                </div>
+                </a>
                 {i < 4 && (
                   <div className="pipeline-arrow">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="9 18 15 12 9 6"/></svg>
