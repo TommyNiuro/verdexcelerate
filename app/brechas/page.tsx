@@ -5,10 +5,78 @@ import AppLayout from '@/components/AppLayout'
 
 type Tab = 'brechas' | 'oportunidades' | 'genero' | 'recomendaciones'
 
+// Mapeo de zonas a codigo de pais para deep-link a /pais?c=
+const ZONE_TO_COUNTRY: Record<string, string> = {
+  'La Guajira': 'CO', 'Sucre': 'CO', 'Cordoba': 'CO', 'Magdalena': 'CO',
+  'Morazan': 'SV', 'El Salvador': 'SV', 'Alta Verapaz': 'GT', 'Guatemala': 'GT',
+  'Honduras': 'HN',
+}
+function goToZone(zone: string) {
+  const code = ZONE_TO_COUNTRY[zone]
+  window.location.href = code ? `/pais?c=${code}` : '/zonas'
+}
+
+// Relaciones brecha <-> zona para el panel de referencias cruzadas
+const XREF_ZONES = [
+  { id: 'guajira', label: 'La Guajira, Colombia', dots: 5 },
+  { id: 'verapaz', label: 'Alta Verapaz, Guatemala', dots: 4 },
+  { id: 'morazan', label: 'Morazan, El Salvador', dots: 4 },
+  { id: 'sucre', label: 'Sucre, Colombia', dots: 3 },
+  { id: 'cordoba', label: 'Cordoba, Colombia', dots: 3 },
+  { id: 'magdalena', label: 'Magdalena, Colombia', dots: 2 },
+]
+const XREF_BRECHAS = [
+  { id: 'fondos', label: 'Fondos de capital semilla rurales', dots: 5, zones: ['guajira', 'sucre', 'morazan'] },
+  { id: 'conectividad', label: 'Conectividad para adopcion AgTech', dots: 5, zones: ['verapaz', 'guajira'] },
+  { id: 'genero', label: 'Liderazgo femenino AgrifoodTech', dots: 4, zones: ['guajira', 'verapaz', 'morazan', 'sucre', 'cordoba', 'magdalena'] },
+  { id: 'talento', label: 'Talento tecnico insuficiente', dots: 4, zones: ['morazan', 'magdalena'] },
+  { id: 'mercado', label: 'Acceso limitado a mercados', dots: 3, zones: ['cordoba', 'sucre'] },
+  { id: 'regulacion', label: 'Barreras regulatorias', dots: 3, zones: ['verapaz', 'morazan'] },
+]
+
 export default function BrechasPage() {
   const [tab, setTab] = useState<Tab>('brechas')
   const [planOpen, setPlanOpen] = useState(false)
   const [crossOpen, setCrossOpen] = useState(false)
+  const [catFilter, setCatFilter] = useState<string | null>(null)
+  const [xref, setXref] = useState<{ type: 'brecha' | 'zona'; id: string } | null>(null)
+  const [toast, setToast] = useState('')
+
+  function showToast(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(''), 3000)
+  }
+
+  // Referencias cruzadas: zonas/brechas resaltadas segun seleccion
+  const relZones = xref?.type === 'brecha' ? (XREF_BRECHAS.find(b => b.id === xref.id)?.zones ?? []) : []
+  const relBrechas = xref?.type === 'zona' ? XREF_BRECHAS.filter(b => b.zones.includes(xref.id)).map(b => b.id) : []
+  function xrefText(): string {
+    if (!xref) return 'Selecciona una brecha o zona para ver las conexiones.'
+    if (xref.type === 'brecha') {
+      const b = XREF_BRECHAS.find(x => x.id === xref.id)!
+      const names = b.zones.map(z => XREF_ZONES.find(x => x.id === z)?.label.split(',')[0]).join(', ')
+      return `"${b.label}" conecta con ${b.zones.length} zonas prioritarias: ${names}.`
+    }
+    const z = XREF_ZONES.find(x => x.id === xref.id)!
+    const bs = XREF_BRECHAS.filter(b => b.zones.includes(xref.id))
+    return `"${z.label}" se ve afectada por ${bs.length} brechas: ${bs.map(b => b.label).join(', ')}.`
+  }
+
+  async function copyActionPlan() {
+    const rows = [
+      ['Fondos de capital semilla rurales', 'Disenar mecanismo de tickets USD 5K-50K con proceso simplificado para zonas rurales', 'Equipo Componente 3', 'Q3 2026', 'Planificado'],
+      ['Conectividad para AgTech', 'Lanzar reto de innovacion abierta para soluciones offline-first y low-bandwidth', 'Equipo Componente 2', 'Q4 2026', 'Pendiente'],
+      ['Liderazgo femenino AgTech', 'Implementar programa de mentoria especializado para fundadoras con meta 40%', 'Equipo Genero + Comp. 2', 'Q3 2026', 'En progreso'],
+      ['Talento tecnico insuficiente', 'Establecer convenios con 3+ universidades para programas agtech interdisciplinarios', 'Equipo Componente 1', 'Q1 2027', 'Planificado'],
+      ['Acceso mercados exportacion', 'Articular 5 alianzas formales con corporativos ancla para pilotos en cadenas de valor', 'Equipo Componente 1', 'Q4 2026', 'En progreso'],
+      ['Barreras regulatorias', 'Mapear y proponer reformas regulatorias para drones, biotech y fintech agricola', 'Equipo Legal + Comp. 1', 'Q2 2027', 'Pendiente'],
+    ]
+    const text = ['VerdeXcelerate — Plan de Accion (Brechas Criticas)', 'Fecha: Junio 2026', '']
+      .concat(rows.map(r => `[${r[4]}] ${r[0]}\n  Accion: ${r[1]}\n  Responsable: ${r[2]} | Plazo: ${r[3]}`))
+      .join('\n')
+    try { await navigator.clipboard.writeText(text); showToast('Plan de accion copiado al portapapeles') }
+    catch { showToast('No se pudo copiar el plan') }
+  }
 
   return (
     <AppLayout>
@@ -48,7 +116,13 @@ export default function BrechasPage() {
               { cat: 'talento', icon: 'tal', label: 'Talento', val: '6', sub: 'brechas identificadas', color: 'var(--warning)', svg: <><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 6 3 6 3s3 0 6-3v-5"/></> },
               { cat: 'mercado', icon: 'mer', label: 'Mercado', val: '5', sub: 'brechas identificadas', color: 'var(--accent)', svg: <><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></> },
             ].map(s => (
-              <div key={s.cat} className={`summary-card cat-${s.cat}`}>
+              <div
+                key={s.cat}
+                className={`summary-card cat-${s.cat}`}
+                style={{cursor:'pointer', outline: catFilter === s.cat ? `2px solid ${s.color}` : 'none', outlineOffset:'2px', opacity: catFilter && catFilter !== s.cat ? .55 : 1, transition:'opacity .2s, outline .2s'}}
+                title={catFilter === s.cat ? 'Quitar filtro' : `Filtrar brechas de ${s.label}`}
+                onClick={() => setCatFilter(catFilter === s.cat ? null : s.cat)}
+              >
                 <div className={`summary-icon ${s.icon}`}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">{s.svg}</svg>
                 </div>
@@ -58,6 +132,12 @@ export default function BrechasPage() {
               </div>
             ))}
           </div>
+          {catFilter && (
+            <div style={{display:'flex',alignItems:'center',gap:'10px',margin:'4px 0 -8px',fontSize:'13px',color:'var(--muted)'}}>
+              <span>Mostrando brechas de <strong style={{color:'var(--text)'}}>{catFilter}</strong></span>
+              <button className="btn-sm" onClick={() => setCatFilter(null)}>Limpiar filtro</button>
+            </div>
+          )}
 
           <div className="radar-panel anim-fade-up delay-3">
             <h3>Severidad promedio por categoria (regional)</h3>
@@ -110,7 +190,7 @@ export default function BrechasPage() {
               { sev:'sev-4', title:'Talento tecnico insuficiente para startups AgrifoodTech', sevBadge:'4/5 Alta', sevCls:'sev-high', cat:'cat-talento', catLabel:'Talento', desc:'Deficit de perfiles tecnicos con conocimiento en agricultura. Universidades no ofrecen programas interdisciplinarios en agtech. Alta migracion de talento joven desde zonas rurales.', zones:['Morazan','Magdalena','Honduras'], meta:['Afecta jovenes'] },
               { sev:'sev-3', title:'Acceso limitado a mercados de exportacion', sevBadge:'3/5 Media', sevCls:'sev-medium', cat:'cat-mercado', catLabel:'Mercado', desc:'Productores de zonas prioritarias carecen de canales directos a mercados internacionales. Las startups de trazabilidad y logistica pueden resolver esta brecha si alcanzan escala.', zones:['Cordoba','Sucre'], meta:['Afecta peq. productores'] },
               { sev:'sev-3', title:'Barreras regulatorias para innovacion agricola', sevBadge:'3/5 Media', sevCls:'sev-medium', cat:'cat-regulacion', catLabel:'Regulacion', desc:'Marcos regulatorios desactualizados que limitan el uso de drones, biotecnologia y fintech agricola. Procesos de certificacion lentos y costosos para startups en etapa temprana.', zones:['Guatemala','Honduras','El Salvador'], meta:['Afecta startups'] },
-            ].map(g => (
+            ].filter(g => !catFilter || g.cat === `cat-${catFilter}`).map(g => (
               <div key={g.title} className={`gap-card ${g.sev}`}>
                 <div className="gap-header">
                   <div className="gap-title">{g.title}</div>
@@ -119,7 +199,15 @@ export default function BrechasPage() {
                 <span className={`gap-cat ${g.cat}`}>{g.catLabel}</span>
                 <div className="gap-desc">{g.desc}</div>
                 <div className="gap-zones">
-                  {g.zones.map(z => <span key={z} className="zone-tag">{z}</span>)}
+                  {g.zones.map(z => (
+                    <span
+                      key={z}
+                      className="zone-tag"
+                      style={{cursor:'pointer'}}
+                      title={z === 'Todas las zonas' ? 'Ver zonas prioritarias' : `Ver ${z}`}
+                      onClick={() => z === 'Todas las zonas' ? (window.location.href = '/zonas') : goToZone(z)}
+                    >{z}</span>
+                  ))}
                 </div>
                 <div className="gap-meta">
                   {g.meta.map(m => <div key={m} className="gap-meta-item">{m}</div>)}
@@ -164,12 +252,22 @@ export default function BrechasPage() {
               <table className="data-table">
                 <thead><tr><th>Pais</th><th className="num-col">Total startups</th><th className="num-col">Lid. femenino</th><th className="num-col">%</th><th>Tendencia</th></tr></thead>
                 <tbody>
-                  <tr><td style={{fontWeight:600}}>🇨🇷 Costa Rica</td><td className="num-col">198</td><td className="num-col">44</td><td className="num-col" style={{color:'var(--accent)',fontWeight:700}}>22%</td><td style={{color:'var(--success)',fontSize:'12px'}}>▲ Creciendo</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇵🇦 Panama</td><td className="num-col">162</td><td className="num-col">32</td><td className="num-col" style={{color:'var(--accent)',fontWeight:700}}>20%</td><td style={{color:'var(--success)',fontSize:'12px'}}>▲ Creciendo</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇨🇴 Colombia</td><td className="num-col">486</td><td className="num-col">88</td><td className="num-col" style={{fontWeight:700}}>18%</td><td style={{color:'var(--muted)',fontSize:'12px'}}>— Estable</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇸🇻 El Salvador</td><td className="num-col">118</td><td className="num-col">19</td><td className="num-col" style={{fontWeight:700}}>16%</td><td style={{color:'var(--muted)',fontSize:'12px'}}>— Estable</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇬🇹 Guatemala</td><td className="num-col">147</td><td className="num-col">21</td><td className="num-col" style={{color:'var(--warning)',fontWeight:700}}>14%</td><td style={{color:'var(--danger)',fontSize:'12px'}}>▼ Bajando</td></tr>
-                  <tr><td style={{fontWeight:600}}>🇭🇳 Honduras</td><td className="num-col">132</td><td className="num-col">16</td><td className="num-col" style={{color:'var(--danger)',fontWeight:700}}>12%</td><td style={{color:'var(--danger)',fontSize:'12px'}}>▼ Bajando</td></tr>
+                  {[
+                    { c:'CR', flag:'🇨🇷', name:'Costa Rica', tot:198, fem:44, pct:'22%', pctColor:'var(--accent)', trend:'▲ Creciendo', trendColor:'var(--success)' },
+                    { c:'PA', flag:'🇵🇦', name:'Panama', tot:162, fem:32, pct:'20%', pctColor:'var(--accent)', trend:'▲ Creciendo', trendColor:'var(--success)' },
+                    { c:'CO', flag:'🇨🇴', name:'Colombia', tot:486, fem:88, pct:'18%', pctColor:'', trend:'— Estable', trendColor:'var(--muted)' },
+                    { c:'SV', flag:'🇸🇻', name:'El Salvador', tot:118, fem:19, pct:'16%', pctColor:'', trend:'— Estable', trendColor:'var(--muted)' },
+                    { c:'GT', flag:'🇬🇹', name:'Guatemala', tot:147, fem:21, pct:'14%', pctColor:'var(--warning)', trend:'▼ Bajando', trendColor:'var(--danger)' },
+                    { c:'HN', flag:'🇭🇳', name:'Honduras', tot:132, fem:16, pct:'12%', pctColor:'var(--danger)', trend:'▼ Bajando', trendColor:'var(--danger)' },
+                  ].map(r => (
+                    <tr key={r.c} style={{cursor:'pointer'}} title={`Ver perfil de ${r.name}`} onClick={() => window.location.href = `/pais?c=${r.c}`}>
+                      <td style={{fontWeight:600}}>{r.flag} {r.name}</td>
+                      <td className="num-col">{r.tot}</td>
+                      <td className="num-col">{r.fem}</td>
+                      <td className="num-col" style={{color:r.pctColor || undefined,fontWeight:700}}>{r.pct}</td>
+                      <td style={{color:r.trendColor,fontSize:'12px'}}>{r.trend}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -333,7 +431,7 @@ export default function BrechasPage() {
             </div>
             <div className="modal-footer">
               <button className="btn-modal-close" onClick={() => setPlanOpen(false)}>Cerrar</button>
-              <button className="btn-copy">
+              <button className="btn-copy" onClick={copyActionPlan}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{width:'14px',height:'14px'}}><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                 Copiar al portapapeles
               </button>
@@ -350,48 +448,57 @@ export default function BrechasPage() {
             </h3>
             <button className={`cross-ref-toggle${crossOpen ? ' open' : ''}`}>▼</button>
           </div>
-          <div className="cross-ref-connections">Selecciona una brecha o zona para ver las conexiones.</div>
+          <div className="cross-ref-connections" style={xref ? {color:'var(--text)'} : undefined}>{xrefText()}</div>
           <div className={`cross-ref-body${crossOpen ? ' open' : ''}`}>
             <div className="cross-ref-content">
               <div className="cross-ref-col">
                 <h4>Brechas</h4>
-                {[
-                  { label:'Fondos de capital semilla rurales', dots:5 },
-                  { label:'Conectividad para adopcion AgTech', dots:5 },
-                  { label:'Liderazgo femenino AgrifoodTech', dots:4 },
-                  { label:'Talento tecnico insuficiente', dots:4 },
-                  { label:'Acceso limitado a mercados', dots:3 },
-                  { label:'Barreras regulatorias', dots:3 },
-                ].map(item => (
-                  <div key={item.label} className="cross-ref-item">
-                    {item.label}
-                    <div className="cross-ref-strength">
-                      {Array.from({length:5},(_,i) => <div key={i} className={`strength-dot${i<item.dots?' filled':''}`}></div>)}
+                {XREF_BRECHAS.map(item => {
+                  const selected = xref?.type === 'brecha' && xref.id === item.id
+                  const related = relBrechas.includes(item.id)
+                  return (
+                    <div
+                      key={item.id}
+                      className="cross-ref-item"
+                      style={{cursor:'pointer', background: selected ? 'var(--accent)' : related ? 'rgba(0,167,157,.12)' : undefined, color: selected ? '#fff' : undefined, borderColor: selected || related ? 'var(--accent)' : undefined, transition:'all .15s'}}
+                      onClick={() => setXref(selected ? null : { type:'brecha', id:item.id })}
+                    >
+                      {item.label}
+                      <div className="cross-ref-strength">
+                        {Array.from({length:5},(_,i) => <div key={i} className={`strength-dot${i<item.dots?' filled':''}`}></div>)}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
               <div className="cross-ref-col">
                 <h4>Zonas Prioritarias</h4>
-                {[
-                  { label:'La Guajira, Colombia', dots:5 },
-                  { label:'Alta Verapaz, Guatemala', dots:4 },
-                  { label:'Morazan, El Salvador', dots:4 },
-                  { label:'Sucre, Colombia', dots:3 },
-                  { label:'Cordoba, Colombia', dots:3 },
-                  { label:'Magdalena, Colombia', dots:2 },
-                ].map(item => (
-                  <div key={item.label} className="cross-ref-item">
-                    {item.label}
-                    <div className="cross-ref-strength">
-                      {Array.from({length:5},(_,i) => <div key={i} className={`strength-dot${i<item.dots?' filled':''}`}></div>)}
+                {XREF_ZONES.map(item => {
+                  const selected = xref?.type === 'zona' && xref.id === item.id
+                  const related = relZones.includes(item.id)
+                  return (
+                    <div
+                      key={item.id}
+                      className="cross-ref-item"
+                      style={{cursor:'pointer', background: selected ? 'var(--accent)' : related ? 'rgba(0,167,157,.12)' : undefined, color: selected ? '#fff' : undefined, borderColor: selected || related ? 'var(--accent)' : undefined, transition:'all .15s'}}
+                      onClick={() => setXref(selected ? null : { type:'zona', id:item.id })}
+                    >
+                      {item.label}
+                      <div className="cross-ref-strength">
+                        {Array.from({length:5},(_,i) => <div key={i} className={`strength-dot${i<item.dots?' filled':''}`}></div>)}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className={`toast${toast ? ' show' : ''}`}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>{toast}</span>
       </div>
     </AppLayout>
   )
