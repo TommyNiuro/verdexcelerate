@@ -26,6 +26,8 @@ export type Country = {
   notes: string | null
 }
 
+const COUNTRY_IDS: Record<string, number> = { CO: 1, CR: 2, SV: 3, GT: 4, HN: 5, PA: 6 }
+
 export async function getActors(filters?: {
   type?: string
   country?: string
@@ -35,7 +37,7 @@ export async function getActors(filters?: {
 }) {
   let query = supabase
     .from('actors')
-    .select('*, countries(iso2, name)')
+    .select('*, countries(iso2, name)', { count: 'exact' })
     .eq('status', 'aprobado')
     .order('name')
 
@@ -43,7 +45,8 @@ export async function getActors(filters?: {
     query = query.eq('type', filters.type)
   }
   if (filters?.country && filters.country !== 'todos') {
-    query = query.eq('countries.iso2', filters.country)
+    const countryId = COUNTRY_IDS[filters.country.toUpperCase()]
+    if (countryId) query = query.eq('country_id', countryId)
   }
   if (filters?.search) {
     query = query.ilike('name', `%${filters.search}%`)
