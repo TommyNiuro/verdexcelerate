@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zonas Prioritarias · VerdeXcelerate</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;450;500;600;700&family=DM+Serif+Display&display=swap');
+    :root {
+      --bg:#f4f5f7;--surface:#ffffff;--fg:#1B2A4A;--muted:#7a8599;--border:#e5e8ee;
+      --accent:#00A79D;--accent-light:#00c9bd;--accent-dark:#008f87;
+      --accent-soft:rgba(0,167,157,.08);--fg-soft:rgba(27,42,74,.04);
+      --sidebar-bg:linear-gradient(195deg,#0f1729 0%,#162038 50%,#1a2744 100%);
+      --sidebar-fg:#8392ab;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.06);
+      --shadow-lg:0 10px 25px -3px rgba(0,0,0,.07),0 4px 10px -4px rgba(0,0,0,.04);
+      --font-display:'DM Serif Display',Georgia,serif;
+      --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+      --font-mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,monospace;
+      --radius:10px;--radius-lg:16px;
+      --ease-out-expo:cubic-bezier(0.16,1,0.3,1);--ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;font-family:var(--font-body);font-size:14px;color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased;height:100vh;display:grid;grid-template-columns:260px 1fr;overflow:hidden}
+    @media(max-width:920px){
+      body{grid-template-columns:1fr;overflow:auto}
+      .sidebar{display:none}
+      .main{overflow:auto}
+      .topbar{padding:12px 16px}
+      .topbar h1{font-size:18px}
+      .content{padding:20px 16px 80px}
+      .zones-grid{grid-template-columns:repeat(2,1fr)}
+      .page-intro h2{font-size:22px}
+      .risk-matrix{padding:20px}
+      .risk-matrix-grid{overflow-x:auto}
+      .heatmap-container{overflow-x:auto}
+      .heatmap-grid{min-width:520px}
+      .timeline-track{overflow-x:auto;padding-bottom:12px}
+      .timeline-track{min-width:600px}
+      .modal-content{width:95%;max-width:none}
+      .compare-table{display:block;overflow-x:auto}
+      .panel-body-flush{overflow-x:auto}
+      .data-table{min-width:700px}
+    }
+    @media(max-width:600px){
+      .content{padding:16px 12px 80px}
+      .topbar{flex-direction:column;gap:8px;align-items:flex-start}
+      .topbar h1{font-size:16px}
+      .zones-grid{grid-template-columns:1fr}
+      .zone-card{padding:20px}
+      .zone-top{flex-direction:column;gap:8px}
+      .zone-stats{grid-template-columns:repeat(3,1fr);gap:8px}
+      .zone-stat{padding:8px}
+      .zone-stat-val{font-size:16px}
+      .zone-bar-label{width:80px;font-size:10.5px}
+      .zone-name{font-size:16px}
+      .page-intro h2{font-size:20px}
+      .page-intro p{font-size:13px}
+      .risk-matrix{padding:16px}
+      .risk-matrix-grid{min-width:360px;overflow-x:auto;grid-template-rows:repeat(3,80px) 28px}
+      .rm-legend{gap:10px}
+      .rm-legend-item{font-size:10px}
+      .progress-timeline{padding:20px 16px}
+      .timeline-track{min-width:500px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .coverage-heatmap{padding:20px 16px}
+      .heatmap-grid{min-width:480px}
+      .heatmap-legend{display:none}
+      .compare-btn{width:100%;justify-content:center;font-size:12px;padding:10px 16px}
+      .modal-content{width:98%;max-height:90vh;border-radius:12px}
+      .modal-header h3{font-size:16px}
+      .modal-header{padding:14px 16px}
+      .compare-table th,.compare-table td{padding:10px 8px;font-size:11px}
+      .data-table th,.data-table td{padding:10px 12px;font-size:12px}
+      .panel-header{padding:14px 16px}
+      .panel-title{font-size:13px}
+      .zone-recommendations{margin-top:12px}
+      .zone-rec-item{flex-direction:column;gap:6px}
+      .zone-rationale{font-size:12px}
+      .breadcrumb{font-size:11px}
+    }
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:3px}
+
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes growBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    .anim-fade-up{animation:fadeInUp .7s var(--ease-out-expo) both}
+    .delay-1{animation-delay:.08s}.delay-2{animation-delay:.16s}.delay-3{animation-delay:.24s}
+    .delay-4{animation-delay:.32s}.delay-5{animation-delay:.4s}.delay-6{animation-delay:.48s}
+
+    .sidebar{background:var(--sidebar-bg);display:flex;flex-direction:column;padding:24px 0;overflow-y:auto;position:relative}
+    .sidebar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03))}
+    .sidebar-logo{display:flex;align-items:center;gap:12px;padding:0 24px 28px;color:white;font-family:var(--font-display);font-size:18px;text-decoration:none}
+    .sidebar-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-light));display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,167,157,.3)}
+    .sidebar-logo-icon svg{width:18px;height:18px}
+    .sidebar-section{padding:0 14px;margin-bottom:4px}
+    .sidebar-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:20px 10px 8px}
+    .sidebar-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--sidebar-fg);text-decoration:none;font-size:13px;font-weight:450;transition:all .2s var(--ease-out-expo);position:relative}
+    .sidebar-link:hover{color:white;transform:translateX(2px)}
+    .sidebar-link.active{color:white;background:rgba(255,255,255,.08)}
+    .sidebar-link.active::after{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent);border-radius:0 3px 3px 0}
+    .sidebar-link svg{width:18px;height:18px;opacity:.5;flex-shrink:0}.sidebar-link:hover svg,.sidebar-link.active svg{opacity:1}
+    .sidebar-badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:linear-gradient(135deg,rgba(0,167,157,.2),rgba(0,167,157,.1));color:var(--accent-light);padding:2px 8px;border-radius:6px;font-weight:500}
+    .sidebar-bottom{margin-top:auto;padding:16px 14px 0;border-top:1px solid rgba(255,255,255,.06)}
+    .sidebar-user{display:flex;align-items:center;gap:10px;padding:10px 12px;color:var(--sidebar-fg);font-size:13px}
+    .sidebar-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,rgba(0,167,157,.4),rgba(0,167,157,.2));display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--accent-light)}
+
+    .main{display:flex;flex-direction:column;overflow:hidden}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:rgba(255,255,255,.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0}
+    .topbar h1{font-family:var(--font-display);font-size:22px;font-weight:400;letter-spacing:-.02em;margin:0}
+    .breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:2px}
+    .breadcrumb a{color:var(--muted);text-decoration:none}.breadcrumb a:hover{color:var(--accent)}
+    .breadcrumb svg{width:12px;height:12px;opacity:.4}
+    .content{flex:1;overflow-y:auto;padding:28px 32px 64px}
+
+    .page-intro{max-width:64ch;margin-bottom:32px}
+    .page-intro h2{font-family:var(--font-display);font-size:28px;letter-spacing:-.025em;margin:0 0 10px;font-weight:400}
+    .page-intro p{color:var(--muted);font-size:14px;line-height:1.7;margin:0}
+
+    /* Zone cards */
+    .zones-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;margin-bottom:32px}
+    .zone-card{
+      background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;
+      transition:all .3s var(--ease-out-expo);position:relative;overflow:hidden;
+    }
+    .zone-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease-out-expo)}
+    .zone-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:transparent}
+    .zone-card:hover::before{transform:scaleX(1)}
+    .zone-card.sev-high::before{background:linear-gradient(90deg,var(--danger),#f87171)}
+    .zone-card.sev-med::before{background:linear-gradient(90deg,var(--warning),#fbbf24)}
+
+    .zone-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+    .zone-name{font-size:18px;font-weight:700;letter-spacing:-.01em}
+    .zone-country{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-top:4px}
+    .zone-severity{
+      display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;
+      font-size:11px;font-weight:600;flex-shrink:0;
+    }
+    .zone-severity::before{content:'';width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite}
+    .severity-high{background:rgba(239,68,68,.1);color:var(--danger)}.severity-high::before{background:var(--danger)}
+    .severity-med{background:rgba(245,158,11,.1);color:var(--warning)}.severity-med::before{background:var(--warning)}
+
+    .zone-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+    .zone-stat{
+      text-align:center;padding:12px;background:var(--bg);border-radius:var(--radius);
+      transition:all .2s var(--ease-out-expo);
+    }
+    .zone-stat:hover{background:var(--accent-soft);transform:translateY(-1px)}
+    .zone-stat-val{font-family:var(--font-mono);font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+    .zone-stat-label{font-size:10px;color:var(--muted);margin-top:3px;font-weight:500}
+
+    .zone-bars{margin-top:16px}
+    .zone-bar-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+    .zone-bar-label{width:110px;font-size:11.5px;color:var(--muted);flex-shrink:0;font-weight:500}
+    .zone-bar-track{flex:1;height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+    .zone-bar-fill{height:100%;border-radius:4px;transform-origin:left;animation:growBar .8s var(--ease-out-expo) both}
+    .fill-danger{background:linear-gradient(90deg,var(--danger),#f87171)}
+    .fill-warning{background:linear-gradient(90deg,var(--warning),#fbbf24)}
+    .fill-accent{background:linear-gradient(90deg,var(--accent),var(--accent-light))}
+    .zone-bar-val{width:32px;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--muted);font-weight:600}
+    .zone-rationale{font-size:12.5px;color:var(--muted);line-height:1.6;padding-top:14px;border-top:1px solid rgba(0,0,0,.04);margin-top:16px}
+
+    /* Gap panel */
+    .panel{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:24px;transition:all .3s var(--ease-out-expo)}
+    .panel:hover{box-shadow:var(--shadow-lg);border-color:transparent}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border)}
+    .panel-title{font-size:14px;font-weight:600;letter-spacing:-.01em}
+    .panel-body-flush{padding:0}
+    .data-table{width:100%;border-collapse:collapse}
+    .data-table th{text-align:left;padding:12px 20px;font-size:10.5px;font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);background:var(--bg)}
+    .data-table td{padding:12px 20px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.04);transition:background .15s}
+    .data-table tbody tr:hover{background:var(--fg-soft)}
+    .data-table .num-col{font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:right}
+    .gap-cat{display:inline-flex;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600}
+    .gap-financiamiento{background:rgba(99,102,241,.1);color:#6366f1}
+    .gap-talento{background:rgba(245,158,11,.1);color:var(--warning)}
+    .gap-conectividad{background:rgba(239,68,68,.1);color:var(--danger)}
+    .gap-genero{background:rgba(236,72,153,.1);color:#ec4899}
+    .gap-mercado{background:rgba(0,167,157,.1);color:var(--accent)}
+
+    /* ── Feature 1: Risk Matrix ── */
+    .risk-matrix{position:relative;background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:24px;transition:all .3s var(--ease-out-expo)}
+    .risk-matrix:hover{box-shadow:var(--shadow-lg);border-color:transparent}
+    .risk-matrix-title{font-size:14px;font-weight:600;letter-spacing:-.01em;margin-bottom:20px}
+    .risk-matrix-grid{display:grid;grid-template-columns:32px repeat(3,1fr);grid-template-rows:repeat(3,100px) 32px;gap:2px;position:relative}
+    .risk-matrix-cell{border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;transition:all .25s var(--ease-out-expo)}
+    .risk-matrix-cell:hover{transform:scale(1.03);z-index:2}
+    .rm-red{background:rgba(239,68,68,.12)}.rm-orange{background:rgba(245,158,11,.1)}.rm-yellow{background:rgba(250,204,21,.1)}.rm-green{background:rgba(16,185,129,.08)}
+    .rm-axis-label{font-family:var(--font-mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:center}
+    .rm-axis-y{writing-mode:vertical-rl;transform:rotate(180deg)}
+    .rm-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;cursor:pointer;transition:all .25s var(--ease-spring);position:absolute;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:3}
+    .rm-dot:hover{transform:scale(1.25);z-index:10}
+    .rm-dot-high{background:linear-gradient(135deg,var(--danger),#f87171)}.rm-dot-med{background:linear-gradient(135deg,var(--warning),#fbbf24)}
+    .rm-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--fg);color:white;padding:8px 14px;border-radius:8px;font-size:11px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;line-height:1.5}
+    .rm-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--fg)}
+    .rm-dot:hover .rm-tooltip{opacity:1}
+    .rm-legend{display:flex;gap:16px;margin-top:16px;flex-wrap:wrap}
+    .rm-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+    .rm-legend-swatch{width:12px;height:12px;border-radius:3px}
+
+    /* ── Feature 2: Zone Recommendations ── */
+    .zone-recommendations{border-top:1px solid rgba(0,0,0,.04);margin-top:16px;overflow:hidden}
+    .zone-rec-toggle{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:12px 0 0;cursor:pointer;font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--accent);transition:all .2s}
+    .zone-rec-toggle:hover{color:var(--accent-dark)}
+    .zone-rec-toggle svg{width:16px;height:16px;transition:transform .3s var(--ease-out-expo)}
+    .zone-rec-toggle.open svg{transform:rotate(180deg)}
+    .zone-rec-list{max-height:0;overflow:hidden;transition:max-height .5s var(--ease-out-expo),opacity .3s;opacity:0}
+    .zone-rec-list.expanded{max-height:400px;opacity:1;padding-top:10px}
+    .zone-rec-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.03)}
+    .zone-rec-item:last-child{border-bottom:none}
+    .zone-rec-priority{flex-shrink:0;font-size:9px;font-weight:700;padding:3px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.06em}
+    .priority-alta{background:rgba(239,68,68,.1);color:var(--danger)}.priority-media{background:rgba(245,158,11,.1);color:var(--warning)}
+    .zone-rec-text{font-size:12px;color:var(--muted);line-height:1.6}
+
+    /* ── Feature 3: Zone Comparison Modal ── */
+    .compare-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,var(--accent),var(--accent-light));color:white;border:none;border-radius:var(--radius);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .25s var(--ease-out-expo);box-shadow:0 4px 14px rgba(0,167,157,.25);margin-bottom:24px}
+    .compare-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,167,157,.35)}
+    .compare-btn svg{width:16px;height:16px}
+    .zone-compare-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s var(--ease-out-expo)}
+    .zone-compare-modal.visible{opacity:1;pointer-events:all}
+    .modal-overlay{position:absolute;inset:0;background:rgba(27,42,74,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+    .modal-content{position:relative;background:white;border-radius:var(--radius-lg);width:90%;max-width:960px;max-height:85vh;overflow:auto;box-shadow:0 25px 60px rgba(0,0,0,.15);animation:fadeInUp .4s var(--ease-out-expo) both}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:2}
+    .modal-header h3{font-family:var(--font-display);font-size:20px;margin:0;font-weight:400}
+    .modal-close{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:white;cursor:pointer;display:grid;place-items:center;transition:all .2s}
+    .modal-close:hover{background:var(--bg);border-color:var(--accent)}
+    .modal-close svg{width:16px;height:16px;color:var(--muted)}
+    .compare-table{width:100%;border-collapse:collapse}
+    .compare-table th{padding:12px 16px;font-size:10.5px;font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);background:var(--bg);text-align:center;position:sticky;top:64px;z-index:1}
+    .compare-table th:first-child{text-align:left}
+    .compare-table td{padding:14px 16px;font-size:13px;text-align:center;border-bottom:1px solid rgba(0,0,0,.04)}
+    .compare-table td:first-child{text-align:left;font-weight:600}
+    .compare-table tbody tr:hover{background:var(--fg-soft)}
+    .val-best{background:rgba(16,185,129,.1);color:var(--success);font-weight:700;border-radius:6px}
+    .val-worst{background:rgba(239,68,68,.08);color:var(--danger);font-weight:700;border-radius:6px}
+
+    /* ── Feature 4: Progress Timeline ── */
+    .progress-timeline{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:24px;transition:all .3s var(--ease-out-expo)}
+    .progress-timeline:hover{box-shadow:var(--shadow-lg);border-color:transparent}
+    .timeline-title{font-size:14px;font-weight:600;letter-spacing:-.01em;margin-bottom:24px}
+    .timeline-track{display:flex;align-items:flex-start;position:relative;padding:0 24px}
+    .timeline-connector{position:absolute;top:18px;left:48px;right:48px;height:3px;background:var(--border);border-radius:2px;z-index:0}
+    .timeline-connector-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent-light));width:0;transition:width 1.5s var(--ease-out-expo)}
+    .timeline-node{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
+    .timeline-dot{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;border:3px solid var(--border);background:white;transition:all .4s var(--ease-spring);cursor:default}
+    .timeline-dot svg{width:16px;height:16px}
+    .timeline-dot.completed{border-color:var(--accent);background:var(--accent);color:white}
+    .timeline-dot.in-progress{border-color:var(--accent);background:white;color:var(--accent);animation:pulse 2s infinite}
+    .timeline-dot.planned{border-color:var(--border);background:white;color:var(--muted)}
+    .timeline-label{margin-top:10px;font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--fg)}
+    .timeline-desc{font-size:11px;color:var(--muted);text-align:center;margin-top:4px;max-width:120px;line-height:1.4}
+
+    /* ── Feature 5: Coverage Heatmap ── */
+    .coverage-heatmap{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:24px;transition:all .3s var(--ease-out-expo)}
+    .coverage-heatmap:hover{box-shadow:var(--shadow-lg);border-color:transparent}
+    .heatmap-title{font-size:14px;font-weight:600;letter-spacing:-.01em;margin-bottom:20px}
+    .heatmap-container{display:flex;gap:24px;align-items:flex-start}
+    .heatmap-grid{display:grid;grid-template-columns:100px repeat(5,1fr);gap:2px;flex:1}
+    .heatmap-header{font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 6px;text-align:center;font-weight:600}
+    .heatmap-header:first-child{text-align:left}
+    .heatmap-row-label{font-size:12px;font-weight:600;display:flex;align-items:center;padding:0 4px}
+    .heatmap-cell{height:42px;border-radius:6px;display:grid;place-items:center;font-family:var(--font-mono);font-size:11px;font-weight:600;color:white;cursor:default;transition:all .25s var(--ease-spring);position:relative}
+    .heatmap-cell:hover{transform:scale(1.08);z-index:2;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+    .heatmap-cell-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--fg);color:white;padding:6px 12px;border-radius:6px;font-size:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+    .heatmap-cell-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--fg)}
+    .heatmap-cell:hover .heatmap-cell-tooltip{opacity:1}
+    .heatmap-legend{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .heatmap-legend-label{font-size:10px;color:var(--muted);font-weight:500}
+    .heatmap-legend-bar{width:18px;height:140px;border-radius:6px;background:linear-gradient(180deg,var(--accent),rgba(0,167,157,.15))}
+
+    @keyframes timelineGrow{from{width:0}to{width:var(--fill)}}
+
+/* ─── AI Assistant Chat ─── */
+.ai-fab{
+  position:fixed;bottom:24px;right:24px;z-index:10000;
+  width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#00A79D,#008f87);color:white;
+  box-shadow:0 6px 24px rgba(0,167,157,.4);
+  display:grid;place-items:center;
+  transition:all .3s cubic-bezier(0.34,1.56,0.64,1);
+  animation:aiFabIn .5s cubic-bezier(0.16,1,0.3,1) 1.5s both;
+}
+@keyframes aiFabIn{from{opacity:0;transform:scale(0) rotate(-180deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.ai-fab:hover{transform:scale(1.1);box-shadow:0 8px 32px rgba(0,167,157,.5)}
+.ai-fab:active{transform:scale(.95)}
+.ai-fab svg{width:26px;height:26px}
+.ai-fab .ai-fab-close{display:none}
+.ai-fab.active .ai-fab-icon{display:none}
+.ai-fab.active .ai-fab-close{display:block}
+.ai-fab-badge{
+  position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:50%;
+  background:#22c55e;border:2px solid white;font-size:0;
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+
+.ai-chat{
+  position:fixed;bottom:92px;right:24px;z-index:9999;
+  width:400px;max-width:calc(100vw - 48px);height:560px;max-height:calc(100vh - 120px);
+  background:rgba(255,255,255,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(0,0,0,.08);border-radius:20px;
+  box-shadow:0 24px 80px rgba(0,0,0,.15),0 8px 32px rgba(0,0,0,.08);
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:scale(0) translateY(20px);transform-origin:bottom right;
+  opacity:0;pointer-events:none;
+  transition:all .35s cubic-bezier(0.16,1,0.3,1);
+}
+.ai-chat.open{transform:scale(1) translateY(0);opacity:1;pointer-events:auto}
+
+.ai-chat-header{
+  padding:16px 20px;display:flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,#1B2A4A,#0f1729);color:white;flex-shrink:0;
+}
+.ai-chat-avatar{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,#00A79D,#00c9bd);
+  display:grid;place-items:center;flex-shrink:0;
+}
+.ai-chat-avatar svg{width:20px;height:20px}
+.ai-chat-header-info{flex:1}
+.ai-chat-header-name{font-size:14px;font-weight:600}
+.ai-chat-header-status{font-size:11px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px}
+.ai-chat-header-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block}
+.ai-chat-header-actions{display:flex;gap:4px}
+.ai-chat-header-actions button{background:rgba(255,255,255,.1);border:none;color:white;width:28px;height:28px;border-radius:8px;cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.ai-chat-header-actions button:hover{background:rgba(255,255,255,.2)}
+
+.ai-chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ai-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;animation:msgIn .3s cubic-bezier(0.16,1,0.3,1)}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ai-msg.bot{background:#f0faf9;color:#1B2A4A;border-bottom-left-radius:4px;align-self:flex-start;border:1px solid rgba(0,167,157,.1)}
+.ai-msg.user{background:linear-gradient(135deg,#00A79D,#008f87);color:white;border-bottom-right-radius:4px;align-self:flex-end}
+.ai-msg code{font-family:ui-monospace,'SF Mono',monospace;font-size:12px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px}
+.ai-msg strong{font-weight:600}
+.ai-typing{align-self:flex-start;display:flex;gap:4px;padding:12px 16px;background:#f0faf9;border-radius:14px;border-bottom-left-radius:4px;border:1px solid rgba(0,167,157,.1)}
+.ai-typing span{width:6px;height:6px;border-radius:50%;background:#00A79D;opacity:.4;animation:typingDot 1.4s ease-in-out infinite}
+.ai-typing span:nth-child(2){animation-delay:.2s}
+.ai-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+.ai-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px}
+.ai-suggestion{
+  padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  background:rgba(0,167,157,.06);color:#00A79D;border:1px solid rgba(0,167,157,.15);
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.ai-suggestion:hover{background:rgba(0,167,157,.12);border-color:#00A79D}
+
+.ai-chat-footer{padding:12px 16px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:8px;flex-shrink:0;background:white}
+.ai-chat-input{
+  flex:1;padding:10px 14px;border:1px solid rgba(0,0,0,.1);border-radius:12px;
+  font-size:13px;font-family:inherit;outline:none;resize:none;
+  transition:border-color .2s;min-height:40px;max-height:100px;
+}
+.ai-chat-input:focus{border-color:#00A79D;box-shadow:0 0 0 3px rgba(0,167,157,.1)}
+.ai-chat-input::placeholder{color:#a0a8b8}
+.ai-chat-send{
+  width:40px;height:40px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#00A79D,#008f87);color:white;
+  cursor:pointer;display:grid;place-items:center;flex-shrink:0;
+  transition:all .2s;
+}
+.ai-chat-send:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,167,157,.3)}
+.ai-chat-send:active{transform:scale(.95)}
+.ai-chat-send:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.ai-chat-send svg{width:18px;height:18px}
+
+@media(max-width:500px){
+  .ai-chat{width:calc(100vw - 16px);right:8px;bottom:80px;height:calc(100vh - 100px);border-radius:16px}
+  .ai-fab{bottom:16px;right:16px;width:50px;height:50px}
+}
+  </style>
+</head>
+<body>
+  <aside class="sidebar" data-od-id="sidebar">
+    <a href="index.html" class="sidebar-logo"><div class="sidebar-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M12 3c-1.2 3.6-4.4 6-8 7 1.6 2 2.8 4.6 3 7.5C8.6 15.2 10.2 13 12 12c1.8 1 3.4 3.2 5 5.5.2-2.9 1.4-5.5 3-7.5-3.6-1-6.8-3.4-8-7z"/></svg></div>VerdeXcelerate</a>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Principal</div>
+      <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
+      <a href="directorio.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Directorio</a>
+      <a href="mapa.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>Mapa</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analisis</div>
+      <a href="pais.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Perfiles de pais</a>
+      <a href="zonas.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Zonas prioritarias<span class="sidebar-badge">6</span></a>
+      <a href="brechas.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Brechas y retos</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Datos</div>
+      <a href="fuentes.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Fuentes</a>
+      <a href="gobernanza.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Gobernanza IA</a>
+    </div>
+    <div class="sidebar-bottom">
+      <a href="configuracion.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Configuracion</a>
+      <div class="sidebar-user"><div class="sidebar-avatar">TS</div><div><div style="color:white;font-size:13px;font-weight:500">TechnoServe</div><div style="font-size:11px">Administrador</div></div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar" data-od-id="topbar">
+      <div><div class="breadcrumb"><a href="dashboard.html">VerdeXcelerate</a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg><span>Zonas prioritarias</span></div><h1>Diagnostico de zonas prioritarias</h1></div>
+    </header>
+
+    <div class="content" data-od-id="zones-content">
+      <div class="page-intro anim-fade-up">
+        <h2>6 zonas de alta vulnerabilidad</h2>
+        <p>Zonas donde la cobertura digital es baja y se requiere investigacion primaria (Fase II). La priorizacion se basa en vulnerabilidad, poblacion indigena, ruralidad y potencial agroalimentario.</p>
+      </div>
+
+      <div class="zones-grid" data-od-id="zones-grid">
+        <div class="zone-card sev-high anim-fade-up delay-1">
+          <div class="zone-top">
+            <div><div class="zone-name">La Guajira</div><div class="zone-country">&#127464;&#127476; Colombia &middot; Caribe</div></div>
+            <div class="zone-severity severity-high">Alta vulnerabilidad</div>
+          </div>
+          <div class="zone-stats">
+            <div class="zone-stat"><div class="zone-stat-val">12</div><div class="zone-stat-label">Actores</div></div>
+            <div class="zone-stat"><div class="zone-stat-val" style="color:var(--danger)">28%</div><div class="zone-stat-label">Cobertura</div></div>
+            <div class="zone-stat"><div class="zone-stat-val">0</div><div class="zone-stat-label">Lid. femenino</div></div>
+          </div>
+          <div class="zone-bars">
+            <div class="zone-bar-row"><span class="zone-bar-label">Financiamiento</span><div class="zone-bar-track"><div class="zone-bar-fill fill-danger" style="width:15%"></div></div><span class="zone-bar-val">1/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Conectividad</span><div class="zone-bar-track"><div class="zone-bar-fill fill-danger" style="width:20%"></div></div><span class="zone-bar-val">1/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Talento</span><div class="zone-bar-track"><div class="zone-bar-fill fill-warning" style="width:35%"></div></div><span class="zone-bar-val">2/5</span></div>
+          </div>
+          <div class="zone-rationale">Alta vulnerabilidad. Poblacion Wayuu con agricultura de subsistencia. Potencial en energia solar para riego y cadenas de chivo/ovino.</div>
+          <div class="zone-recommendations">
+            <button class="zone-rec-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('expanded')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>Recomendaciones de intervencion</button>
+            <div class="zone-rec-list">
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Implementar programa de microfinanzas con enfoque etnico para productores Wayuu, apalancando energia solar para sistemas de riego.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Desplegar conectividad satelital comunitaria para habilitar plataformas AgTech en zonas remotas.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-media">Media</span><span class="zone-rec-text">Crear programa de mentoria con mujeres lideres de Barranquilla para formar liderazgo femenino local.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone-card sev-high anim-fade-up delay-2">
+          <div class="zone-top">
+            <div><div class="zone-name">Sucre</div><div class="zone-country">&#127464;&#127476; Colombia &middot; Caribe</div></div>
+            <div class="zone-severity severity-high">Alta vulnerabilidad</div>
+          </div>
+          <div class="zone-stats">
+            <div class="zone-stat"><div class="zone-stat-val">18</div><div class="zone-stat-label">Actores</div></div>
+            <div class="zone-stat"><div class="zone-stat-val" style="color:var(--warning)">34%</div><div class="zone-stat-label">Cobertura</div></div>
+            <div class="zone-stat"><div class="zone-stat-val">2</div><div class="zone-stat-label">Lid. femenino</div></div>
+          </div>
+          <div class="zone-bars">
+            <div class="zone-bar-row"><span class="zone-bar-label">Financiamiento</span><div class="zone-bar-track"><div class="zone-bar-fill fill-danger" style="width:20%"></div></div><span class="zone-bar-val">1/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Mercado</span><div class="zone-bar-track"><div class="zone-bar-fill fill-warning" style="width:40%"></div></div><span class="zone-bar-val">2/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Infraestructura</span><div class="zone-bar-track"><div class="zone-bar-fill fill-warning" style="width:35%"></div></div><span class="zone-bar-val">2/5</span></div>
+          </div>
+          <div class="zone-rationale">Alta vulnerabilidad. Cadena de yuca y name con potencial agroindustrial. Limitado acceso a servicios financieros rurales.</div>
+          <div class="zone-recommendations">
+            <button class="zone-rec-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('expanded')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>Recomendaciones de intervencion</button>
+            <div class="zone-rec-list">
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Establecer fondo rotatorio de capital semilla para agroindustria de yuca, vinculando cooperativas con mercados nacionales.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-media">Media</span><span class="zone-rec-text">Desarrollar hub de procesamiento agroindustrial con acceso a infraestructura compartida y asistencia tecnica.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone-card sev-high anim-fade-up delay-3">
+          <div class="zone-top">
+            <div><div class="zone-name">Morazan</div><div class="zone-country">&#127480;&#127483; El Salvador</div></div>
+            <div class="zone-severity severity-high">Alta vulnerabilidad</div>
+          </div>
+          <div class="zone-stats">
+            <div class="zone-stat"><div class="zone-stat-val">8</div><div class="zone-stat-label">Actores</div></div>
+            <div class="zone-stat"><div class="zone-stat-val" style="color:var(--danger)">22%</div><div class="zone-stat-label">Cobertura</div></div>
+            <div class="zone-stat"><div class="zone-stat-val">1</div><div class="zone-stat-label">Lid. femenino</div></div>
+          </div>
+          <div class="zone-bars">
+            <div class="zone-bar-row"><span class="zone-bar-label">Conectividad</span><div class="zone-bar-track"><div class="zone-bar-fill fill-danger" style="width:15%"></div></div><span class="zone-bar-val">1/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Talento</span><div class="zone-bar-track"><div class="zone-bar-fill fill-danger" style="width:20%"></div></div><span class="zone-bar-val">1/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Financiamiento</span><div class="zone-bar-track"><div class="zone-bar-fill fill-warning" style="width:30%"></div></div><span class="zone-bar-val">2/5</span></div>
+          </div>
+          <div class="zone-rationale">Alta vulnerabilidad y potencial agroalimentario. Cadenas de cafe y granos basicos. CONAMYPE como aliado potencial para programas de innovacion local.</div>
+          <div class="zone-recommendations">
+            <button class="zone-rec-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('expanded')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>Recomendaciones de intervencion</button>
+            <div class="zone-rec-list">
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Alianza con CONAMYPE para programa de digitalizacion de productores de cafe y granos basicos.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Instalar puntos de acceso WiFi comunitario en mercados rurales para adopcion de herramientas digitales.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-media">Media</span><span class="zone-rec-text">Programa de formacion tecnica acelerada en agronegocios con universidades locales.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone-card sev-high anim-fade-up delay-4">
+          <div class="zone-top">
+            <div><div class="zone-name">Alta Verapaz</div><div class="zone-country">&#127468;&#127481; Guatemala</div></div>
+            <div class="zone-severity severity-high">Alta vulnerabilidad</div>
+          </div>
+          <div class="zone-stats">
+            <div class="zone-stat"><div class="zone-stat-val">14</div><div class="zone-stat-label">Actores</div></div>
+            <div class="zone-stat"><div class="zone-stat-val" style="color:var(--danger)">26%</div><div class="zone-stat-label">Cobertura</div></div>
+            <div class="zone-stat"><div class="zone-stat-val">1</div><div class="zone-stat-label">Lid. femenino</div></div>
+          </div>
+          <div class="zone-bars">
+            <div class="zone-bar-row"><span class="zone-bar-label">Genero</span><div class="zone-bar-track"><div class="zone-bar-fill fill-danger" style="width:15%"></div></div><span class="zone-bar-val">1/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Conectividad</span><div class="zone-bar-track"><div class="zone-bar-fill fill-danger" style="width:20%"></div></div><span class="zone-bar-val">1/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Mercado</span><div class="zone-bar-track"><div class="zone-bar-fill fill-warning" style="width:30%"></div></div><span class="zone-bar-val">2/5</span></div>
+          </div>
+          <div class="zone-rationale">Alta concentracion de poblacion indigena Q'eqchi' y ruralidad. Cadenas de cafe, cardamomo y cacao. CafeTrace GT opera aqui con trazabilidad blockchain.</div>
+          <div class="zone-recommendations">
+            <button class="zone-rec-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('expanded')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>Recomendaciones de intervencion</button>
+            <div class="zone-rec-list">
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Escalar modelo CafeTrace blockchain a cardamomo y cacao para trazabilidad integrada multi-cadena.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Programa de empoderamiento economico para mujeres Q'eqchi' en liderazgo de cooperativas.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-media">Media</span><span class="zone-rec-text">Infraestructura de conectividad rural con torres comunitarias de bajo costo.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone-card sev-med anim-fade-up delay-5">
+          <div class="zone-top">
+            <div><div class="zone-name">Cordoba</div><div class="zone-country">&#127464;&#127476; Colombia &middot; Caribe</div></div>
+            <div class="zone-severity severity-med">Vulnerabilidad media</div>
+          </div>
+          <div class="zone-stats">
+            <div class="zone-stat"><div class="zone-stat-val">24</div><div class="zone-stat-label">Actores</div></div>
+            <div class="zone-stat"><div class="zone-stat-val" style="color:var(--warning)">41%</div><div class="zone-stat-label">Cobertura</div></div>
+            <div class="zone-stat"><div class="zone-stat-val">3</div><div class="zone-stat-label">Lid. femenino</div></div>
+          </div>
+          <div class="zone-bars">
+            <div class="zone-bar-row"><span class="zone-bar-label">Financiamiento</span><div class="zone-bar-track"><div class="zone-bar-fill fill-warning" style="width:35%"></div></div><span class="zone-bar-val">2/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Talento</span><div class="zone-bar-track"><div class="zone-bar-fill fill-warning" style="width:40%"></div></div><span class="zone-bar-val">2/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Infraestructura</span><div class="zone-bar-track"><div class="zone-bar-fill fill-accent" style="width:50%"></div></div><span class="zone-bar-val">3/5</span></div>
+          </div>
+          <div class="zone-rationale">Excluye Monteria. Region Caribe con cadenas de lacteos y ganaderia. Potencial agroindustrial con brechas en acceso a financiamiento temprano.</div>
+          <div class="zone-recommendations">
+            <button class="zone-rec-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('expanded')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>Recomendaciones de intervencion</button>
+            <div class="zone-rec-list">
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Crear fondo de garantias para productores lacteos y ganaderos que acceden a credito por primera vez.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-media">Media</span><span class="zone-rec-text">Programa de innovacion en cadena fria y logistica para reducir perdidas post-cosecha en lacteos.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone-card sev-high anim-fade-up delay-6">
+          <div class="zone-top">
+            <div><div class="zone-name">Magdalena</div><div class="zone-country">&#127464;&#127476; Colombia &middot; Caribe</div></div>
+            <div class="zone-severity severity-high">Alta vulnerabilidad</div>
+          </div>
+          <div class="zone-stats">
+            <div class="zone-stat"><div class="zone-stat-val">19</div><div class="zone-stat-label">Actores</div></div>
+            <div class="zone-stat"><div class="zone-stat-val" style="color:var(--warning)">36%</div><div class="zone-stat-label">Cobertura</div></div>
+            <div class="zone-stat"><div class="zone-stat-val">2</div><div class="zone-stat-label">Lid. femenino</div></div>
+          </div>
+          <div class="zone-bars">
+            <div class="zone-bar-row"><span class="zone-bar-label">Financiamiento</span><div class="zone-bar-track"><div class="zone-bar-fill fill-danger" style="width:20%"></div></div><span class="zone-bar-val">1/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Conectividad</span><div class="zone-bar-track"><div class="zone-bar-fill fill-warning" style="width:35%"></div></div><span class="zone-bar-val">2/5</span></div>
+            <div class="zone-bar-row"><span class="zone-bar-label">Mercado</span><div class="zone-bar-track"><div class="zone-bar-fill fill-warning" style="width:40%"></div></div><span class="zone-bar-val">2/5</span></div>
+          </div>
+          <div class="zone-rationale">Alta vulnerabilidad. Sierra Nevada con cafe de alta calidad. Zona bananera con potencial de innovacion en logistica y trazabilidad.</div>
+          <div class="zone-recommendations">
+            <button class="zone-rec-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('expanded')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>Recomendaciones de intervencion</button>
+            <div class="zone-rec-list">
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Plataforma de trazabilidad blockchain para cafe Sierra Nevada con certificacion de origen.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-alta">Alta</span><span class="zone-rec-text">Fondo de capital semilla para startups AgTech en zona bananera orientadas a logistica inteligente.</span></div>
+              <div class="zone-rec-item"><span class="zone-rec-priority priority-media">Media</span><span class="zone-rec-text">Conectar productores con plataformas de comercio electronico para acceso directo a mercados de exportacion.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compare Button -->
+      <button class="compare-btn anim-fade-up" style="animation-delay:.52s" onclick="document.getElementById('compareModal').classList.add('visible')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M21 3l-7 7"/><path d="M3 3l7 7"/><path d="M16 21h5v-5"/><path d="M8 21H3v-5"/><path d="M21 21l-7-7"/><path d="M3 21l7-7"/></svg>
+        Comparar Zonas
+      </button>
+
+      <!-- Feature 1: Risk Matrix -->
+      <div class="risk-matrix anim-fade-up" style="animation-delay:.54s" data-od-id="risk-matrix">
+        <div class="risk-matrix-title">Matriz de riesgo &mdash; Impacto vs Probabilidad</div>
+        <div class="risk-matrix-grid">
+          <div class="rm-axis-label rm-axis-y" style="grid-row:1/4">Impacto</div>
+          <!-- Row 1: High impact -->
+          <div class="risk-matrix-cell rm-red" style="grid-column:2;grid-row:1;position:relative">
+            <div class="rm-dot rm-dot-high" style="top:30px;left:20px"><span>LG</span><div class="rm-tooltip">La Guajira<br>Impacto: Alto | Prob: Alta</div></div>
+          </div>
+          <div class="risk-matrix-cell rm-red" style="grid-column:3;grid-row:1;position:relative">
+            <div class="rm-dot rm-dot-high" style="top:25px;left:35px"><span>MZ</span><div class="rm-tooltip">Morazan<br>Impacto: Alto | Prob: Alta</div></div>
+          </div>
+          <div class="risk-matrix-cell rm-orange" style="grid-column:4;grid-row:1;position:relative">
+            <div class="rm-dot rm-dot-high" style="top:35px;left:25px"><span>AV</span><div class="rm-tooltip">Alta Verapaz<br>Impacto: Alto | Prob: Media</div></div>
+          </div>
+          <!-- Row 2: Med impact -->
+          <div class="risk-matrix-cell rm-orange" style="grid-column:2;grid-row:2;position:relative">
+            <div class="rm-dot rm-dot-high" style="top:30px;left:30px"><span>MG</span><div class="rm-tooltip">Magdalena<br>Impacto: Medio | Prob: Alta</div></div>
+          </div>
+          <div class="risk-matrix-cell rm-yellow" style="grid-column:3;grid-row:2;position:relative">
+            <div class="rm-dot rm-dot-high" style="top:25px;left:20px"><span>SU</span><div class="rm-tooltip">Sucre<br>Impacto: Medio | Prob: Media</div></div>
+          </div>
+          <div class="risk-matrix-cell rm-green" style="grid-column:4;grid-row:2"></div>
+          <!-- Row 3: Low impact -->
+          <div class="risk-matrix-cell rm-yellow" style="grid-column:2;grid-row:3"></div>
+          <div class="risk-matrix-cell rm-green" style="grid-column:3;grid-row:3;position:relative">
+            <div class="rm-dot rm-dot-med" style="top:30px;left:30px"><span>CO</span><div class="rm-tooltip">Cordoba<br>Impacto: Bajo | Prob: Media</div></div>
+          </div>
+          <div class="risk-matrix-cell rm-green" style="grid-column:4;grid-row:3"></div>
+          <!-- X axis labels -->
+          <div style="grid-column:2;grid-row:4" class="rm-axis-label">Alta</div>
+          <div style="grid-column:3;grid-row:4" class="rm-axis-label">Media</div>
+          <div style="grid-column:4;grid-row:4" class="rm-axis-label">Baja</div>
+        </div>
+        <div style="text-align:center;font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.06em">PROBABILIDAD DE CRISIS</div>
+        <div class="rm-legend">
+          <div class="rm-legend-item"><div class="rm-legend-swatch" style="background:rgba(239,68,68,.3)"></div>Riesgo critico</div>
+          <div class="rm-legend-item"><div class="rm-legend-swatch" style="background:rgba(245,158,11,.25)"></div>Riesgo alto</div>
+          <div class="rm-legend-item"><div class="rm-legend-swatch" style="background:rgba(250,204,21,.25)"></div>Riesgo moderado</div>
+          <div class="rm-legend-item"><div class="rm-legend-swatch" style="background:rgba(16,185,129,.2)"></div>Riesgo bajo</div>
+        </div>
+      </div>
+
+      <!-- Feature 4: Progress Timeline -->
+      <div class="progress-timeline anim-fade-up" style="animation-delay:.56s" data-od-id="progress-timeline">
+        <div class="timeline-title">Cronograma de intervenciones</div>
+        <div class="timeline-track" id="timelineTrack">
+          <div class="timeline-connector"><div class="timeline-connector-fill" id="timelineFill"></div></div>
+          <div class="timeline-node">
+            <div class="timeline-dot completed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="timeline-label">Q1 2025</div>
+            <div class="timeline-desc">Diagnostico y mapeo de actores completado</div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot completed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="timeline-label">Q3 2025</div>
+            <div class="timeline-desc">Investigacion primaria Fase II iniciada</div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot in-progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/></svg></div>
+            <div class="timeline-label">Q1 2026</div>
+            <div class="timeline-desc">Pilotos de intervencion en 3 zonas</div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot planned"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="timeline-label">Q3 2026</div>
+            <div class="timeline-desc">Escalamiento a zonas restantes</div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot planned"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+            <div class="timeline-label">Q4 2026</div>
+            <div class="timeline-desc">Evaluacion de impacto y reporte final</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 5: Coverage Heatmap -->
+      <div class="coverage-heatmap anim-fade-up" style="animation-delay:.58s" data-od-id="coverage-heatmap">
+        <div class="heatmap-title">Mapa de calor &mdash; Cobertura por zona y dimension</div>
+        <div class="heatmap-container">
+          <div class="heatmap-grid" id="heatmapGrid">
+            <!-- Populated by JS -->
+          </div>
+          <div class="heatmap-legend">
+            <div class="heatmap-legend-label">100%</div>
+            <div class="heatmap-legend-bar"></div>
+            <div class="heatmap-legend-label">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel anim-fade-up" style="animation-delay:.6s" data-od-id="gaps-analysis">
+        <div class="panel-header"><span class="panel-title">Brechas criticas identificadas en zonas prioritarias</span></div>
+        <div class="panel-body-flush">
+          <table class="data-table">
+            <thead><tr><th>Brecha</th><th>Categoria</th><th>Zona(s)</th><th class="num-col">Severidad</th><th>Afecta mujeres</th><th>Afecta peq. prod.</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600">Ausencia de fondos de capital semilla rurales</td><td><span class="gap-cat gap-financiamiento">Financiamiento</span></td><td>La Guajira, Sucre, Morazan</td><td class="num-col" style="color:var(--danger);font-weight:700">5/5</td><td>Si</td><td>Si</td></tr>
+              <tr><td style="font-weight:600">Sin conectividad para adopcion de AgTech</td><td><span class="gap-cat gap-conectividad">Conectividad</span></td><td>Alta Verapaz, La Guajira</td><td class="num-col" style="color:var(--danger);font-weight:700">5/5</td><td>Si</td><td>Si</td></tr>
+              <tr><td style="font-weight:600">Baja representacion femenina en liderazgo</td><td><span class="gap-cat gap-genero">Genero</span></td><td>Todas las zonas</td><td class="num-col" style="color:var(--danger);font-weight:700">4/5</td><td>Si</td><td>&mdash;</td></tr>
+              <tr><td style="font-weight:600">Talento tecnico insuficiente para startups</td><td><span class="gap-cat gap-talento">Talento</span></td><td>Morazan, Magdalena</td><td class="num-col" style="color:var(--warning);font-weight:700">4/5</td><td>&mdash;</td><td>&mdash;</td></tr>
+              <tr><td style="font-weight:600">Acceso limitado a mercados de exportacion</td><td><span class="gap-cat gap-mercado">Mercado</span></td><td>Cordoba, Sucre</td><td class="num-col" style="color:var(--warning);font-weight:700">3/5</td><td>&mdash;</td><td>Si</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature 3: Zone Comparison Modal -->
+  <div class="zone-compare-modal" id="compareModal">
+    <div class="modal-overlay" onclick="this.parentElement.classList.remove('visible')"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Comparacion de zonas prioritarias</h3>
+        <button class="modal-close" onclick="document.getElementById('compareModal').classList.remove('visible')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <table class="compare-table" id="compareTable">
+        <!-- Populated by JS -->
+      </table>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    /* ── Feature 3: Populate comparison table ── */
+    const zones = [
+      { name:'La Guajira', actores:12, cobertura:28, lidFem:0, financiamiento:1, conectividad:1 },
+      { name:'Sucre', actores:18, cobertura:34, lidFem:2, financiamiento:1, conectividad:3 },
+      { name:'Morazan', actores:8, cobertura:22, lidFem:1, financiamiento:2, conectividad:1 },
+      { name:'Alta Verapaz', actores:14, cobertura:26, lidFem:1, financiamiento:2, conectividad:1 },
+      { name:'Cordoba', actores:24, cobertura:41, lidFem:3, financiamiento:2, conectividad:3 },
+      { name:'Magdalena', actores:19, cobertura:36, lidFem:2, financiamiento:1, conectividad:2 }
+    ];
+    const metrics = [
+      { key:'actores', label:'Actores', higherBetter:true },
+      { key:'cobertura', label:'Cobertura (%)', higherBetter:true },
+      { key:'lidFem', label:'Liderazgo femenino', higherBetter:true },
+      { key:'financiamiento', label:'Financiamiento (1-5)', higherBetter:true },
+      { key:'conectividad', label:'Conectividad (1-5)', higherBetter:true }
+    ];
+    const ct = document.getElementById('compareTable');
+    let thead = '<thead><tr><th>Metrica</th>';
+    zones.forEach(z => { thead += '<th>' + z.name + '</th>'; });
+    thead += '</tr></thead>';
+    let tbody = '<tbody>';
+    metrics.forEach(m => {
+      const vals = zones.map(z => z[m.key]);
+      const best = m.higherBetter ? Math.max(...vals) : Math.min(...vals);
+      const worst = m.higherBetter ? Math.min(...vals) : Math.max(...vals);
+      tbody += '<tr><td>' + m.label + '</td>';
+      zones.forEach(z => {
+        const v = z[m.key];
+        const suffix = m.key === 'cobertura' ? '%' : '';
+        let cls = '';
+        if (v === best) cls = 'val-best';
+        else if (v === worst) cls = 'val-worst';
+        tbody += '<td class="' + cls + '">' + v + suffix + '</td>';
+      });
+      tbody += '</tr>';
+    });
+    tbody += '</tbody>';
+    ct.innerHTML = thead + tbody;
+
+    /* ── Feature 5: Populate coverage heatmap ── */
+    const heatData = {
+      zones: ['La Guajira','Sucre','Morazan','Alta Verapaz','Cordoba','Magdalena'],
+      dims: ['Actores','Cobertura','Lid. Fem.','Financ.','Conect.'],
+      values: [
+        [24,28,0,20,20],
+        [36,34,22,20,60],
+        [16,22,11,40,20],
+        [28,26,11,40,20],
+        [48,41,33,40,60],
+        [38,36,22,20,40]
+      ]
+    };
+    const hg = document.getElementById('heatmapGrid');
+    let hhtml = '<div class="heatmap-header"></div>';
+    heatData.dims.forEach(d => { hhtml += '<div class="heatmap-header">' + d + '</div>'; });
+    heatData.zones.forEach((z, i) => {
+      hhtml += '<div class="heatmap-row-label">' + z + '</div>';
+      heatData.values[i].forEach((v, j) => {
+        const alpha = Math.max(0.15, v / 100);
+        const textColor = v > 45 ? 'white' : 'var(--fg)';
+        hhtml += '<div class="heatmap-cell" style="background:rgba(0,167,157,' + alpha + ');color:' + textColor + '">' + v + '%<div class="heatmap-cell-tooltip">' + z + ' &middot; ' + heatData.dims[j] + ': ' + v + '%</div></div>';
+      });
+    });
+    hg.innerHTML = hhtml;
+
+    /* ── Feature 4: Animate timeline on scroll ── */
+    const tlFill = document.getElementById('timelineFill');
+    const tlObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          tlFill.style.width = '45%';
+          tlObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    tlObserver.observe(document.getElementById('timelineTrack'));
+
+    /* ── IntersectionObserver for animations ── */
+    const animObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.anim-fade-up').forEach(el => {
+      el.style.animationPlayState = 'paused';
+      animObserver.observe(el);
+    });
+
+    /* ── Close modal on Escape ── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.getElementById('compareModal').classList.remove('visible');
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Fuentes de Datos · VerdeXcelerate</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;450;500;600;700&family=DM+Serif+Display&display=swap');
+    :root{--bg:#f4f5f7;--surface:#fff;--fg:#1B2A4A;--muted:#7a8599;--border:#e5e8ee;--accent:#00A79D;--accent-light:#00c9bd;--accent-dark:#008f87;--accent-soft:rgba(0,167,157,.08);--fg-soft:rgba(27,42,74,.04);--sidebar-bg:linear-gradient(195deg,#0f1729,#162038,#1a2744);--sidebar-fg:#8392ab;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--shadow-lg:0 10px 25px -3px rgba(0,0,0,.07),0 4px 10px -4px rgba(0,0,0,.04);--font-display:'DM Serif Display',Georgia,serif;--font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;--font-mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,monospace;--radius:10px;--radius-lg:16px;--ease-out-expo:cubic-bezier(.16,1,.3,1);--ease-spring:cubic-bezier(.34,1.56,.64,1)}
+    *,*::before,*::after{box-sizing:border-box}body{margin:0;font-family:var(--font-body);font-size:14px;color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased;height:100vh;display:grid;grid-template-columns:260px 1fr;overflow:hidden}@media(max-width:920px){body{grid-template-columns:1fr}.sidebar{display:none}}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:3px}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@keyframes growBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes dotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}.anim-fade-up{animation:fadeInUp .7s var(--ease-out-expo) both}.delay-1{animation-delay:.06s}.delay-2{animation-delay:.12s}.delay-3{animation-delay:.18s}.delay-4{animation-delay:.24s}.delay-5{animation-delay:.3s}.delay-6{animation-delay:.36s}
+    .sidebar{background:var(--sidebar-bg);display:flex;flex-direction:column;padding:24px 0;overflow-y:auto;position:relative}.sidebar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03))}.sidebar-logo{display:flex;align-items:center;gap:12px;padding:0 24px 28px;color:#fff;font-family:var(--font-display);font-size:18px;text-decoration:none}.sidebar-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-light));display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,167,157,.3)}.sidebar-logo-icon svg{width:18px;height:18px}.sidebar-section{padding:0 14px;margin-bottom:4px}.sidebar-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:20px 10px 8px}.sidebar-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--sidebar-fg);text-decoration:none;font-size:13px;font-weight:450;transition:all .2s var(--ease-out-expo);position:relative}.sidebar-link:hover{color:#fff;transform:translateX(2px)}.sidebar-link.active{color:#fff;background:rgba(255,255,255,.08)}.sidebar-link.active::after{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent);border-radius:0 3px 3px 0}.sidebar-link svg{width:18px;height:18px;opacity:.5;flex-shrink:0}.sidebar-link:hover svg,.sidebar-link.active svg{opacity:1}.sidebar-badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:linear-gradient(135deg,rgba(0,167,157,.2),rgba(0,167,157,.1));color:var(--accent-light);padding:2px 8px;border-radius:6px;font-weight:500}.sidebar-bottom{margin-top:auto;padding:16px 14px 0;border-top:1px solid rgba(255,255,255,.06)}.sidebar-user{display:flex;align-items:center;gap:10px;padding:10px 12px;color:var(--sidebar-fg);font-size:13px}.sidebar-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,rgba(0,167,157,.4),rgba(0,167,157,.2));display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--accent-light)}
+    .main{display:flex;flex-direction:column;overflow:hidden}.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:rgba(255,255,255,.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0}.topbar h1{font-family:var(--font-display);font-size:22px;font-weight:400;letter-spacing:-.02em;margin:0}.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:2px}.breadcrumb a{color:var(--muted);text-decoration:none}.breadcrumb a:hover{color:var(--accent)}.breadcrumb svg{width:12px;height:12px;opacity:.4}.content{flex:1;overflow-y:auto;padding:28px 32px 64px}
+    .page-intro{max-width:64ch;margin-bottom:32px}.page-intro h2{font-family:var(--font-display);font-size:28px;letter-spacing:-.025em;margin:0 0 10px;font-weight:400}.page-intro p{color:var(--muted);font-size:14px;line-height:1.7;margin:0}
+    /* Stats row */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}@media(max-width:920px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+    .stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;position:relative;overflow:hidden;transition:all .3s var(--ease-out-expo)}.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-light));transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease-out-expo)}.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:transparent}.stat-card:hover::before{transform:scaleX(1)}
+    .stat-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;margin-bottom:12px}.stat-icon svg{width:20px;height:20px}
+    .stat-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px}.stat-val{font-family:var(--font-mono);font-size:24px;font-weight:700;letter-spacing:-.02em}.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+    /* Pipeline */
+    .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:32px;border-radius:var(--radius-lg);overflow:hidden}
+    .pipeline-stage{background:#fff;padding:18px 16px;text-align:center;position:relative;transition:all .3s var(--ease-out-expo)}.pipeline-stage:hover{background:var(--accent-soft)}.pipeline-stage::after{content:'';position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:0;height:0;border:8px solid transparent;border-left-color:var(--border);z-index:1}.pipeline-stage:last-child::after{display:none}
+    .pipeline-num{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--accent)}.pipeline-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500}
+    /* Source cards */
+    .sources-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;margin-bottom:32px}
+    .source-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;position:relative;overflow:hidden;transition:all .3s var(--ease-out-expo)}.source-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}.source-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:transparent}
+    .source-card.type-entrevista::before{background:linear-gradient(180deg,#6366f1,#818cf8)}.source-card.type-bd::before{background:linear-gradient(180deg,var(--accent),var(--accent-light))}.source-card.type-encuesta::before{background:linear-gradient(180deg,#ec4899,#f472b6)}.source-card.type-web::before{background:linear-gradient(180deg,var(--warning),#fbbf24)}.source-card.type-oficial::before{background:linear-gradient(180deg,var(--danger),#f87171)}.source-card.type-ai::before{background:linear-gradient(180deg,#8b5cf6,#a78bfa)}
+    .source-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:12px}
+    .source-type{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:6px}
+    .type-entrevista .source-type{background:rgba(99,102,241,.1);color:#6366f1}.type-bd .source-type{background:var(--accent-soft);color:var(--accent)}.type-encuesta .source-type{background:rgba(236,72,153,.1);color:#ec4899}.type-web .source-type{background:rgba(245,158,11,.1);color:var(--warning)}.type-oficial .source-type{background:rgba(239,68,68,.1);color:var(--danger)}.type-ai .source-type{background:rgba(139,92,246,.1);color:#8b5cf6}
+    .source-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px}
+    .status-active{background:rgba(16,185,129,.1);color:var(--success)}.status-pending{background:rgba(245,158,11,.1);color:var(--warning)}.status-scheduled{background:rgba(99,102,241,.1);color:#6366f1}
+    .status-dot{width:6px;height:6px;border-radius:50%}
+    .status-active .status-dot{background:var(--success);animation:dotPulse 2s ease-in-out infinite}.status-pending .status-dot{background:var(--warning)}.status-scheduled .status-dot{background:#6366f1}
+    .source-title{font-size:15px;font-weight:700;letter-spacing:-.01em;margin-bottom:6px}
+    .source-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+    .source-meta{display:flex;gap:16px;font-size:12px;color:var(--muted);padding-top:12px;border-top:1px solid rgba(0,0,0,.04);flex-wrap:wrap}.source-meta-item{display:flex;align-items:center;gap:5px}.source-meta-item svg{width:14px;height:14px;opacity:.5}
+    .source-progress{margin-top:12px}.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px}.progress-track{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent-light));transform-origin:left;animation:growBar .8s var(--ease-out-expo) both}
+    /* Tabs */
+    .tabs{display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border)}.tab-btn{padding:12px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s var(--ease-out-expo);background:none}.tab-btn:hover{color:var(--fg)}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+    .tab-content{display:none}.tab-content.active{display:block}
+    /* Table */
+    .panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .3s var(--ease-out-expo);margin-bottom:24px}.panel:hover{box-shadow:var(--shadow-lg);border-color:transparent}.panel-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border)}.panel-title{font-size:14px;font-weight:600;letter-spacing:-.01em}
+    .data-table{width:100%;border-collapse:collapse}.data-table th{text-align:left;padding:12px 20px;font-size:10.5px;font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);background:var(--bg)}.data-table td{padding:12px 20px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.04);transition:background .15s}.data-table tbody tr:hover{background:var(--fg-soft)}.data-table .num-col{font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:right}
+    .country-flag{font-size:16px;margin-right:6px}
+    .confidence-bar{width:80px;height:6px;background:var(--bg);border-radius:3px;display:inline-block;vertical-align:middle;overflow:hidden;margin-left:8px}.confidence-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent-light))}
+    .btn-add{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .25s var(--ease-out-expo);background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;box-shadow:0 2px 8px rgba(0,167,157,.25)}.btn-add:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,167,157,.35)}.btn-add svg{width:16px;height:16px}
+    .filters-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;align-items:center}
+    .filter-chip{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;transition:all .2s var(--ease-out-expo)}.filter-chip:hover{border-color:var(--accent);color:var(--accent)}.filter-chip.active{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border-color:transparent}
+
+    /* ===== Feature 1: Data Lineage Visualization ===== */
+    .data-lineage{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:32px;overflow:hidden;transition:all .3s var(--ease-out-expo)}.data-lineage:hover{box-shadow:var(--shadow-lg);border-color:transparent}
+    .data-lineage-title{font-family:var(--font-display);font-size:20px;margin:0 0 8px}.data-lineage-sub{font-size:13px;color:var(--muted);margin:0 0 24px}
+    .lineage-container{position:relative;width:100%;overflow-x:auto}
+    .lineage-svg{width:100%;min-width:700px;height:200px}
+    .lineage-node{cursor:pointer;transition:transform .2s var(--ease-out-expo)}.lineage-node:hover{transform:scale(1.05)}
+    .lineage-node rect{rx:12;ry:12;transition:all .3s var(--ease-out-expo)}
+    .lineage-node:hover rect{filter:brightness(1.1);stroke-width:2}
+    .lineage-node text{font-family:var(--font-body);font-size:12px;font-weight:600;fill:#fff;pointer-events:none}
+    .lineage-node .node-sub{font-size:9px;font-weight:400;opacity:.8}
+    @keyframes flowDot{0%{offset-distance:0%}100%{offset-distance:100%}}
+    .flow-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-light);position:absolute;offset-rotate:0deg;animation:flowDot 2.5s linear infinite;box-shadow:0 0 8px rgba(0,201,189,.6);pointer-events:none}
+    .lineage-path{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:6 4;opacity:.5}
+    @keyframes dashFlow{to{stroke-dashoffset:-20}}.lineage-path{animation:dashFlow 1s linear infinite}
+    .lineage-popup{position:fixed;background:#fff;border-radius:var(--radius-lg);padding:20px 24px;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);z-index:1001;min-width:280px;max-width:360px;border:1px solid var(--border);display:none;animation:fadeInUp .25s var(--ease-out-expo)}
+    .lineage-popup h4{font-family:var(--font-display);font-size:16px;margin:0 0 8px}.lineage-popup p{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 12px}
+    .lineage-popup-close{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+    .lineage-popup .popup-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.popup-stat{background:var(--bg);border-radius:8px;padding:10px 12px}.popup-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono)}.popup-stat-val{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--accent)}
+
+    /* ===== Feature 2: Source Reliability Dashboard ===== */
+    .reliability-dashboard{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:32px;transition:all .3s var(--ease-out-expo)}.reliability-dashboard:hover{box-shadow:var(--shadow-lg);border-color:transparent}
+    .reliability-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+    .reliability-title{font-family:var(--font-display);font-size:20px;margin:0 0 4px}.reliability-sub{font-size:13px;color:var(--muted);margin:0}
+    .reliability-overall{text-align:center;background:linear-gradient(135deg,var(--accent-soft),rgba(0,167,157,.02));border-radius:var(--radius-lg);padding:20px 32px;border:1px solid rgba(0,167,157,.15)}
+    .reliability-overall-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px}
+    .reliability-overall-val{font-family:var(--font-mono);font-size:42px;font-weight:800;color:var(--accent);line-height:1}
+    .reliability-overall-sub{font-size:11px;color:var(--muted);margin-top:4px}
+    .reliability-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}@media(max-width:920px){.reliability-grid{grid-template-columns:1fr}}
+    .reliability-bars{display:flex;flex-direction:column;gap:14px}
+    .rel-bar-item{display:flex;align-items:center;gap:12px}.rel-bar-label{font-size:12px;font-weight:500;min-width:100px;color:var(--fg)}
+    .rel-bar-track{flex:1;height:24px;background:var(--bg);border-radius:6px;overflow:hidden;position:relative}
+    .rel-bar-fill{height:100%;border-radius:6px;transition:width 1.2s var(--ease-out-expo);position:relative;display:flex;align-items:center;justify-content:flex-end;padding-right:8px}
+    .rel-bar-fill span{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fff}
+    .rel-bar-fill.green{background:linear-gradient(90deg,#10b981,#34d399)}.rel-bar-fill.yellow{background:linear-gradient(90deg,#f59e0b,#fbbf24)}.rel-bar-fill.red{background:linear-gradient(90deg,#ef4444,#f87171)}
+    .reliability-breakdown{display:flex;flex-direction:column;gap:12px}
+    .rel-metric{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-radius:10px}
+    .rel-metric-left{display:flex;align-items:center;gap:10px}.rel-metric-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center}
+    .rel-metric-icon svg{width:16px;height:16px}
+    .rel-metric-name{font-size:13px;font-weight:600}.rel-metric-desc{font-size:11px;color:var(--muted)}
+    .rel-metric-score{font-family:var(--font-mono);font-size:20px;font-weight:700}
+
+    /* ===== Feature 3: Collection Calendar ===== */
+    .collection-calendar{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:32px;overflow:hidden;transition:all .3s var(--ease-out-expo)}.collection-calendar:hover{box-shadow:var(--shadow-lg);border-color:transparent}
+    .calendar-title{font-family:var(--font-display);font-size:20px;margin:0 0 4px}.calendar-sub{font-size:13px;color:var(--muted);margin:0 0 20px}
+    .calendar-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+    .calendar-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:500}
+    .calendar-legend-dot{width:12px;height:6px;border-radius:3px}
+    .gantt-container{overflow-x:auto;position:relative}
+    .gantt-grid{display:grid;grid-template-columns:140px repeat(12,1fr);min-width:800px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .gantt-header{background:var(--bg);padding:10px 12px;font-size:10px;font-family:var(--font-mono);font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--border);text-align:center}
+    .gantt-header:first-child{text-align:left}
+    .gantt-row-label{padding:10px 12px;font-size:12px;font-weight:500;border-bottom:1px solid rgba(0,0,0,.04);display:flex;align-items:center;background:#fff}
+    .gantt-cell{border-bottom:1px solid rgba(0,0,0,.04);border-left:1px solid rgba(0,0,0,.04);position:relative;min-height:38px;background:#fff}
+    .gantt-bar{position:absolute;top:8px;bottom:8px;border-radius:4px;opacity:.85;cursor:pointer;transition:opacity .2s,transform .2s var(--ease-out-expo);z-index:2}.gantt-bar:hover{opacity:1;transform:scaleY(1.2)}
+    .gantt-bar-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1B2A4A;color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;white-space:nowrap;z-index:10;pointer-events:none}.gantt-bar:hover .gantt-bar-tooltip{display:block}
+    .gantt-today{position:absolute;top:0;bottom:0;width:2px;background:var(--danger);z-index:3;pointer-events:none}.gantt-today::before{content:'Hoy';position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;font-family:var(--font-mono);color:var(--danger);font-weight:700;white-space:nowrap}
+
+    /* ===== Feature 4: Real-time Sync Status ===== */
+    .sync-status{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px 28px;margin-bottom:32px;transition:all .3s var(--ease-out-expo)}.sync-status:hover{box-shadow:var(--shadow-lg);border-color:transparent}
+    .sync-status-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .sync-status-title{font-family:var(--font-display);font-size:20px;margin:0}.sync-status-live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--success)}
+    @keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}.sync-live-dot{width:8px;height:8px;border-radius:50%;background:var(--success);animation:livePulse 1.5s ease-in-out infinite}
+    .sync-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+    .sync-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg);border-radius:10px;transition:all .25s var(--ease-out-expo);position:relative;overflow:hidden}
+    .sync-item:hover{background:var(--accent-soft)}
+    .sync-item-icon{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+    .sync-item-icon svg{width:16px;height:16px}
+    .sync-item-info{flex:1;min-width:0}.sync-item-name{font-size:13px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sync-item-time{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+    .sync-item-status{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+    .sync-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .sync-dot.synced{background:var(--success)}.sync-dot.syncing{background:var(--warning);animation:livePulse 1s ease-in-out infinite}.sync-dot.error{background:var(--danger)}
+    .sync-item-next{font-size:10px;color:var(--muted);font-family:var(--font-mono);white-space:nowrap}
+    @keyframes syncPulseBar{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+    .sync-item.is-syncing::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--warning),transparent);animation:syncPulseBar 1.5s ease-in-out infinite}
+
+    /* ===== Feature 5: Data Coverage Matrix ===== */
+    .coverage-matrix{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:32px;transition:all .3s var(--ease-out-expo)}.coverage-matrix:hover{box-shadow:var(--shadow-lg);border-color:transparent}
+    .coverage-title{font-family:var(--font-display);font-size:20px;margin:0 0 4px}.coverage-sub{font-size:13px;color:var(--muted);margin:0 0 20px}
+    .coverage-legend{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+    .coverage-gradient{width:200px;height:12px;border-radius:6px;background:linear-gradient(90deg,#fee2e2,#fecaca,#fbbf24,#86efac,#10b981,#047857)}
+    .coverage-legend-labels{display:flex;justify-content:space-between;width:200px;font-size:10px;font-family:var(--font-mono);color:var(--muted)}
+    .coverage-gap-label{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-left:auto}.coverage-gap-dot{width:16px;height:16px;border:2px dashed var(--danger);border-radius:3px}
+    .matrix-container{overflow-x:auto}
+    .matrix-grid{display:grid;min-width:750px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .matrix-header{background:var(--bg);padding:10px 8px;font-size:10px;font-family:var(--font-mono);font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:center;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+    .matrix-header:first-child{text-align:left;justify-content:flex-start;padding-left:12px}
+    .matrix-row-label{padding:10px 12px;font-size:12px;font-weight:500;border-bottom:1px solid rgba(0,0,0,.04);display:flex;align-items:center;gap:6px;background:#fff}
+    .matrix-cell{border-bottom:1px solid rgba(0,0,0,.04);border-left:1px solid rgba(0,0,0,.04);position:relative;display:grid;place-items:center;min-height:44px;cursor:pointer;transition:all .2s var(--ease-out-expo)}
+    .matrix-cell:hover{transform:scale(1.08);z-index:2;box-shadow:0 0 12px rgba(0,0,0,.15);border-radius:4px}
+    .matrix-cell-inner{width:calc(100% - 6px);height:calc(100% - 6px);border-radius:4px;display:grid;place-items:center;font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fff;transition:all .3s}
+    .matrix-cell.gap .matrix-cell-inner{border:2px dashed var(--danger)}
+    .matrix-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1B2A4A;color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;white-space:nowrap;z-index:20;pointer-events:none}.matrix-cell:hover .matrix-tooltip{display:block}
+    /* ─── Responsive: Tablet ─── */
+    @media(max-width:920px){
+      body{grid-template-columns:1fr;overflow:auto}
+      .sidebar{display:none}
+      .main{overflow:auto}
+      .topbar{padding:12px 16px}
+      .topbar h1{font-size:18px}
+      .content{padding:20px 16px 80px}
+    }
+    /* ─── Responsive: Mobile ─── */
+    @media(max-width:600px){
+      .content{padding:16px 12px 80px}
+      .topbar{flex-direction:column;gap:8px;align-items:flex-start}
+      .topbar h1{font-size:16px}
+      .stats-row{grid-template-columns:1fr!important}
+      .pipeline{grid-template-columns:repeat(3,1fr)!important;overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .sources-grid{grid-template-columns:1fr!important}
+      .reliability-grid{grid-template-columns:1fr!important}
+      .lineage-container{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .matrix-container{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .tabs{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;gap:0}
+      .tab-btn{white-space:nowrap;flex-shrink:0;padding:8px 12px;font-size:12px}
+      .page-intro h2{font-size:22px}
+      .panel-header{flex-direction:column;gap:8px;align-items:flex-start}
+      .filters-bar{flex-wrap:wrap}
+      .data-table{display:block;overflow-x:auto}
+      .reliability-header{flex-direction:column}
+      .source-meta{flex-direction:column;gap:6px}
+    }
+    /* ─── AI Assistant Chat ─── */
+    .ai-fab{
+      position:fixed;bottom:24px;right:24px;z-index:10000;
+      width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+      background:linear-gradient(135deg,#00A79D,#008f87);color:white;
+      box-shadow:0 6px 24px rgba(0,167,157,.4);
+      display:grid;place-items:center;
+      transition:all .3s cubic-bezier(0.34,1.56,0.64,1);
+      animation:aiFabIn .5s cubic-bezier(0.16,1,0.3,1) 1.5s both;
+    }
+    @keyframes aiFabIn{from{opacity:0;transform:scale(0) rotate(-180deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+    .ai-fab:hover{transform:scale(1.1);box-shadow:0 8px 32px rgba(0,167,157,.5)}
+    .ai-fab:active{transform:scale(.95)}
+    .ai-fab svg{width:26px;height:26px}
+    .ai-fab .ai-fab-close{display:none}
+    .ai-fab.active .ai-fab-icon{display:none}
+    .ai-fab.active .ai-fab-close{display:block}
+    .ai-fab-badge{
+      position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:50%;
+      background:#22c55e;border:2px solid white;font-size:0;
+      animation:aiFabPulse 2s ease-in-out infinite;
+    }
+    @keyframes aiFabPulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+    .ai-chat{
+      position:fixed;bottom:92px;right:24px;z-index:9999;
+      width:400px;max-width:calc(100vw - 48px);height:560px;max-height:calc(100vh - 120px);
+      background:rgba(255,255,255,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border:1px solid rgba(0,0,0,.08);border-radius:20px;
+      box-shadow:0 24px 80px rgba(0,0,0,.15),0 8px 32px rgba(0,0,0,.08);
+      display:flex;flex-direction:column;overflow:hidden;
+      transform:scale(0) translateY(20px);transform-origin:bottom right;
+      opacity:0;pointer-events:none;
+      transition:all .35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .ai-chat.open{transform:scale(1) translateY(0);opacity:1;pointer-events:auto}
+    .ai-chat-header{
+      padding:16px 20px;display:flex;align-items:center;gap:12px;
+      background:linear-gradient(135deg,#1B2A4A,#0f1729);color:white;flex-shrink:0;
+    }
+    .ai-chat-avatar{
+      width:36px;height:36px;border-radius:10px;
+      background:linear-gradient(135deg,#00A79D,#00c9bd);
+      display:grid;place-items:center;flex-shrink:0;
+    }
+    .ai-chat-avatar svg{width:20px;height:20px}
+    .ai-chat-header-info{flex:1}
+    .ai-chat-header-name{font-size:14px;font-weight:600}
+    .ai-chat-header-status{font-size:11px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px}
+    .ai-chat-header-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block}
+    .ai-chat-header-actions{display:flex;gap:4px}
+    .ai-chat-header-actions button{background:rgba(255,255,255,.1);border:none;color:white;width:28px;height:28px;border-radius:8px;cursor:pointer;display:grid;place-items:center;transition:background .2s}
+    .ai-chat-header-actions button:hover{background:rgba(255,255,255,.2)}
+    .ai-chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+    .ai-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;animation:msgIn .3s cubic-bezier(0.16,1,0.3,1)}
+    @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .ai-msg.bot{background:#f0faf9;color:#1B2A4A;border-bottom-left-radius:4px;align-self:flex-start;border:1px solid rgba(0,167,157,.1)}
+    .ai-msg.user{background:linear-gradient(135deg,#00A79D,#008f87);color:white;border-bottom-right-radius:4px;align-self:flex-end}
+    .ai-msg code{font-family:ui-monospace,'SF Mono',monospace;font-size:12px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px}
+    .ai-msg strong{font-weight:600}
+    .ai-typing{align-self:flex-start;display:flex;gap:4px;padding:12px 16px;background:#f0faf9;border-radius:14px;border-bottom-left-radius:4px;border:1px solid rgba(0,167,157,.1)}
+    .ai-typing span{width:6px;height:6px;border-radius:50%;background:#00A79D;opacity:.4;animation:typingDot 1.4s ease-in-out infinite}
+    .ai-typing span:nth-child(2){animation-delay:.2s}
+    .ai-typing span:nth-child(3){animation-delay:.4s}
+    @keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+    .ai-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px}
+    .ai-suggestion{
+      padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;
+      background:rgba(0,167,157,.06);color:#00A79D;border:1px solid rgba(0,167,157,.15);
+      cursor:pointer;transition:all .2s;white-space:nowrap;
+    }
+    .ai-suggestion:hover{background:rgba(0,167,157,.12);border-color:#00A79D}
+    .ai-chat-footer{padding:12px 16px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:8px;flex-shrink:0;background:white}
+    .ai-chat-input{
+      flex:1;padding:10px 14px;border:1px solid rgba(0,0,0,.1);border-radius:12px;
+      font-size:13px;font-family:inherit;outline:none;resize:none;
+      transition:border-color .2s;min-height:40px;max-height:100px;
+    }
+    .ai-chat-input:focus{border-color:#00A79D;box-shadow:0 0 0 3px rgba(0,167,157,.1)}
+    .ai-chat-input::placeholder{color:#a0a8b8}
+    .ai-chat-send{
+      width:40px;height:40px;border-radius:12px;border:none;
+      background:linear-gradient(135deg,#00A79D,#008f87);color:white;
+      cursor:pointer;display:grid;place-items:center;flex-shrink:0;
+      transition:all .2s;
+    }
+    .ai-chat-send:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,167,157,.3)}
+    .ai-chat-send:active{transform:scale(.95)}
+    .ai-chat-send:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+    .ai-chat-send svg{width:18px;height:18px}
+    @media(max-width:500px){
+      .ai-chat{width:calc(100vw - 16px);right:8px;bottom:80px;height:calc(100vh - 100px);border-radius:16px}
+      .ai-fab{bottom:16px;right:16px;width:50px;height:50px}
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo"><div class="sidebar-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3c-1.2 3.6-4.4 6-8 7 1.6 2 2.8 4.6 3 7.5C8.6 15.2 10.2 13 12 12c1.8 1 3.4 3.2 5 5.5.2-2.9 1.4-5.5 3-7.5-3.6-1-6.8-3.4-8-7z"/></svg></div>VerdeXcelerate</a>
+    <div class="sidebar-section"><div class="sidebar-label">Principal</div><a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a><a href="directorio.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Directorio<span class="sidebar-badge">2,847</span></a><a href="mapa.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Mapa</a></div>
+    <div class="sidebar-section"><div class="sidebar-label">Analisis</div><a href="pais.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Perfiles de pais</a><a href="zonas.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Zonas prioritarias<span class="sidebar-badge">6</span></a><a href="brechas.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Brechas y retos</a></div>
+    <div class="sidebar-section"><div class="sidebar-label">Datos</div><a href="fuentes.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Fuentes</a><a href="gobernanza.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Gobernanza IA</a></div>
+    <div class="sidebar-bottom"><a href="configuracion.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Configuracion</a><div class="sidebar-user"><div class="sidebar-avatar">TS</div><div><div style="color:#fff;font-size:13px;font-weight:500">TechnoServe</div><div style="font-size:11px">Administrador</div></div></div></div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div><div class="breadcrumb"><a href="dashboard.html">VerdeXcelerate</a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg><span>Fuentes de datos</span></div><h1>Fuentes de datos</h1></div>
+      <button class="btn-add" onclick="document.getElementById('addSourceModal').style.display='flex'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar fuente</button>
+    </header>
+    <div class="content">
+      <div class="page-intro anim-fade-up">
+        <h2>Gestion integral de fuentes</h2>
+        <p>Rastreo y validacion de todas las fuentes de datos del mapeo: entrevistas (60 planificadas en 6 paises), bases de datos externas, encuestas, scraping web y fuentes gubernamentales oficiales. Cada dato trazable a su origen.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row anim-fade-up delay-1">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(99,102,241,.1);color:#6366f1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <div class="stat-label">Entrevistas realizadas</div>
+          <div class="stat-val" style="color:#6366f1"><span class="counter" data-target="47">0</span>/60</div>
+          <div class="stat-sub">78% completado</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--accent-soft);color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+          <div class="stat-label">Bases de datos</div>
+          <div class="stat-val" style="color:var(--accent)"><span class="counter" data-target="18">0</span></div>
+          <div class="stat-sub">12 activas, 6 pendientes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(236,72,153,.1);color:#ec4899"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg></div>
+          <div class="stat-label">Encuestas</div>
+          <div class="stat-val" style="color:#ec4899"><span class="counter" data-target="324">0</span></div>
+          <div class="stat-sub">respuestas recopiladas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+          <div class="stat-label">Fuentes IA/scraping</div>
+          <div class="stat-val" style="color:#8b5cf6"><span class="counter" data-target="9">0</span></div>
+          <div class="stat-sub">monitoreando activamente</div>
+        </div>
+      </div>
+
+      <!-- Pipeline -->
+      <div class="panel anim-fade-up delay-2">
+        <div class="panel-header"><span class="panel-title">Pipeline de procesamiento de datos</span><span style="font-size:12px;color:var(--muted)">Actualizado hace 2h</span></div>
+        <div style="padding:20px 24px">
+          <div class="pipeline">
+            <div class="pipeline-stage"><div class="pipeline-num">156</div><div class="pipeline-label">Recopilados</div></div>
+            <div class="pipeline-stage"><div class="pipeline-num">134</div><div class="pipeline-label">Validados</div></div>
+            <div class="pipeline-stage"><div class="pipeline-num">118</div><div class="pipeline-label">Procesados</div></div>
+            <div class="pipeline-stage"><div class="pipeline-num">95</div><div class="pipeline-label">Integrados</div></div>
+            <div class="pipeline-stage"><div class="pipeline-num">87</div><div class="pipeline-label">Publicados</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 1: Data Lineage Visualization -->
+      <div class="data-lineage anim-fade-up delay-2">
+        <h3 class="data-lineage-title">Linaje de datos</h3>
+        <p class="data-lineage-sub">Flujo de datos desde la recopilacion hasta la visualizacion final en el dashboard.</p>
+        <div class="lineage-container">
+          <svg class="lineage-svg" viewBox="0 0 900 180" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="lgNode1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#818cf8"/></linearGradient>
+              <linearGradient id="lgNode2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+              <linearGradient id="lgNode3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient>
+              <linearGradient id="lgNode4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00A79D"/><stop offset="100%" stop-color="#00c9bd"/></linearGradient>
+              <linearGradient id="lgNode5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1B2A4A"/><stop offset="100%" stop-color="#2d4a7a"/></linearGradient>
+            </defs>
+            <!-- Paths -->
+            <path class="lineage-path" id="lpath1" d="M175,90 C230,90 230,90 280,90"/>
+            <path class="lineage-path" id="lpath2" d="M430,90 C485,90 485,90 535,90"/>
+            <path class="lineage-path" id="lpath3" d="M685,90 C720,90 720,90 720,90"/>
+            <path class="lineage-path" id="lpath4" d="M870,90 C905,90 905,50 905,50" style="display:none"/>
+            <!-- Rearranged for 5 nodes across 900px -->
+            <!-- Node 1: Entrevistas -->
+            <g class="lineage-node" data-node="entrevistas" transform="translate(20,50)">
+              <rect width="150" height="80" fill="url(#lgNode1)" stroke="#6366f1" stroke-width="1"/>
+              <text x="75" y="38" text-anchor="middle">Entrevistas</text>
+              <text x="75" y="55" text-anchor="middle" class="node-sub">47 completadas</text>
+            </g>
+            <!-- Node 2: Validacion -->
+            <g class="lineage-node" data-node="validacion" transform="translate(215,50)">
+              <rect width="150" height="80" fill="url(#lgNode2)" stroke="#f59e0b" stroke-width="1"/>
+              <text x="75" y="38" text-anchor="middle">Validacion</text>
+              <text x="75" y="55" text-anchor="middle" class="node-sub">134 validados</text>
+            </g>
+            <!-- Node 3: Clasificacion IA -->
+            <g class="lineage-node" data-node="clasificacion" transform="translate(410,50)">
+              <rect width="150" height="80" fill="url(#lgNode3)" stroke="#8b5cf6" stroke-width="1"/>
+              <text x="75" y="38" text-anchor="middle">Clasificacion IA</text>
+              <text x="75" y="55" text-anchor="middle" class="node-sub">3 modelos ML</text>
+            </g>
+            <!-- Node 4: Base de datos -->
+            <g class="lineage-node" data-node="basedatos" transform="translate(605,50)">
+              <rect width="150" height="80" fill="url(#lgNode4)" stroke="#00A79D" stroke-width="1"/>
+              <text x="75" y="38" text-anchor="middle">Base de datos</text>
+              <text x="75" y="55" text-anchor="middle" class="node-sub">11,742 registros</text>
+            </g>
+            <!-- Node 5: Dashboard -->
+            <g class="lineage-node" data-node="dashboard" transform="translate(800,50)">
+              <rect width="80" height="80" fill="url(#lgNode5)" stroke="#1B2A4A" stroke-width="1"/>
+              <text x="40" y="38" text-anchor="middle" font-size="11">Dash-</text>
+              <text x="40" y="53" text-anchor="middle" font-size="11">board</text>
+            </g>
+            <!-- Animated flow paths (wider spacing) -->
+            <path class="lineage-path" d="M170,90 Q192,90 215,90"/>
+            <path class="lineage-path" d="M365,90 Q387,90 410,90"/>
+            <path class="lineage-path" d="M560,90 Q582,90 605,90"/>
+            <path class="lineage-path" d="M755,90 Q777,90 800,90"/>
+          </svg>
+          <!-- Animated dots (positioned via JS) -->
+          <div class="flow-dot" id="flowDot1" style="offset-path:path('M170 90 Q192 90 215 90');animation-delay:0s"></div>
+          <div class="flow-dot" id="flowDot2" style="offset-path:path('M365 90 Q387 90 410 90');animation-delay:.6s"></div>
+          <div class="flow-dot" id="flowDot3" style="offset-path:path('M560 90 Q582 90 605 90');animation-delay:1.2s"></div>
+          <div class="flow-dot" id="flowDot4" style="offset-path:path('M755 90 Q777 90 800 90');animation-delay:1.8s"></div>
+        </div>
+      </div>
+      <!-- Lineage Popup (rendered once, repositioned) -->
+      <div class="lineage-popup" id="lineagePopup">
+        <button class="lineage-popup-close" onclick="document.getElementById('lineagePopup').style.display='none'">&times;</button>
+        <h4 id="popupTitle"></h4>
+        <p id="popupDesc"></p>
+        <div class="popup-stats" id="popupStats"></div>
+      </div>
+
+      <!-- Feature 4: Real-time Sync Status -->
+      <div class="sync-status anim-fade-up delay-3">
+        <div class="sync-status-header">
+          <h3 class="sync-status-title">Estado de sincronizacion</h3>
+          <span class="sync-status-live"><span class="sync-live-dot"></span>EN VIVO</span>
+        </div>
+        <div class="sync-grid" id="syncGrid"></div>
+      </div>
+
+      <!-- Feature 2: Source Reliability Dashboard -->
+      <div class="reliability-dashboard anim-fade-up delay-3">
+        <div class="reliability-header">
+          <div><h3 class="reliability-title">Panel de confiabilidad</h3><p class="reliability-sub">Puntuaciones de confiabilidad por tipo de fuente y metrica de calidad.</p></div>
+          <div class="reliability-overall">
+            <div class="reliability-overall-label">Score general</div>
+            <div class="reliability-overall-val"><span class="counter" data-target="87">0</span>%</div>
+            <div class="reliability-overall-sub">+3% vs. mes anterior</div>
+          </div>
+        </div>
+        <div class="reliability-grid">
+          <div class="reliability-bars" id="reliabilityBars"></div>
+          <div class="reliability-breakdown">
+            <div class="rel-metric">
+              <div class="rel-metric-left">
+                <div class="rel-metric-icon" style="background:rgba(16,185,129,.1);color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+                <div><div class="rel-metric-name">Precision</div><div class="rel-metric-desc">Exactitud de los datos</div></div>
+              </div>
+              <div class="rel-metric-score" style="color:var(--success)">91%</div>
+            </div>
+            <div class="rel-metric">
+              <div class="rel-metric-left">
+                <div class="rel-metric-icon" style="background:rgba(99,102,241,.1);color:#6366f1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 11-6.219-8.56"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div><div class="rel-metric-name">Cobertura</div><div class="rel-metric-desc">Completitud geografica y tematica</div></div>
+              </div>
+              <div class="rel-metric-score" style="color:#6366f1">84%</div>
+            </div>
+            <div class="rel-metric">
+              <div class="rel-metric-left">
+                <div class="rel-metric-icon" style="background:rgba(245,158,11,.1);color:var(--warning)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+                <div><div class="rel-metric-name">Frescura</div><div class="rel-metric-desc">Actualidad de la informacion</div></div>
+              </div>
+              <div class="rel-metric-score" style="color:var(--warning)">79%</div>
+            </div>
+            <div class="rel-metric">
+              <div class="rel-metric-left">
+                <div class="rel-metric-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg></div>
+                <div><div class="rel-metric-name">Consistencia</div><div class="rel-metric-desc">Coherencia entre fuentes</div></div>
+              </div>
+              <div class="rel-metric-score" style="color:#8b5cf6">88%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 5: Data Coverage Matrix -->
+      <div class="coverage-matrix anim-fade-up delay-4">
+        <h3 class="coverage-title">Matriz de cobertura de datos</h3>
+        <p class="coverage-sub">Cobertura por pais y area tematica. La intensidad del color indica el porcentaje de cobertura.</p>
+        <div class="coverage-legend">
+          <div>
+            <div class="coverage-gradient"></div>
+            <div class="coverage-legend-labels"><span>0%</span><span>50%</span><span>100%</span></div>
+          </div>
+          <div class="coverage-gap-label"><span class="coverage-gap-dot"></span>Brecha critica (&lt;30%)</div>
+        </div>
+        <div class="matrix-container"><div class="matrix-grid" id="coverageMatrix"></div></div>
+      </div>
+
+      <!-- Feature 3: Collection Calendar (Gantt) -->
+      <div class="collection-calendar anim-fade-up delay-4">
+        <h3 class="calendar-title">Calendario de recopilacion</h3>
+        <p class="calendar-sub">Vista Gantt del cronograma de recopilacion de datos por fuente, Ene-Dic 2026.</p>
+        <div class="calendar-legend">
+          <div class="calendar-legend-item"><span class="calendar-legend-dot" style="background:linear-gradient(90deg,#6366f1,#818cf8)"></span>Entrevistas</div>
+          <div class="calendar-legend-item"><span class="calendar-legend-dot" style="background:linear-gradient(90deg,#00A79D,#00c9bd)"></span>Bases de datos</div>
+          <div class="calendar-legend-item"><span class="calendar-legend-dot" style="background:linear-gradient(90deg,#ec4899,#f472b6)"></span>Encuestas</div>
+          <div class="calendar-legend-item"><span class="calendar-legend-dot" style="background:linear-gradient(90deg,#f59e0b,#fbbf24)"></span>Web/Scraping</div>
+          <div class="calendar-legend-item"><span class="calendar-legend-dot" style="background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></span>IA Monitoring</div>
+          <div class="calendar-legend-item"><span class="calendar-legend-dot" style="background:linear-gradient(90deg,#ef4444,#f87171)"></span>Oficiales</div>
+        </div>
+        <div class="gantt-container" id="ganttContainer"></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs anim-fade-up delay-3">
+        <button class="tab-btn active" data-tab="todas">Todas las fuentes</button>
+        <button class="tab-btn" data-tab="entrevistas">Entrevistas</button>
+        <button class="tab-btn" data-tab="bases">Bases de datos</button>
+        <button class="tab-btn" data-tab="encuestas">Encuestas</button>
+        <button class="tab-btn" data-tab="cronograma">Cronograma</button>
+      </div>
+
+      <!-- TAB: Todas -->
+      <div class="tab-content active" id="tab-todas">
+        <div class="filters-bar anim-fade-up delay-4">
+          <span class="filter-chip active" data-filter="all">Todas</span>
+          <span class="filter-chip" data-filter="entrevista">Entrevistas</span>
+          <span class="filter-chip" data-filter="bd">Bases de datos</span>
+          <span class="filter-chip" data-filter="encuesta">Encuestas</span>
+          <span class="filter-chip" data-filter="web">Web/Scraping</span>
+          <span class="filter-chip" data-filter="oficial">Oficiales</span>
+          <span class="filter-chip" data-filter="ai">IA Monitoring</span>
+        </div>
+        <div class="sources-grid" id="sourcesGrid">
+          <div class="source-card type-entrevista anim-fade-up delay-4" data-type="entrevista">
+            <div class="source-header"><span class="source-type">Entrevista</span><span class="source-status status-active"><span class="status-dot"></span>Completada</span></div>
+            <div class="source-title">Entrevistas a startups AgriTech - Colombia</div>
+            <div class="source-desc">Entrevistas semi-estructuradas a 12 startups AgriTech en Bogota, Medellin y Cali. Cobertura de 5 cadenas de valor.</div>
+            <div class="source-meta"><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mar 2026</span><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>12 actores</span><span class="source-meta-item"><span class="country-flag">🇨🇴</span>Colombia</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Progreso</span><span>100%</span></div><div class="progress-track"><div class="progress-fill" style="width:100%"></div></div></div>
+          </div>
+          <div class="source-card type-entrevista anim-fade-up delay-5" data-type="entrevista">
+            <div class="source-header"><span class="source-type">Entrevista</span><span class="source-status status-active"><span class="status-dot"></span>En curso</span></div>
+            <div class="source-title">Entrevistas a inversores - Regional</div>
+            <div class="source-desc">Entrevistas a fondos de inversion y angel investors con tesis AgriTech en Centroamerica y Colombia.</div>
+            <div class="source-meta"><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Abr-Jun 2026</span><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>8/15 actores</span><span class="source-meta-item">🌎 Regional</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Progreso</span><span>53%</span></div><div class="progress-track"><div class="progress-fill" style="width:53%"></div></div></div>
+          </div>
+          <div class="source-card type-bd anim-fade-up delay-4" data-type="bd">
+            <div class="source-header"><span class="source-type">Base de datos</span><span class="source-status status-active"><span class="status-dot"></span>Activa</span></div>
+            <div class="source-title">Crunchbase Pro - AgriTech LATAM</div>
+            <div class="source-desc">Datos de startups, rondas de financiamiento, inversores y adquisiciones en el sector AgriTech para la region.</div>
+            <div class="source-meta"><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>1,245 registros</span><span class="source-meta-item">API sync cada 24h</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Confiabilidad</span><span>94%</span></div><div class="progress-track"><div class="progress-fill" style="width:94%"></div></div></div>
+          </div>
+          <div class="source-card type-bd anim-fade-up delay-5" data-type="bd">
+            <div class="source-header"><span class="source-type">Base de datos</span><span class="source-status status-active"><span class="status-dot"></span>Activa</span></div>
+            <div class="source-title">LAVCA Venture Data</div>
+            <div class="source-desc">Datos de venture capital en LATAM con enfoque en sectores de innovacion agricola y tecnologia climtica.</div>
+            <div class="source-meta"><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>856 registros</span><span class="source-meta-item">Actualizada mensualmente</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Confiabilidad</span><span>91%</span></div><div class="progress-track"><div class="progress-fill" style="width:91%"></div></div></div>
+          </div>
+          <div class="source-card type-encuesta anim-fade-up delay-4" data-type="encuesta">
+            <div class="source-header"><span class="source-type">Encuesta</span><span class="source-status status-active"><span class="status-dot"></span>Activa</span></div>
+            <div class="source-title">Encuesta de madurez digital - ESOs</div>
+            <div class="source-desc">Evaluacion de madurez digital y capacidades de organizaciones de apoyo al ecosistema en 6 paises.</div>
+            <div class="source-meta"><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>89 respuestas</span><span class="source-meta-item">Google Forms</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Tasa de respuesta</span><span>74%</span></div><div class="progress-track"><div class="progress-fill" style="width:74%"></div></div></div>
+          </div>
+          <div class="source-card type-web anim-fade-up delay-5" data-type="web">
+            <div class="source-header"><span class="source-type">Web scraping</span><span class="source-status status-active"><span class="status-dot"></span>Activo</span></div>
+            <div class="source-title">LinkedIn AgriTech Profiles</div>
+            <div class="source-desc">Extraccion automatizada de perfiles de startups, fundadores y organizaciones AgriTech en la region.</div>
+            <div class="source-meta"><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>2,134 perfiles</span><span class="source-meta-item">Crawler semanal</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Cobertura</span><span>68%</span></div><div class="progress-track"><div class="progress-fill" style="width:68%"></div></div></div>
+          </div>
+          <div class="source-card type-oficial anim-fade-up delay-4" data-type="oficial">
+            <div class="source-header"><span class="source-type">Oficial</span><span class="source-status status-active"><span class="status-dot"></span>Verificada</span></div>
+            <div class="source-title">Registros mercantiles nacionales</div>
+            <div class="source-desc">Datos de registro de empresas en Camaras de Comercio de 6 paises con clasificacion CIIU agrifood.</div>
+            <div class="source-meta"><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Fuente oficial</span><span class="source-meta-item">6 paises</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Procesamiento</span><span>82%</span></div><div class="progress-track"><div class="progress-fill" style="width:82%"></div></div></div>
+          </div>
+          <div class="source-card type-ai anim-fade-up delay-5" data-type="ai">
+            <div class="source-header"><span class="source-type">IA Monitoring</span><span class="source-status status-active"><span class="status-dot"></span>Activo 24/7</span></div>
+            <div class="source-title">AI News & Events Tracker</div>
+            <div class="source-desc">Monitoreo con IA de noticias, eventos, rondas de financiamiento y cambios regulatorios en AgriTech LATAM.</div>
+            <div class="source-meta"><span class="source-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>3 modelos activos</span><span class="source-meta-item">154 alertas/sem</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Precision</span><span>89%</span></div><div class="progress-track"><div class="progress-fill" style="width:89%"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: Entrevistas -->
+      <div class="tab-content" id="tab-entrevistas">
+        <div class="panel anim-fade-up">
+          <div class="panel-header"><span class="panel-title">Cronograma de entrevistas por pais (60 planificadas)</span></div>
+          <table class="data-table">
+            <thead><tr><th>Pais</th><th>Actores planificados</th><th>Completadas</th><th>En curso</th><th>Pendientes</th><th>Progreso</th></tr></thead>
+            <tbody>
+              <tr><td><span class="country-flag">🇨🇴</span>Colombia</td><td class="num-col">15</td><td class="num-col" style="color:var(--success);font-weight:600">12</td><td class="num-col" style="color:var(--warning)">2</td><td class="num-col">1</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:100px"><div class="progress-fill" style="width:80%"></div></div><span style="font-family:var(--font-mono);font-size:12px">80%</span></div></td></tr>
+              <tr><td><span class="country-flag">🇨🇷</span>Costa Rica</td><td class="num-col">10</td><td class="num-col" style="color:var(--success);font-weight:600">8</td><td class="num-col" style="color:var(--warning)">1</td><td class="num-col">1</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:100px"><div class="progress-fill" style="width:80%"></div></div><span style="font-family:var(--font-mono);font-size:12px">80%</span></div></td></tr>
+              <tr><td><span class="country-flag">🇸🇻</span>El Salvador</td><td class="num-col">10</td><td class="num-col" style="color:var(--success);font-weight:600">7</td><td class="num-col" style="color:var(--warning)">2</td><td class="num-col">1</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:100px"><div class="progress-fill" style="width:70%"></div></div><span style="font-family:var(--font-mono);font-size:12px">70%</span></div></td></tr>
+              <tr><td><span class="country-flag">🇬🇹</span>Guatemala</td><td class="num-col">10</td><td class="num-col" style="color:var(--success);font-weight:600">8</td><td class="num-col" style="color:var(--warning)">1</td><td class="num-col">1</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:100px"><div class="progress-fill" style="width:80%"></div></div><span style="font-family:var(--font-mono);font-size:12px">80%</span></div></td></tr>
+              <tr><td><span class="country-flag">🇭🇳</span>Honduras</td><td class="num-col">8</td><td class="num-col" style="color:var(--success);font-weight:600">6</td><td class="num-col" style="color:var(--warning)">1</td><td class="num-col">1</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:100px"><div class="progress-fill" style="width:75%"></div></div><span style="font-family:var(--font-mono);font-size:12px">75%</span></div></td></tr>
+              <tr><td><span class="country-flag">🇵🇦</span>Panama</td><td class="num-col">7</td><td class="num-col" style="color:var(--success);font-weight:600">6</td><td class="num-col" style="color:var(--warning)">0</td><td class="num-col">1</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:100px"><div class="progress-fill" style="width:86%"></div></div><span style="font-family:var(--font-mono);font-size:12px">86%</span></div></td></tr>
+              <tr style="font-weight:700;background:var(--fg-soft)"><td>Total regional</td><td class="num-col">60</td><td class="num-col" style="color:var(--success)">47</td><td class="num-col" style="color:var(--warning)">7</td><td class="num-col">6</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:100px"><div class="progress-fill" style="width:78%"></div></div><span style="font-family:var(--font-mono);font-size:12px">78%</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel anim-fade-up delay-1">
+          <div class="panel-header"><span class="panel-title">Cobertura por tipo de actor (TOR: 9 tipos)</span></div>
+          <table class="data-table">
+            <thead><tr><th>Tipo de actor</th><th>Entrevistas objetivo</th><th>Realizadas</th><th>Cobertura</th></tr></thead>
+            <tbody>
+              <tr><td>Startups AgriTech</td><td class="num-col">15</td><td class="num-col">13</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:87%"></div></div> 87%</td></tr>
+              <tr><td>Inversores</td><td class="num-col">8</td><td class="num-col">6</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:75%"></div></div> 75%</td></tr>
+              <tr><td>ESOs (Org. de apoyo)</td><td class="num-col">8</td><td class="num-col">7</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:88%"></div></div> 88%</td></tr>
+              <tr><td>Asociaciones agricolas</td><td class="num-col">6</td><td class="num-col">5</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:83%"></div></div> 83%</td></tr>
+              <tr><td>Corporativos</td><td class="num-col">5</td><td class="num-col">4</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:80%"></div></div> 80%</td></tr>
+              <tr><td>Academia</td><td class="num-col">5</td><td class="num-col">4</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:80%"></div></div> 80%</td></tr>
+              <tr><td>Gobierno</td><td class="num-col">5</td><td class="num-col">3</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:60%"></div></div> 60%</td></tr>
+              <tr><td>Organismos internacionales</td><td class="num-col">4</td><td class="num-col">3</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:75%"></div></div> 75%</td></tr>
+              <tr><td>Redes y comunidades</td><td class="num-col">4</td><td class="num-col">2</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:50%"></div></div> 50%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: Bases de datos -->
+      <div class="tab-content" id="tab-bases">
+        <div class="panel anim-fade-up">
+          <div class="panel-header"><span class="panel-title">Bases de datos integradas</span></div>
+          <table class="data-table">
+            <thead><tr><th>Fuente</th><th>Tipo</th><th>Registros</th><th>Frecuencia</th><th>Confiabilidad</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>Crunchbase Pro</td><td>Startups/VC</td><td class="num-col">1,245</td><td>Diaria (API)</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:94%"></div></div> 94%</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Activa</span></td></tr>
+              <tr><td>LAVCA Data</td><td>Venture Capital</td><td class="num-col">856</td><td>Mensual</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:91%"></div></div> 91%</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Activa</span></td></tr>
+              <tr><td>PitchBook</td><td>Deals/M&A</td><td class="num-col">612</td><td>Semanal</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:92%"></div></div> 92%</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Activa</span></td></tr>
+              <tr><td>FAO STAT</td><td>Agricultura</td><td class="num-col">3,450</td><td>Anual</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:97%"></div></div> 97%</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Activa</span></td></tr>
+              <tr><td>Banco Mundial</td><td>Desarrollo</td><td class="num-col">2,100</td><td>Trimestral</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:98%"></div></div> 98%</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Activa</span></td></tr>
+              <tr><td>CEPAL</td><td>Economico</td><td class="num-col">1,890</td><td>Semestral</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:95%"></div></div> 95%</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Activa</span></td></tr>
+              <tr><td>AngelList LATAM</td><td>Startups</td><td class="num-col">478</td><td>Semanal</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:85%"></div></div> 85%</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Activa</span></td></tr>
+              <tr><td>Global Innovation Index</td><td>Innovacion</td><td class="num-col">420</td><td>Anual</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:96%"></div></div> 96%</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Activa</span></td></tr>
+              <tr><td>IICA AgriTech DB</td><td>Agricultura</td><td class="num-col">356</td><td>Mensual</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:88%"></div></div> 88%</td><td><span class="source-status status-pending" style="display:inline-flex"><span class="status-dot"></span>Pendiente</span></td></tr>
+              <tr><td>Climate-KIC Data</td><td>Clima/CO2e</td><td class="num-col">290</td><td>Trimestral</td><td><div class="confidence-bar"><div class="confidence-fill" style="width:90%"></div></div> 90%</td><td><span class="source-status status-pending" style="display:inline-flex"><span class="status-dot"></span>Pendiente</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: Encuestas -->
+      <div class="tab-content" id="tab-encuestas">
+        <div class="sources-grid anim-fade-up">
+          <div class="source-card type-encuesta">
+            <div class="source-header"><span class="source-type">Encuesta</span><span class="source-status status-active"><span class="status-dot"></span>Activa</span></div>
+            <div class="source-title">Madurez digital de ESOs</div>
+            <div class="source-desc">Evaluacion de capacidades digitales y de apoyo al ecosistema en organizaciones de soporte.</div>
+            <div class="source-meta"><span class="source-meta-item">89 respuestas</span><span class="source-meta-item">Google Forms</span><span class="source-meta-item">74% tasa</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Respuestas</span><span>89/120</span></div><div class="progress-track"><div class="progress-fill" style="width:74%"></div></div></div>
+          </div>
+          <div class="source-card type-encuesta">
+            <div class="source-header"><span class="source-type">Encuesta</span><span class="source-status status-active"><span class="status-dot"></span>Activa</span></div>
+            <div class="source-title">Necesidades de pequenos productores</div>
+            <div class="source-desc">Diagnostico de necesidades tecnologicas y brechas de productores en zonas prioritarias.</div>
+            <div class="source-meta"><span class="source-meta-item">156 respuestas</span><span class="source-meta-item">Presencial + Digital</span><span class="source-meta-item">6 zonas</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Respuestas</span><span>156/200</span></div><div class="progress-track"><div class="progress-fill" style="width:78%"></div></div></div>
+          </div>
+          <div class="source-card type-encuesta">
+            <div class="source-header"><span class="source-type">Encuesta</span><span class="source-status status-pending"><span class="status-dot"></span>Pendiente</span></div>
+            <div class="source-title">Diagnostico de genero en AgriTech</div>
+            <div class="source-desc">Encuesta especifica sobre barreras de genero, participacion femenina y oportunidades en startups AgriTech.</div>
+            <div class="source-meta"><span class="source-meta-item">79 respuestas</span><span class="source-meta-item">Typeform</span><span class="source-meta-item">Meta: 40% mujeres</span></div>
+            <div class="source-progress"><div class="progress-label"><span>Respuestas</span><span>79/150</span></div><div class="progress-track"><div class="progress-fill" style="width:53%"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: Cronograma -->
+      <div class="tab-content" id="tab-cronograma">
+        <div class="panel anim-fade-up">
+          <div class="panel-header"><span class="panel-title">Cronograma de recopilacion de datos</span></div>
+          <table class="data-table">
+            <thead><tr><th>Fase</th><th>Actividad</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Responsable</th></tr></thead>
+            <tbody>
+              <tr><td><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:#6366f1">Fase 1</span></td><td>Diseno de instrumentos y protocolos</td><td class="num-col">Ene 2026</td><td class="num-col">Feb 2026</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Completado</span></td><td>Equipo metodologico</td></tr>
+              <tr><td><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:#6366f1">Fase 1</span></td><td>Integracion de bases de datos externas</td><td class="num-col">Feb 2026</td><td class="num-col">Mar 2026</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Completado</span></td><td>Equipo tecnico</td></tr>
+              <tr><td><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent)">Fase 2</span></td><td>Entrevistas Colombia + Costa Rica</td><td class="num-col">Mar 2026</td><td class="num-col">Abr 2026</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>Completado</span></td><td>Consultores locales</td></tr>
+              <tr><td><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent)">Fase 2</span></td><td>Entrevistas Centroamerica (SV, GT, HN, PA)</td><td class="num-col">Abr 2026</td><td class="num-col">Jun 2026</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>En curso</span></td><td>Consultores locales</td></tr>
+              <tr><td><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent)">Fase 2</span></td><td>Encuestas a productores en zonas prioritarias</td><td class="num-col">Abr 2026</td><td class="num-col">Jul 2026</td><td><span class="source-status status-active" style="display:inline-flex"><span class="status-dot"></span>En curso</span></td><td>Equipo de campo</td></tr>
+              <tr><td><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--warning)">Fase 3</span></td><td>Validacion cruzada de datos</td><td class="num-col">Jul 2026</td><td class="num-col">Ago 2026</td><td><span class="source-status status-scheduled" style="display:inline-flex"><span class="status-dot"></span>Programado</span></td><td>Equipo de analisis</td></tr>
+              <tr><td><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--warning)">Fase 3</span></td><td>Configuracion de monitoreo IA continuo</td><td class="num-col">Ago 2026</td><td class="num-col">Sep 2026</td><td><span class="source-status status-scheduled" style="display:inline-flex"><span class="status-dot"></span>Programado</span></td><td>Equipo tecnico</td></tr>
+              <tr><td><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--warning)">Fase 3</span></td><td>Publicacion del mapeo vivo v1.0</td><td class="num-col">Sep 2026</td><td class="num-col">Oct 2026</td><td><span class="source-status status-scheduled" style="display:inline-flex"><span class="status-dot"></span>Programado</span></td><td>Equipo completo</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Add Source Modal -->
+  <div id="addSourceModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:#fff;border-radius:var(--radius-lg);width:520px;max-width:90vw;max-height:80vh;overflow-y:auto;padding:32px;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);animation:fadeInUp .3s var(--ease-out-expo)">
+      <h3 style="font-family:var(--font-display);font-size:22px;margin:0 0 6px">Agregar nueva fuente</h3>
+      <p style="color:var(--muted);font-size:13px;margin:0 0 24px">Registra una nueva fuente de datos para el mapeo del ecosistema.</p>
+      <form onsubmit="event.preventDefault();this.closest('[id]').style.display='none';showToast('Fuente agregada exitosamente')">
+        <div style="margin-bottom:16px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Nombre de la fuente</label><input type="text" placeholder="Ej: Crunchbase, Entrevistas Colombia..." style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></div>
+        <div style="margin-bottom:16px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Tipo de fuente</label><select style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;background:#fff"><option>Entrevista</option><option>Base de datos</option><option>Encuesta</option><option>Web scraping</option><option>Fuente oficial</option><option>IA Monitoring</option></select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Pais</label><select style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;background:#fff"><option>Regional</option><option>Colombia</option><option>Costa Rica</option><option>El Salvador</option><option>Guatemala</option><option>Honduras</option><option>Panama</option></select></div><div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Frecuencia</label><select style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;background:#fff"><option>Unica vez</option><option>Diaria</option><option>Semanal</option><option>Mensual</option><option>Trimestral</option></select></div></div>
+        <div style="margin-bottom:24px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Descripcion</label><textarea rows="3" placeholder="Describe brevemente la fuente y los datos que aporta..." style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;resize:vertical;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+        <div style="display:flex;gap:12px;justify-content:flex-end"><button type="button" onclick="this.closest('[id]').style.display='none'" style="padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--muted);cursor:pointer">Cancelar</button><button type="submit" class="btn-add">Agregar fuente</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+b.dataset.tab).classList.add('active')})});
+    // Filters
+    document.querySelectorAll('.filter-chip').forEach(c=>{c.addEventListener('click',()=>{document.querySelectorAll('.filter-chip').forEach(f=>f.classList.remove('active'));c.classList.add('active');const t=c.dataset.filter;document.querySelectorAll('.source-card').forEach(s=>{s.style.display=(t==='all'||s.dataset.type===t)?'':'none'})})});
+    // Toast
+    function showToast(msg){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1B2A4A;color:#fff;padding:14px 24px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:fadeInUp .3s ease';t.textContent=msg||'Guardado';document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},3000)}
+    // Animated counters
+    const counters=document.querySelectorAll('.counter');const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const el=e.target;const target=+el.dataset.target;const dur=1200;const start=performance.now();const ease=t=>1-Math.pow(1-t,4);(function tick(now){const t=Math.min((now-start)/dur,1);el.textContent=Math.round(ease(t)*target);if(t<1)requestAnimationFrame(tick);else el.textContent=target})(start);io.unobserve(el)}})},{threshold:.3});counters.forEach(c=>io.observe(c));
+
+    // ===== Feature 1: Data Lineage - Node click popup =====
+    (function(){
+      const nodeData={
+        entrevistas:{title:'Entrevistas',desc:'Recopilacion primaria mediante entrevistas semi-estructuradas a actores del ecosistema AgriTech en 6 paises.',stats:[{label:'Completadas',val:'47/60'},{label:'Paises',val:'6'},{label:'Tipos actor',val:'9'},{label:'Horas audio',val:'94h'}]},
+        validacion:{title:'Validacion',desc:'Proceso de verificacion cruzada y control de calidad. Cada dato se valida contra al menos 2 fuentes independientes.',stats:[{label:'Validados',val:'134'},{label:'Rechazados',val:'22'},{label:'Tasa OK',val:'86%'},{label:'Revisores',val:'8'}]},
+        clasificacion:{title:'Clasificacion IA',desc:'Clasificacion automatica mediante 3 modelos de ML: NER para entidades, topic modeling y sentiment analysis.',stats:[{label:'Modelos',val:'3'},{label:'Precision',val:'89%'},{label:'Categorias',val:'24'},{label:'Proc/dia',val:'~500'}]},
+        basedatos:{title:'Base de datos',desc:'Repositorio central PostgreSQL con 11,742 registros normalizados, indexados y listos para analisis.',stats:[{label:'Registros',val:'11,742'},{label:'Tablas',val:'18'},{label:'Relaciones',val:'42'},{label:'Uptime',val:'99.9%'}]},
+        dashboard:{title:'Dashboard',desc:'Visualizacion interactiva de todos los datos procesados. Actualizado automaticamente cada 2 horas.',stats:[{label:'Vistas',val:'12'},{label:'Usuarios',val:'34'},{label:'Refresh',val:'2h'},{label:'Graficos',val:'28'}]}
+      };
+      document.querySelectorAll('.lineage-node').forEach(node=>{
+        node.addEventListener('click',function(ev){
+          ev.stopPropagation();
+          const key=this.dataset.node;const d=nodeData[key];if(!d)return;
+          const popup=document.getElementById('lineagePopup');
+          document.getElementById('popupTitle').textContent=d.title;
+          document.getElementById('popupDesc').textContent=d.desc;
+          const statsEl=document.getElementById('popupStats');
+          statsEl.innerHTML=d.stats.map(s=>'<div class="popup-stat"><div class="popup-stat-label">'+s.label+'</div><div class="popup-stat-val">'+s.val+'</div></div>').join('');
+          const rect=this.getBoundingClientRect();
+          popup.style.display='block';
+          popup.style.left=Math.min(rect.left,window.innerWidth-320)+'px';
+          popup.style.top=(rect.bottom+10)+'px';
+        });
+      });
+      document.addEventListener('click',function(e){if(!e.target.closest('.lineage-popup')&&!e.target.closest('.lineage-node'))document.getElementById('lineagePopup').style.display='none'});
+    })();
+
+    // ===== Feature 2: Reliability Dashboard - Bar chart =====
+    (function(){
+      const sources=[
+        {name:'Bases de datos',score:94,color:'green'},
+        {name:'Fuentes oficiales',score:92,color:'green'},
+        {name:'Entrevistas',score:87,color:'green'},
+        {name:'Encuestas',score:78,color:'yellow'},
+        {name:'IA Monitoring',score:89,color:'green'},
+        {name:'Web scraping',score:68,color:'yellow'}
+      ];
+      const container=document.getElementById('reliabilityBars');
+      sources.forEach(s=>{
+        const colorClass=s.score>=80?'green':s.score>=60?'yellow':'red';
+        container.innerHTML+='<div class="rel-bar-item"><span class="rel-bar-label">'+s.name+'</span><div class="rel-bar-track"><div class="rel-bar-fill '+colorClass+'" style="width:0%" data-width="'+s.score+'"><span>'+s.score+'%</span></div></div></div>';
+      });
+      const barObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.rel-bar-fill').forEach(bar=>{setTimeout(()=>{bar.style.width=bar.dataset.width+'%'},100)});barObs.unobserve(e.target)}})},{threshold:.2});
+      barObs.observe(container);
+    })();
+
+    // ===== Feature 3: Collection Calendar (Gantt) =====
+    (function(){
+      const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      const tasks=[
+        {name:'Entrevistas CO+CR',type:'entrevista',start:2,end:4,color:'linear-gradient(90deg,#6366f1,#818cf8)'},
+        {name:'Entrevistas CA',type:'entrevista',start:3,end:6,color:'linear-gradient(90deg,#6366f1,#818cf8)'},
+        {name:'Crunchbase API',type:'bd',start:1,end:12,color:'linear-gradient(90deg,#00A79D,#00c9bd)'},
+        {name:'LAVCA sync',type:'bd',start:2,end:12,color:'linear-gradient(90deg,#00A79D,#00c9bd)'},
+        {name:'Encuesta ESOs',type:'encuesta',start:3,end:7,color:'linear-gradient(90deg,#ec4899,#f472b6)'},
+        {name:'Encuesta productores',type:'encuesta',start:4,end:8,color:'linear-gradient(90deg,#ec4899,#f472b6)'},
+        {name:'LinkedIn scraping',type:'web',start:2,end:10,color:'linear-gradient(90deg,#f59e0b,#fbbf24)'},
+        {name:'AI News Tracker',type:'ai',start:3,end:12,color:'linear-gradient(90deg,#8b5cf6,#a78bfa)'},
+        {name:'Registros mercantiles',type:'oficial',start:1,end:5,color:'linear-gradient(90deg,#ef4444,#f87171)'},
+        {name:'FAO STAT update',type:'oficial',start:5,end:6,color:'linear-gradient(90deg,#ef4444,#f87171)'}
+      ];
+      const cols=13; // 1 label + 12 months
+      const container=document.getElementById('ganttContainer');
+      let html='<div class="gantt-grid" style="grid-template-columns:140px repeat(12,1fr)">';
+      // Header
+      html+='<div class="gantt-header">Fuente</div>';
+      months.forEach(m=>{html+='<div class="gantt-header">'+m+'</div>'});
+      // Rows
+      const currentMonth=6; // June 2026
+      tasks.forEach(t=>{
+        html+='<div class="gantt-row-label">'+t.name+'</div>';
+        for(let m=1;m<=12;m++){
+          html+='<div class="gantt-cell">';
+          if(m>=t.start&&m<=t.end){
+            let barStyle='background:'+t.color+';';
+            if(m===t.start)barStyle+='left:0;border-radius:4px 0 0 4px;';
+            else barStyle+='left:-1px;';
+            if(m===t.end)barStyle+='right:0;border-radius:0 4px 4px 0;';
+            else barStyle+='right:-1px;';
+            if(m===t.start&&m===t.end)barStyle+='border-radius:4px;left:4px;right:4px;';
+            html+='<div class="gantt-bar" style="'+barStyle+'"><div class="gantt-bar-tooltip">'+t.name+' ('+months[t.start-1]+'-'+months[t.end-1]+')</div></div>';
+          }
+          if(m===currentMonth){
+            html+='<div class="gantt-today"></div>';
+          }
+          html+='</div>';
+        }
+      });
+      html+='</div>';
+      container.innerHTML=html;
+    })();
+
+    // ===== Feature 4: Real-time Sync Status =====
+    (function(){
+      const syncSources=[
+        {name:'Crunchbase Pro',icon:'db',status:'synced',lastSync:'Hace 23 min',next:'En 37 min',color:'var(--accent-soft)',iconColor:'var(--accent)'},
+        {name:'LAVCA Data',icon:'db',status:'syncing',lastSync:'Sincronizando...',next:'Ahora',color:'rgba(245,158,11,.1)',iconColor:'var(--warning)'},
+        {name:'LinkedIn Scraper',icon:'web',status:'synced',lastSync:'Hace 3h 12min',next:'En 20h 48min',color:'rgba(245,158,11,.1)',iconColor:'var(--warning)'},
+        {name:'FAO STAT',icon:'db',status:'synced',lastSync:'Hace 2 dias',next:'En 88 dias',color:'var(--accent-soft)',iconColor:'var(--accent)'},
+        {name:'AI News Tracker',icon:'ai',status:'synced',lastSync:'Hace 8 min',next:'En 22 min',color:'rgba(139,92,246,.1)',iconColor:'#8b5cf6'},
+        {name:'PitchBook',icon:'db',status:'error',lastSync:'Error: timeout',next:'Reintentando...',color:'rgba(239,68,68,.1)',iconColor:'var(--danger)'},
+        {name:'Banco Mundial',icon:'db',status:'synced',lastSync:'Hace 14 dias',next:'En 76 dias',color:'var(--accent-soft)',iconColor:'var(--accent)'},
+        {name:'Google Forms',icon:'survey',status:'synced',lastSync:'Hace 1h 5min',next:'En 55 min',color:'rgba(236,72,153,.1)',iconColor:'#ec4899'}
+      ];
+      const icons={
+        db:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
+        web:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>',
+        ai:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+        survey:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>'
+      };
+      const grid=document.getElementById('syncGrid');
+      function renderSync(){
+        grid.innerHTML=syncSources.map(s=>{
+          return '<div class="sync-item'+(s.status==='syncing'?' is-syncing':'')+'">'+
+            '<div class="sync-item-icon" style="background:'+s.color+';color:'+s.iconColor+'">'+icons[s.icon]+'</div>'+
+            '<div class="sync-item-info"><div class="sync-item-name">'+s.name+'</div><div class="sync-item-time">'+s.lastSync+'</div></div>'+
+            '<div class="sync-item-status"><span class="sync-dot '+s.status+'"></span><span class="sync-item-next">'+s.next+'</span></div></div>';
+        }).join('');
+      }
+      renderSync();
+      // Simulate sync changes
+      setInterval(()=>{
+        const rnd=Math.floor(Math.random()*syncSources.length);
+        const src=syncSources[rnd];
+        if(src.status==='syncing'){
+          src.status='synced';src.lastSync='Hace 1 min';src.next='En 59 min';
+        } else if(src.status==='error'){
+          src.status='syncing';src.lastSync='Reintentando...';src.next='Ahora';
+        } else {
+          // Randomly update times
+          const mins=Math.floor(Math.random()*30)+1;
+          src.lastSync='Hace '+mins+' min';
+        }
+        renderSync();
+      },5000);
+    })();
+
+    // ===== Feature 5: Data Coverage Matrix =====
+    (function(){
+      const countries=[
+        {name:'Colombia',flag:'\u{1F1E8}\u{1F1F4}'},
+        {name:'Costa Rica',flag:'\u{1F1E8}\u{1F1F7}'},
+        {name:'El Salvador',flag:'\u{1F1F8}\u{1F1FB}'},
+        {name:'Guatemala',flag:'\u{1F1EC}\u{1F1F9}'},
+        {name:'Honduras',flag:'\u{1F1ED}\u{1F1F3}'},
+        {name:'Panama',flag:'\u{1F1F5}\u{1F1E6}'}
+      ];
+      const themes=['Startups','Inversores','ESOs','Cadenas Valor','Genero','Clima','Politica Pub.','Tecnologia','Mercados'];
+      // Coverage data: rows = countries, cols = themes (percentages)
+      const data=[
+        [92,78,85,88,45,72,68,90,82],
+        [88,82,79,75,52,80,71,85,70],
+        [65,42,58,70,28,55,62,48,38],
+        [72,55,68,82,35,60,75,52,45],
+        [60,38,52,68,22,48,58,42,35],
+        [78,65,72,55,40,62,70,60,58]
+      ];
+      const cols=themes.length+1;
+      const grid=document.getElementById('coverageMatrix');
+      grid.style.gridTemplateColumns='120px repeat('+themes.length+',1fr)';
+      let html='<div class="matrix-header">Pais</div>';
+      themes.forEach(t=>{html+='<div class="matrix-header">'+t+'</div>'});
+      countries.forEach((c,ri)=>{
+        html+='<div class="matrix-row-label"><span>'+c.flag+'</span> '+c.name+'</div>';
+        data[ri].forEach((val,ci)=>{
+          const isGap=val<30;
+          const bg=coverageColor(val);
+          const textColor=val>50?'#fff':'#1B2A4A';
+          html+='<div class="matrix-cell'+(isGap?' gap':'')+'"><div class="matrix-cell-inner" style="background:'+bg+';color:'+textColor+'">'+val+'%</div><div class="matrix-tooltip">'+c.name+' / '+themes[ci]+': '+val+'%</div></div>';
+        });
+      });
+      grid.innerHTML=html;
+      function coverageColor(pct){
+        if(pct>=80)return '#047857';
+        if(pct>=60)return '#10b981';
+        if(pct>=40)return '#fbbf24';
+        if(pct>=30)return '#f59e0b';
+        return '#ef4444';
+      }
+    })();
+  </script>
+
+<!-- AI Assistant -->
+<button class="ai-fab" id="aiFab" title="Asistente IA VerdeXcelerate">
+  <span class="ai-fab-badge"></span>
+  <svg class="ai-fab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a3 3 0 00-3 3v1H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-3V5a3 3 0 00-3-3z"/><circle cx="9" cy="13" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.5" fill="currentColor" stroke="none"/><path d="M9 17c1 1 5 1 6 0"/></svg>
+  <svg class="ai-fab-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+</button>
+<div class="ai-chat" id="aiChat">
+  <div class="ai-chat-header">
+    <div class="ai-chat-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M12 2a3 3 0 00-3 3v1H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-3V5a3 3 0 00-3-3z"/><circle cx="9" cy="13" r="1.5" fill="white" stroke="none"/><circle cx="15" cy="13" r="1.5" fill="white" stroke="none"/><path d="M9 17c1 1 5 1 6 0"/></svg></div>
+    <div class="ai-chat-header-info">
+      <div class="ai-chat-header-name">Asistente VerdeXcelerate</div>
+      <div class="ai-chat-header-status">En linea · Contexto completo</div>
+    </div>
+    <div class="ai-chat-header-actions">
+      <button onclick="clearAiChat()" title="Limpiar chat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+    </div>
+  </div>
+  <div class="ai-chat-body" id="aiChatBody"></div>
+  <div class="ai-suggestions" id="aiSuggestions"></div>
+  <div class="ai-chat-footer">
+    <textarea class="ai-chat-input" id="aiInput" placeholder="Pregunta sobre la plataforma..." rows="1"></textarea>
+    <button class="ai-chat-send" id="aiSend" title="Enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KB = {
+    platform: {
+      name: 'VerdeXcelerate',
+      desc: 'Plataforma de inteligencia para mapear, analizar y conectar el ecosistema de innovacion agroalimentaria en 6 paises de America Latina.',
+      org: 'TechnoServe con apoyo de BID Lab',
+      countries: ['Colombia','Costa Rica','El Salvador','Guatemala','Honduras','Panama'],
+      totalActors: 2847, totalStartups: 1243, totalInvestors: 331,
+      investmentTracked: '$147M USD',
+      valueChains: ['Cafe','Cacao','Frutas tropicales','Hortalizas','Granos basicos','Ganaderia','Acuicultura','Apicultura','Procesados'],
+      thematicAreas: ['AgTech','FinTech Rural','CleanTech','BioTech','LogTech','FoodTech','EdTech Agro','GovTech','Social Impact'],
+      actorTypes: ['Startup','Scaleup','Empresa consolidada','Inversor','Aceleradora','ONG/Fundacion','Gobierno','Academia','Organismo internacional']
+    },
+    countries: {
+      Colombia: {actors:892,startups:412,investors:98,funding:'$62M',gender:'32%',phase:'Expansion',topZone:'Eje Cafetero',challenges:'Conectividad rural, acceso a credito'},
+      'Costa Rica': {actors:534,startups:267,investors:78,funding:'$38M',gender:'28%',phase:'Maduro',topZone:'Valle Central',challenges:'Escala limitada, costo operativo'},
+      'El Salvador': {actors:298,startups:112,investors:23,funding:'$8M',gender:'19%',phase:'Emergente',topZone:'San Salvador',challenges:'Inseguridad, fuga de talento'},
+      Guatemala: {actors:412,startups:178,investors:45,funding:'$15M',gender:'22%',phase:'Emergente',topZone:'Altiplano',challenges:'Brecha digital, idiomas indigenas'},
+      Honduras: {actors:287,startups:98,investors:31,funding:'$6M',gender:'20%',phase:'Naciente',topZone:'San Pedro Sula',challenges:'Infraestructura, acceso financiero'},
+      Panama: {actors:424,startups:176,investors:56,funding:'$18M',gender:'26%',phase:'Expansion',topZone:'Ciudad de Panama',challenges:'Concentracion urbana, diversificacion'}
+    },
+    priorityZones: {
+      'La Guajira (Colombia)': {severity:'alta',actors:45,coverage:'23%',gender:'18%',gaps:'Conectividad, financiamiento, talento'},
+      'Sucre (Colombia)': {severity:'alta',actors:32,coverage:'19%',gender:'15%',gaps:'Infraestructura, acceso a mercados'},
+      'Morazan (El Salvador)': {severity:'media',actors:28,coverage:'31%',gender:'21%',gaps:'Seguridad, capital semilla'},
+      'Alta Verapaz (Guatemala)': {severity:'alta',actors:38,coverage:'22%',gender:'16%',gaps:'Idiomas, conectividad, educacion'},
+      'Cordoba (Colombia)': {severity:'media',actors:41,coverage:'28%',gender:'20%',gaps:'Infraestructura vial, mercados'},
+      'Magdalena (Colombia)': {severity:'media',actors:36,coverage:'25%',gender:'19%',gaps:'Cambio climatico, tecnificacion'}
+    },
+    gaps: {
+      Financiamiento: {count:12,severity:'critica',desc:'Falta de acceso a capital semilla y serie A en zonas rurales'},
+      Conectividad: {count:8,severity:'alta',desc:'Brecha digital impide adopcion de AgTech en 4 de 6 paises'},
+      Genero: {count:7,severity:'alta',desc:'Solo 29% liderazgo femenino vs meta 40% del TOR'},
+      Talento: {count:6,severity:'media',desc:'Escasez de perfiles tecnicos en agroindustria'},
+      Mercado: {count:5,severity:'media',desc:'Dificultad de acceso a mercados internacionales'}
+    },
+    ai: {
+      models: ['Clasificador de actores (F1:0.91)','Detector de tendencias','Motor de actualizacion','Detector de duplicados'],
+      dataQuality: {completitud:'90%',consistencia:'92%',frescura:'85%',precision:'88%'},
+      healthScore: 87,
+      sources: {entrevistas:'47/60',databases:18,encuestas:324,fuentesIA:9}
+    },
+    sections: {
+      dashboard: 'Panel principal con KPIs regionales, graficos de distribucion, actividad del pipeline, insights IA, monitor de calidad de datos y tracker de objetivos TOR.',
+      directorio: 'Directorio de 2,847 actores con busqueda, filtros por tipo/pais/cadena, nivel de confianza IA, modo de seleccion masiva, importacion CSV y preview rapido.',
+      mapa: 'Mapa interactivo con vista de puntos, heatmap, clusters, herramienta de radio de distancia, panel de estadisticas y modo fullscreen.',
+      pais: 'Perfiles de 6 paises con comparacion lado a lado, radar de madurez, sparklines de tendencia, exportacion de reportes y sidebar de actores clave.',
+      zonas: 'Diagnostico de 6 zonas prioritarias con matriz de riesgo, recomendaciones de intervencion, comparacion, timeline de progreso y heatmap de cobertura.',
+      brechas: 'Analisis de 38 brechas con matriz impacto-esfuerzo, tendencias trimestrales, mapeo de stakeholders, generador de planes de accion y referencias cruzadas.',
+      fuentes: 'Gestion de fuentes de datos con linaje visual, dashboard de confiabilidad, calendario de recoleccion, sync en tiempo real y matriz de cobertura.',
+      gobernanza: 'Gobernanza IA con dashboard de rendimiento de modelos, panel de A/B tests, simulador de correccion de sesgo, alertas automatizadas y checklist de cumplimiento.'
+    }
+  };
+
+  function findResponse(q) {
+    var ql = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if (/^(hola|hey|buenos|buenas|saludos|hi|hello)/.test(ql))
+      return 'Hola! Soy el asistente IA de <strong>VerdeXcelerate</strong>. Tengo acceso a toda la informacion de la plataforma: <strong>2,847 actores</strong>, <strong>6 paises</strong>, <strong>9 cadenas de valor</strong> y <strong>$147M</strong> en inversion rastreada. ¿En que puedo ayudarte?';
+    if (/que es|plataforma|verde.?xcelerate|sobre la/.test(ql))
+      return '<strong>VerdeXcelerate</strong> es una '+KB.platform.desc+' Desarrollada por <strong>'+KB.platform.org+'</strong>. Cubre: '+KB.platform.countries.join(', ')+'. Rastrea <strong>'+KB.platform.totalActors+' actores</strong>, <strong>'+KB.platform.totalStartups+' startups</strong> y <strong>$147M</strong> en inversion.';
+    for (var c in KB.countries) {
+      if (ql.indexOf(c.toLowerCase()) !== -1) {
+        var cd = KB.countries[c];
+        return '<strong>'+c+'</strong>: Fase <strong>'+cd.phase+'</strong> · <strong>'+cd.actors+'</strong> actores · <strong>'+cd.startups+'</strong> startups · <strong>'+cd.investors+'</strong> inversores · Inversion: <strong>'+cd.funding+'</strong> · Lid. femenino: <strong>'+cd.gender+'</strong> · Zona top: '+cd.topZone+' · Retos: '+cd.challenges;
+      }
+    }
+    if (/actor|startup|scaleup|empresa|inversor|aceleradora|directorio/.test(ql))
+      return 'El ecosistema cuenta con <strong>'+KB.platform.totalActors+' actores</strong> mapeados: <strong>'+KB.platform.totalStartups+'</strong> startups, <strong>'+KB.platform.totalInvestors+'</strong> inversores. Los 9 tipos son: '+KB.platform.actorTypes.join(', ')+'.';
+    if (/cadena|valor|cafe|cacao|fruta|hortaliza|grano|ganader/.test(ql))
+      return 'Se rastrean <strong>9 cadenas de valor</strong>: '+KB.platform.valueChains.join(', ')+'.';
+    if (/tematic|agtech|fintech|cleantech|biotech|logtech|foodtech/.test(ql))
+      return 'Las <strong>9 areas tematicas</strong>: '+KB.platform.thematicAreas.join(', ')+'.';
+    if (/inversion|funding|capital|ronda|financ|dinero/.test(ql))
+      return 'Se han rastreado <strong>$147M USD</strong> en inversion total. Colombia $62M (42%), Costa Rica $38M (26%), Panama $18M, Guatemala $15M, El Salvador $8M, Honduras $6M.';
+    if (/genero|mujer|femenin|diversidad|inclusion/.test(ql))
+      return 'Liderazgo femenino promedio: <strong>29%</strong> (meta TOR: 40%). Colombia 32%, Costa Rica 28%, Panama 26%, Guatemala 22%, Honduras 20%, El Salvador 19%.';
+    if (/zona|prioritar|guajira|sucre|morazan|verapaz|cordoba|magdalena/.test(ql)) {
+      var zl='';for(var z in KB.priorityZones){var zd=KB.priorityZones[z];zl+='\n· <strong>'+z+'</strong>: '+zd.severity+', '+zd.actors+' actores, cobertura '+zd.coverage;}
+      return 'Hay <strong>6 zonas prioritarias</strong>:'+zl;
+    }
+    if (/brecha|reto|gap|desafi|problema/.test(ql)) {
+      var gl='';for(var g in KB.gaps){var gd=KB.gaps[g];gl+='\n· <strong>'+g+'</strong>: '+gd.count+' gaps ('+gd.severity+') — '+gd.desc;}
+      return '<strong>38 brechas</strong> en 5 categorias:'+gl;
+    }
+    if (/modelo|ia |inteligencia|clasificad|detector|sesgo|gobernanza/.test(ql))
+      return '<strong>4 modelos IA</strong>: '+KB.ai.models.join(', ')+'. Calidad: Completitud '+KB.ai.dataQuality.completitud+', Consistencia '+KB.ai.dataQuality.consistencia+', Frescura '+KB.ai.dataQuality.frescura+', Precision '+KB.ai.dataQuality.precision+'. Score: <strong>'+KB.ai.healthScore+'/100</strong>.';
+    if (/fuente|dato|entrevista|encuesta|scraping|pipeline/.test(ql))
+      return 'Fuentes: <strong>'+KB.ai.sources.entrevistas+'</strong> entrevistas, <strong>'+KB.ai.sources.databases+'</strong> BD, <strong>'+KB.ai.sources.encuestas+'</strong> encuestas, <strong>'+KB.ai.sources.fuentesIA+'</strong> fuentes IA.';
+    if (/seccion|pantalla|naveg|ir a|donde encuentro/.test(ql)) {
+      var sl='';for(var s in KB.sections)sl+='\n· <strong>'+s.charAt(0).toUpperCase()+s.slice(1)+'</strong>: '+KB.sections[s];
+      return 'Secciones:'+sl;
+    }
+    if (/ayuda|help|que puedo|como funcio/.test(ql))
+      return 'Puedo responder sobre: <strong>paises</strong>, <strong>actores</strong>, <strong>cadenas de valor</strong>, <strong>inversion</strong>, <strong>brechas</strong>, <strong>zonas</strong>, <strong>genero</strong>, <strong>modelos IA</strong>, <strong>fuentes</strong> y cualquier seccion.';
+    if (/tor|technoserve|bid|objetivo|meta/.test(ql))
+      return 'Proyecto <strong>TOR de TechnoServe/BID Lab</strong>. Metas: 60 entrevistas (47 hechas), 5 alianzas (3), 85% cobertura (78%), 40% lid. femenino (29%).';
+    return 'Tengo info sobre <strong>2,847 actores</strong>, 6 paises, 9 cadenas, 38 brechas, modelos IA y mas. Pregunta sobre un <strong>pais</strong>, <strong>brechas</strong>, <strong>inversion</strong>, <strong>genero</strong> o escribe <strong>"ayuda"</strong>.';
+  }
+
+  var fab=document.getElementById('aiFab'),chat=document.getElementById('aiChat'),body=document.getElementById('aiChatBody'),input=document.getElementById('aiInput'),sendBtn=document.getElementById('aiSend'),sugBox=document.getElementById('aiSuggestions');
+  var suggestions=['Resumen de Colombia','¿Cuantos actores hay?','Brechas criticas','Inversion total','Liderazgo femenino','Zonas prioritarias','Modelos IA activos','Cadenas de valor'];
+
+  function toggleChat(){var isOpen=chat.classList.toggle('open');fab.classList.toggle('active',isOpen);if(isOpen&&body.children.length===0)showWelcome();if(isOpen)setTimeout(function(){input.focus();},350);}
+  fab.addEventListener('click',toggleChat);
+  function showWelcome(){addMsg('bot','Hola! Soy el asistente IA de <strong>VerdeXcelerate</strong>. Tengo todo el contexto de la plataforma. ¿Que quieres saber?');renderSuggestions();}
+  function renderSuggestions(){var sh=suggestions.sort(function(){return 0.5-Math.random();}).slice(0,4);sugBox.innerHTML=sh.map(function(s){return '<button class="ai-suggestion" onclick="askAi(\''+s+'\')">'+s+'</button>';}).join('');}
+  function addMsg(type,html){var d=document.createElement('div');d.className='ai-msg '+type;d.innerHTML=html;body.appendChild(d);body.scrollTop=body.scrollHeight;return d;}
+  function showTyping(){var d=document.createElement('div');d.className='ai-typing';d.id='aiTyping';d.innerHTML='<span></span><span></span><span></span>';body.appendChild(d);body.scrollTop=body.scrollHeight;}
+  function hideTyping(){var t=document.getElementById('aiTyping');if(t)t.remove();}
+  window.askAi=function(text){if(!text.trim())return;addMsg('user',text);sugBox.innerHTML='';input.value='';input.style.height='auto';sendBtn.disabled=true;showTyping();setTimeout(function(){hideTyping();addMsg('bot',findResponse(text));sendBtn.disabled=false;renderSuggestions();},600+Math.random()*800);};
+  function handleSend(){var val=input.value.trim();if(val)askAi(val);}
+  sendBtn.addEventListener('click',handleSend);
+  input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();}});
+  input.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';});
+  window.clearAiChat=function(){body.innerHTML='';sugBox.innerHTML='';showWelcome();};
+})();
+</script>
+</body>
+</html>

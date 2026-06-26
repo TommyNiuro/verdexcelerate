@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesion · VerdeXcelerate</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;450;500;600;700&family=DM+Serif+Display&display=swap');
+
+    :root {
+      --bg:#f4f5f7;--surface:#ffffff;--fg:#1B2A4A;--muted:#7a8599;--border:#e5e8ee;
+      --accent:#00A79D;--accent-light:#00c9bd;--accent-dark:#008f87;
+      --accent-soft:rgba(0,167,157,.08);--accent-glow:rgba(0,167,157,.25);
+      --font-display:'DM Serif Display',Georgia,serif;
+      --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+      --font-mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,monospace;
+      --radius:10px;--radius-lg:16px;
+      --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
+      --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html{height:100%}
+    body{margin:0;height:100%;font-family:var(--font-body);font-size:15px;color:var(--fg);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;display:grid;grid-template-columns:1fr 1fr}
+    @media(max-width:920px){
+      body{grid-template-columns:1fr}
+      .login-brand{display:none}
+      .login-form-panel{padding:40px 24px}
+      .login-form-inner{max-width:420px}
+    }
+    @media(max-width:600px){
+      .login-form-panel{padding:32px 16px}
+      .login-form-inner{max-width:100%}
+      .login-form-inner h2{font-size:24px}
+      .login-form-inner .subtitle{font-size:14px;margin-bottom:28px}
+      .input{padding:12px 14px;font-size:14px}
+      .btn-primary{padding:13px 20px;font-size:14px}
+      .btn-oauth{padding:12px 16px;font-size:13px}
+      .divider{margin:22px 0;font-size:12px}
+      .form-row{flex-direction:column;gap:12px;align-items:flex-start}
+      .pill-badge{font-size:10px;padding:4px 12px;margin-bottom:16px}
+      .login-footer{margin-top:28px;font-size:12px}
+      .trusted-strip{margin-top:36px}
+      .trusted-logos{gap:20px}
+      .trusted-logos span{font-size:13px}
+    }
+    @media(max-width:400px){
+      .login-form-panel{padding:24px 12px}
+      .login-form-inner h2{font-size:22px}
+      .btn-oauth{gap:8px;font-size:12px;padding:11px 12px}
+      .btn-oauth svg{width:16px;height:16px}
+      .field label{font-size:12px}
+      .checkbox-row{font-size:12px}
+      .link{font-size:12px}
+    }
+
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+    @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    @keyframes orbFloat1{0%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.1)}66%{transform:translate(-15px,15px) scale(.95)}100%{transform:translate(0,0) scale(1)}}
+    @keyframes orbFloat2{0%{transform:translate(0,0) scale(1)}33%{transform:translate(-25px,20px) scale(.9)}66%{transform:translate(20px,-10px) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
+    @keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Left panel — brand */
+    .login-brand{
+      background:linear-gradient(160deg,#0f1729 0%,#152035 40%,#1a2744 100%);
+      display:flex;flex-direction:column;justify-content:space-between;padding:56px;
+      position:relative;overflow:hidden;
+    }
+    /* Animated orbs */
+    .login-brand .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;pointer-events:none}
+    .login-brand .orb-1{width:400px;height:400px;background:var(--accent);bottom:-100px;left:-100px;animation:orbFloat1 12s ease-in-out infinite}
+    .login-brand .orb-2{width:300px;height:300px;background:#6366f1;top:-80px;right:-60px;animation:orbFloat2 15s ease-in-out infinite}
+    .login-brand .orb-3{width:200px;height:200px;background:var(--accent-light);top:50%;left:50%;animation:orbFloat1 18s ease-in-out infinite reverse}
+
+    /* Mesh grid */
+    .login-brand .mesh{
+      position:absolute;inset:0;
+      background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+      background-size:60px 60px;opacity:.5;
+    }
+
+    .brand-top{position:relative;z-index:1;animation:fadeInUp .8s var(--ease-out-expo) both}
+    .brand-logo{display:flex;align-items:center;gap:14px;color:white;font-family:var(--font-display);font-size:22px;letter-spacing:-.01em;text-decoration:none}
+    .brand-logo-icon{
+      width:40px;height:40px;border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-light));
+      display:grid;place-items:center;
+      box-shadow:0 4px 16px rgba(0,167,157,.4);
+      transition:transform .3s var(--ease-spring);
+    }
+    .brand-logo:hover .brand-logo-icon{transform:scale(1.1) rotate(-5deg)}
+    .brand-logo-icon svg{width:20px;height:20px}
+
+    .brand-middle{position:relative;z-index:1;color:white;animation:fadeInUp .8s var(--ease-out-expo) .2s both}
+    .brand-middle h1{
+      font-family:var(--font-display);font-size:clamp(34px,4vw,50px);
+      line-height:1.1;letter-spacing:-.025em;margin:0 0 24px;max-width:16ch;font-weight:400;
+    }
+    .brand-middle p{color:rgba(255,255,255,.5);font-size:16px;line-height:1.7;max-width:38ch;margin:0}
+
+    .brand-stats{position:relative;z-index:1;display:flex;gap:48px;animation:fadeInUp .8s var(--ease-out-expo) .4s both}
+    .brand-stat{text-align:left}
+    .brand-stat-num{
+      font-family:var(--font-mono);font-size:32px;font-weight:700;
+      background:linear-gradient(135deg,var(--accent),var(--accent-light));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;font-variant-numeric:tabular-nums;
+    }
+    .brand-stat-label{font-size:13px;color:rgba(255,255,255,.35);margin-top:4px;font-weight:400}
+
+    /* Floating badges on left panel */
+    .float-badge{
+      position:absolute;z-index:2;background:rgba(255,255,255,.08);
+      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;
+      display:flex;align-items:center;gap:10px;font-size:13px;color:white;
+    }
+    .float-badge-1{top:35%;right:40px;animation:float 6s ease-in-out infinite,fadeIn 1s .6s both}
+    .float-badge-2{bottom:30%;right:60px;animation:float 6s ease-in-out 1.5s infinite,fadeIn 1s .8s both}
+    .float-badge-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center}
+    .float-badge-icon.green{background:rgba(16,185,129,.2)}
+    .float-badge-icon.blue{background:rgba(59,130,246,.2)}
+    .float-badge-icon svg{width:16px;height:16px}
+    .float-badge-text{font-weight:500}
+    .float-badge-sub{font-size:11px;color:rgba(255,255,255,.4);font-weight:400}
+
+    /* Right panel — form */
+    .login-form-panel{
+      display:flex;flex-direction:column;justify-content:center;align-items:center;
+      padding:56px 40px;background:var(--bg);position:relative;overflow:hidden;
+    }
+    .login-form-panel::before{
+      content:'';position:absolute;top:-200px;right:-200px;width:500px;height:500px;
+      background:radial-gradient(circle,rgba(0,167,157,.06) 0%,transparent 60%);pointer-events:none;
+    }
+
+    .login-form-inner{width:100%;max-width:400px;position:relative;z-index:1;animation:fadeInUp .6s var(--ease-out-expo) both}
+    .login-form-inner h2{font-family:var(--font-display);font-size:30px;letter-spacing:-.02em;margin:0 0 6px;font-weight:400}
+    .login-form-inner .subtitle{color:var(--muted);font-size:15px;margin:0 0 36px}
+
+    .field{display:flex;flex-direction:column;gap:7px;margin-bottom:20px}
+    .field label{font-size:13px;font-weight:500;color:var(--muted)}
+    .input{
+      width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius);
+      background:white;color:var(--fg);font:inherit;font-size:15px;
+      transition:all .25s var(--ease-out-expo);
+    }
+    .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+    .input:hover:not(:focus){border-color:#c0c6d0}
+    .input::placeholder{color:rgba(122,133,153,.5)}
+
+    .form-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+    .checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+    .checkbox-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+    .link{font-size:13px;color:var(--accent);text-decoration:none;cursor:pointer;font-weight:500;transition:color .15s}
+    .link:hover{color:var(--accent-dark)}
+
+    .btn-primary{
+      width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:14px 24px;border-radius:var(--radius);border:none;
+      background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+      color:white;font:inherit;font-size:15px;font-weight:600;cursor:pointer;
+      transition:all .25s var(--ease-out-expo);position:relative;overflow:hidden;
+      box-shadow:0 4px 12px rgba(0,167,157,.25);
+    }
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,167,157,.35)}
+    .btn-primary:active{transform:translateY(0);box-shadow:0 2px 8px rgba(0,167,157,.2)}
+    .btn-primary::after{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);
+      background-size:200% 100%;animation:shimmer 3s infinite;
+    }
+
+    .divider{display:flex;align-items:center;gap:16px;margin:28px 0;color:var(--muted);font-size:13px}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    .btn-oauth{
+      width:100%;display:inline-flex;align-items:center;justify-content:center;gap:12px;
+      padding:13px 20px;border-radius:var(--radius);border:1.5px solid var(--border);
+      background:white;color:var(--fg);font:inherit;font-size:14px;font-weight:500;cursor:pointer;
+      transition:all .25s var(--ease-out-expo);margin-bottom:12px;
+    }
+    .btn-oauth:hover{border-color:var(--fg);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.06)}
+    .btn-oauth:active{transform:translateY(0)}
+    .btn-oauth svg{width:18px;height:18px}
+
+    .login-footer{margin-top:36px;text-align:center;font-size:13px;color:var(--muted)}
+
+    .pill-badge{
+      display:inline-flex;align-items:center;gap:6px;padding:5px 14px;
+      background:linear-gradient(135deg,rgba(0,167,157,.1),rgba(0,167,157,.05));
+      color:var(--accent);border-radius:999px;font-family:var(--font-mono);font-size:11px;
+      letter-spacing:.04em;text-transform:uppercase;margin-bottom:20px;font-weight:600;
+      border:1px solid rgba(0,167,157,.15);
+    }
+    .pill-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+
+    /* Trusted by strip */
+    .trusted-strip{margin-top:48px;text-align:center;animation:fadeIn 1s 1s both}
+    .trusted-strip p{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin:0 0 16px}
+    .trusted-logos{display:flex;align-items:center;justify-content:center;gap:32px;opacity:.35;filter:grayscale(1)}
+    .trusted-logos span{font-family:var(--font-display);font-size:15px;color:var(--fg);font-weight:400}
+
+/* ─── AI Assistant Chat ─── */
+.ai-fab{
+  position:fixed;bottom:24px;right:24px;z-index:10000;
+  width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#00A79D,#008f87);color:white;
+  box-shadow:0 6px 24px rgba(0,167,157,.4);
+  display:grid;place-items:center;
+  transition:all .3s cubic-bezier(0.34,1.56,0.64,1);
+  animation:aiFabIn .5s cubic-bezier(0.16,1,0.3,1) 1.5s both;
+}
+@keyframes aiFabIn{from{opacity:0;transform:scale(0) rotate(-180deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.ai-fab:hover{transform:scale(1.1);box-shadow:0 8px 32px rgba(0,167,157,.5)}
+.ai-fab:active{transform:scale(.95)}
+.ai-fab svg{width:26px;height:26px}
+.ai-fab .ai-fab-close{display:none}
+.ai-fab.active .ai-fab-icon{display:none}
+.ai-fab.active .ai-fab-close{display:block}
+.ai-fab-badge{
+  position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:50%;
+  background:#22c55e;border:2px solid white;font-size:0;
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+
+.ai-chat{
+  position:fixed;bottom:92px;right:24px;z-index:9999;
+  width:400px;max-width:calc(100vw - 48px);height:560px;max-height:calc(100vh - 120px);
+  background:rgba(255,255,255,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(0,0,0,.08);border-radius:20px;
+  box-shadow:0 24px 80px rgba(0,0,0,.15),0 8px 32px rgba(0,0,0,.08);
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:scale(0) translateY(20px);transform-origin:bottom right;
+  opacity:0;pointer-events:none;
+  transition:all .35s cubic-bezier(0.16,1,0.3,1);
+}
+.ai-chat.open{transform:scale(1) translateY(0);opacity:1;pointer-events:auto}
+
+.ai-chat-header{
+  padding:16px 20px;display:flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,#1B2A4A,#0f1729);color:white;flex-shrink:0;
+}
+.ai-chat-avatar{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,#00A79D,#00c9bd);
+  display:grid;place-items:center;flex-shrink:0;
+}
+.ai-chat-avatar svg{width:20px;height:20px}
+.ai-chat-header-info{flex:1}
+.ai-chat-header-name{font-size:14px;font-weight:600}
+.ai-chat-header-status{font-size:11px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px}
+.ai-chat-header-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block}
+.ai-chat-header-actions{display:flex;gap:4px}
+.ai-chat-header-actions button{background:rgba(255,255,255,.1);border:none;color:white;width:28px;height:28px;border-radius:8px;cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.ai-chat-header-actions button:hover{background:rgba(255,255,255,.2)}
+
+.ai-chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ai-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;animation:msgIn .3s cubic-bezier(0.16,1,0.3,1)}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ai-msg.bot{background:#f0faf9;color:#1B2A4A;border-bottom-left-radius:4px;align-self:flex-start;border:1px solid rgba(0,167,157,.1)}
+.ai-msg.user{background:linear-gradient(135deg,#00A79D,#008f87);color:white;border-bottom-right-radius:4px;align-self:flex-end}
+.ai-msg code{font-family:ui-monospace,'SF Mono',monospace;font-size:12px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px}
+.ai-msg strong{font-weight:600}
+.ai-typing{align-self:flex-start;display:flex;gap:4px;padding:12px 16px;background:#f0faf9;border-radius:14px;border-bottom-left-radius:4px;border:1px solid rgba(0,167,157,.1)}
+.ai-typing span{width:6px;height:6px;border-radius:50%;background:#00A79D;opacity:.4;animation:typingDot 1.4s ease-in-out infinite}
+.ai-typing span:nth-child(2){animation-delay:.2s}
+.ai-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+.ai-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px}
+.ai-suggestion{
+  padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  background:rgba(0,167,157,.06);color:#00A79D;border:1px solid rgba(0,167,157,.15);
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.ai-suggestion:hover{background:rgba(0,167,157,.12);border-color:#00A79D}
+
+.ai-chat-footer{padding:12px 16px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:8px;flex-shrink:0;background:white}
+.ai-chat-input{
+  flex:1;padding:10px 14px;border:1px solid rgba(0,0,0,.1);border-radius:12px;
+  font-size:13px;font-family:inherit;outline:none;resize:none;
+  transition:border-color .2s;min-height:40px;max-height:100px;
+}
+.ai-chat-input:focus{border-color:#00A79D;box-shadow:0 0 0 3px rgba(0,167,157,.1)}
+.ai-chat-input::placeholder{color:#a0a8b8}
+.ai-chat-send{
+  width:40px;height:40px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#00A79D,#008f87);color:white;
+  cursor:pointer;display:grid;place-items:center;flex-shrink:0;
+  transition:all .2s;
+}
+.ai-chat-send:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,167,157,.3)}
+.ai-chat-send:active{transform:scale(.95)}
+.ai-chat-send:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.ai-chat-send svg{width:18px;height:18px}
+
+@media(max-width:500px){
+  .ai-chat{width:calc(100vw - 16px);right:8px;bottom:80px;height:calc(100vh - 100px);border-radius:16px}
+  .ai-fab{bottom:16px;right:16px;width:50px;height:50px}
+}
+  </style>
+</head>
+<body>
+  <div class="login-brand" data-od-id="login-brand">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="mesh"></div>
+
+    <div class="brand-top">
+      <a href="index.html" class="brand-logo">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
+            <path d="M12 3c-1.2 3.6-4.4 6-8 7 1.6 2 2.8 4.6 3 7.5C8.6 15.2 10.2 13 12 12c1.8 1 3.4 3.2 5 5.5.2-2.9 1.4-5.5 3-7.5-3.6-1-6.8-3.4-8-7z"/>
+          </svg>
+        </div>
+        VerdeXcelerate
+      </a>
+    </div>
+
+    <div class="brand-middle">
+      <h1>Mapeo Vivo del Ecosistema AgrifoodTech</h1>
+      <p>Plataforma de inteligencia para mapear, analizar y conectar el ecosistema de innovacion agroalimentaria en Latinoamerica.</p>
+    </div>
+
+    <!-- Floating badges -->
+    <div class="float-badge float-badge-1">
+      <div class="float-badge-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div>
+        <div class="float-badge-text">312 actores clasificados</div>
+        <div class="float-badge-sub">Pipeline IA activo</div>
+      </div>
+    </div>
+    <div class="float-badge float-badge-2">
+      <div class="float-badge-icon blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10"/></svg>
+      </div>
+      <div>
+        <div class="float-badge-text">6 paises conectados</div>
+        <div class="float-badge-sub">CO, CR, SV, GT, HN, PA</div>
+      </div>
+    </div>
+
+    <div class="brand-stats">
+      <div class="brand-stat">
+        <div class="brand-stat-num" data-count="2847">2,847</div>
+        <div class="brand-stat-label">Actores mapeados</div>
+      </div>
+      <div class="brand-stat">
+        <div class="brand-stat-num">9</div>
+        <div class="brand-stat-label">Areas tematicas</div>
+      </div>
+      <div class="brand-stat">
+        <div class="brand-stat-num">9</div>
+        <div class="brand-stat-label">Cadenas de valor</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-form-panel" data-od-id="login-form">
+    <div class="login-form-inner">
+      <span class="pill-badge">Beta &middot; Acceso anticipado</span>
+      <h2>Iniciar sesion</h2>
+      <p class="subtitle">Accede al Mapeo Vivo AgrifoodTech</p>
+
+      <button class="btn-oauth" onclick="window.location.href='dashboard.html'">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continuar con Google
+      </button>
+      <button class="btn-oauth" onclick="window.location.href='dashboard.html'">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        Continuar con GitHub
+      </button>
+
+      <div class="divider">o con correo</div>
+
+      <form onsubmit="event.preventDefault();this.querySelector('button').textContent='Ingresando...';setTimeout(()=>window.location.href='dashboard.html',800)">
+        <div class="field">
+          <label for="email">Correo electronico</label>
+          <input class="input" type="email" id="email" placeholder="tu@organizacion.org" />
+        </div>
+        <div class="field">
+          <label for="password">Contrasena</label>
+          <input class="input" type="password" id="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" />
+        </div>
+        <div class="form-row">
+          <label class="checkbox-row">
+            <input type="checkbox" checked />
+            Recordarme
+          </label>
+          <a class="link" href="javascript:void(0)" onclick="alert('Se ha enviado un enlace de recuperacion a tu correo.')">Recuperar contrasena</a>
+        </div>
+        <button class="btn-primary" type="submit">Iniciar sesion &rarr;</button>
+      </form>
+
+      <div class="login-footer">
+        &#191;Primera vez? <a class="link" href="dashboard.html">Solicitar acceso</a>
+      </div>
+
+      <div class="trusted-strip">
+        <p>Impulsado por</p>
+        <div class="trusted-logos">
+          <span>TechnoServe</span>
+          <span>BID Lab</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

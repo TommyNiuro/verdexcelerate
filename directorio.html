@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Directorio · VerdeXcelerate</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;450;500;600;700&family=DM+Serif+Display&display=swap');
+    :root{--bg:#f4f5f7;--surface:#fff;--fg:#1B2A4A;--muted:#7a8599;--border:#e5e8ee;--accent:#00A79D;--accent-light:#00c9bd;--accent-dark:#008f87;--accent-soft:rgba(0,167,157,.08);--accent-glow:rgba(0,167,157,.25);--fg-soft:rgba(27,42,74,.04);--sidebar-bg:linear-gradient(195deg,#0f1729,#162038,#1a2744);--sidebar-fg:#8392ab;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--shadow-sm:0 1px 2px rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.06);--shadow-lg:0 10px 25px -3px rgba(0,0,0,.07),0 4px 10px -4px rgba(0,0,0,.04);--font-display:'DM Serif Display',Georgia,serif;--font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;--font-mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,monospace;--radius:10px;--radius-lg:16px;--ease-out-expo:cubic-bezier(.16,1,.3,1);--ease-spring:cubic-bezier(.34,1.56,.64,1)}
+    *,*::before,*::after{box-sizing:border-box}body{margin:0;font-family:var(--font-body);font-size:14px;color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased;height:100vh;display:grid;grid-template-columns:260px 1fr;overflow:hidden}@media(max-width:920px){body{grid-template-columns:1fr}.sidebar{display:none}}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:3px}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}@keyframes growBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes dotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}.anim-fade-up{animation:fadeInUp .7s var(--ease-out-expo) both}.delay-1{animation-delay:.05s}.delay-2{animation-delay:.1s}.delay-3{animation-delay:.15s}.delay-4{animation-delay:.2s}.delay-5{animation-delay:.25s}
+    .sidebar{background:var(--sidebar-bg);display:flex;flex-direction:column;padding:24px 0;overflow-y:auto;position:relative}.sidebar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03))}.sidebar-logo{display:flex;align-items:center;gap:12px;padding:0 24px 28px;color:#fff;font-family:var(--font-display);font-size:18px;text-decoration:none}.sidebar-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-light));display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,167,157,.3)}.sidebar-logo-icon svg{width:18px;height:18px}.sidebar-section{padding:0 14px;margin-bottom:4px}.sidebar-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:20px 10px 8px}.sidebar-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--sidebar-fg);text-decoration:none;font-size:13px;font-weight:450;transition:all .2s var(--ease-out-expo);position:relative}.sidebar-link:hover{color:#fff;transform:translateX(2px)}.sidebar-link.active{color:#fff;background:rgba(255,255,255,.08)}.sidebar-link.active::after{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent);border-radius:0 3px 3px 0}.sidebar-link svg{width:18px;height:18px;opacity:.5;flex-shrink:0}.sidebar-link:hover svg,.sidebar-link.active svg{opacity:1}.sidebar-badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:linear-gradient(135deg,rgba(0,167,157,.2),rgba(0,167,157,.1));color:var(--accent-light);padding:2px 8px;border-radius:6px;font-weight:500}.sidebar-bottom{margin-top:auto;padding:16px 14px 0;border-top:1px solid rgba(255,255,255,.06)}.sidebar-user{display:flex;align-items:center;gap:10px;padding:10px 12px;color:var(--sidebar-fg);font-size:13px}.sidebar-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,rgba(0,167,157,.4),rgba(0,167,157,.2));display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--accent-light)}
+    .main{display:flex;flex-direction:column;overflow:hidden}.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:rgba(255,255,255,.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0}.topbar h1{font-family:var(--font-display);font-size:22px;font-weight:400;letter-spacing:-.02em;margin:0}.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:2px}.breadcrumb a{color:var(--muted);text-decoration:none}.breadcrumb a:hover{color:var(--accent)}.breadcrumb svg{width:12px;height:12px;opacity:.4}.topbar-right{display:flex;align-items:center;gap:10px}
+    .btn-sm{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius);border:1px solid var(--border);background:#fff;font:inherit;font-size:13px;font-weight:500;color:var(--fg);cursor:pointer;transition:all .2s var(--ease-out-expo)}.btn-sm:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow-sm)}.btn-sm svg{width:14px;height:14px}
+    .btn-accent{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(0,167,157,.25);position:relative;overflow:hidden}.btn-accent::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);background-size:200% 100%;animation:shimmer 3s infinite}.btn-accent:hover{box-shadow:0 4px 16px rgba(0,167,157,.35);color:#fff;border-color:transparent}
+    .content{flex:1;overflow-y:auto;padding:28px 32px 64px}
+    /* Type chips */
+    .type-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+    .type-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;transition:all .25s var(--ease-out-expo);position:relative;overflow:hidden}.type-chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}.type-chip.active{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(0,167,157,.25)}.type-chip .chip-count{font-family:var(--font-mono);font-size:10px;opacity:.6}
+    .type-chip .chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    /* Search + filters */
+    .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+    .search-input{flex:1;min-width:260px;display:flex;align-items:center;gap:10px;padding:10px 16px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);transition:all .25s var(--ease-out-expo)}.search-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}.search-input input{border:none;outline:none;background:none;font:inherit;font-size:14px;color:var(--fg);flex:1}.search-input input::placeholder{color:rgba(122,133,153,.5)}.search-input svg{width:16px;height:16px;color:var(--muted);flex-shrink:0;opacity:.5}
+    .search-kbd{font-family:var(--font-mono);font-size:10px;padding:3px 6px;border-radius:4px;background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+    .filter-select{padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius);background:#fff;font:inherit;font-size:13px;color:var(--fg);cursor:pointer;min-width:148px;transition:all .2s var(--ease-out-expo);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8599' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}.filter-select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);outline:none}
+    .results-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;font-size:13px;color:var(--muted)}.results-meta strong{color:var(--fg);font-weight:700}
+    .view-toggle{display:flex;gap:0;border:1.5px solid var(--border);border-radius:8px;overflow:hidden}.view-btn{padding:7px 11px;background:#fff;border:none;cursor:pointer;color:var(--muted);display:grid;place-items:center;transition:all .15s}.view-btn.active{background:var(--fg);color:#fff}.view-btn:hover:not(.active){background:var(--fg-soft)}.view-btn svg{width:16px;height:16px}
+    /* Actor cards */
+    .actors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+    .actors-grid.list-view{grid-template-columns:1fr}
+    .actors-grid.list-view .actor-card{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:16px 24px}
+    .actors-grid.list-view .actor-top{margin-bottom:0}.actors-grid.list-view .actor-desc{display:none}.actors-grid.list-view .actor-tags{margin-bottom:0}
+    .actor-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;transition:all .3s var(--ease-out-expo);cursor:pointer;text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden}
+    .actor-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-light));transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease-out-expo)}
+    .actor-card:hover{border-color:transparent;box-shadow:var(--shadow-lg);transform:translateY(-3px)}.actor-card:hover::before{transform:scaleX(1)}
+    .actor-card.hidden{display:none}
+    .actor-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+    .actor-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:13px;font-weight:700;flex-shrink:0;transition:transform .3s var(--ease-spring)}.actor-card:hover .actor-icon{transform:scale(1.1) rotate(-3deg)}
+    .actor-icon.startup{background:rgba(0,167,157,.1);color:var(--accent)}.actor-icon.inversor{background:rgba(99,102,241,.1);color:#6366f1}.actor-icon.eso{background:rgba(245,158,11,.1);color:var(--warning)}.actor-icon.academia{background:rgba(236,72,153,.1);color:#ec4899}.actor-icon.gobierno{background:rgba(27,42,74,.06);color:var(--fg)}.actor-icon.corporativo{background:rgba(16,185,129,.06);color:var(--success)}.actor-icon.asociacion{background:rgba(139,92,246,.1);color:#8b5cf6}.actor-icon.red{background:rgba(239,68,68,.06);color:var(--danger)}.actor-icon.organismo{background:rgba(59,130,246,.1);color:#3b82f6}
+    .actor-name{font-size:15px;font-weight:700;letter-spacing:-.01em;margin-bottom:6px}
+    .actor-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .actor-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+    .tag{display:inline-flex;align-items:center;padding:4px 10px;background:var(--fg-soft);color:var(--muted);border-radius:6px;font-size:11px;font-weight:500}.tag.stage{background:rgba(0,167,157,.08);color:var(--accent);font-weight:600}
+    .actor-meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);padding-top:14px;border-top:1px solid rgba(0,0,0,.04)}.actor-meta-left{display:flex;align-items:center;gap:14px}
+    .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;box-shadow:0 0 0 2px rgba(0,0,0,.04)}.status-dot.approved{background:var(--success)}.status-dot.pending{background:var(--warning)}.status-dot.draft{background:var(--muted)}
+    .confidence-bar{width:48px;height:5px;background:var(--bg);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:4px}.confidence-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent-light));transition:width .8s var(--ease-out-expo)}
+    .actor-source{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);opacity:.7}
+    .actor-gender{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:5px;font-weight:600}.gender-f{background:rgba(236,72,153,.1);color:#ec4899}.gender-m{background:rgba(59,130,246,.1);color:#3b82f6}.gender-nb{background:rgba(139,92,246,.1);color:#8b5cf6}
+    /* Pagination */
+    .pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:32px}
+    .page-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:#fff;display:grid;place-items:center;font-size:13px;cursor:pointer;color:var(--fg);transition:all .2s var(--ease-out-expo);font-weight:500}.page-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}.page-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(0,167,157,.25)}.page-btn.disabled{opacity:.3;cursor:default;pointer-events:none}
+    .no-results{text-align:center;padding:60px 20px;color:var(--muted)}.no-results svg{width:48px;height:48px;opacity:.3;margin-bottom:16px}.no-results h3{font-size:16px;font-weight:600;margin:0 0 8px;color:var(--fg)}.no-results p{font-size:13px;margin:0}
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:32px}.modal-overlay.show{display:flex}
+    .modal{background:#fff;border-radius:var(--radius-lg);width:640px;max-width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);animation:scaleIn .3s var(--ease-out-expo)}
+    .modal-header{padding:28px 32px 0;display:flex;align-items:flex-start;gap:16px}
+    .modal-close{width:32px;height:32px;border-radius:8px;border:none;background:var(--fg-soft);cursor:pointer;display:grid;place-items:center;color:var(--muted);transition:all .15s;margin-left:auto;flex-shrink:0}.modal-close:hover{background:rgba(239,68,68,.1);color:var(--danger)}.modal-close svg{width:16px;height:16px}
+    .modal-body{padding:20px 32px 32px}
+    .modal-name{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}.modal-type{font-size:12px;color:var(--muted);font-weight:500}
+    .modal-section{margin-top:20px}.modal-section h4{font-size:12px;font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:500}
+    .modal-desc{font-size:14px;color:var(--muted);line-height:1.7;margin:0}
+    .modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+    .modal-stat{background:var(--bg);border-radius:var(--radius);padding:14px;text-align:center}.modal-stat-val{font-family:var(--font-mono);font-size:18px;font-weight:700}.modal-stat-label{font-size:11px;color:var(--muted);margin-top:2px}
+    .modal-tags{display:flex;gap:6px;flex-wrap:wrap}
+    .modal-actions{display:flex;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+    .modal-btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s var(--ease-out-expo)}.modal-btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;box-shadow:0 2px 8px rgba(0,167,157,.25)}.modal-btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,167,157,.35)}.modal-btn-secondary{background:var(--fg-soft);color:var(--fg)}.modal-btn-secondary:hover{background:var(--border)}
+    /* Stats Strip */
+    .stats-strip{display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap}.stats-strip .stat-card{flex:1;min-width:155px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;transition:all .25s var(--ease-out-expo)}.stats-strip .stat-card:hover{border-color:var(--accent);box-shadow:var(--shadow-sm);transform:translateY(-2px)}.stat-card .stat-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}.stat-card .stat-info{display:flex;flex-direction:column;gap:2px}.stat-card .stat-value{font-family:var(--font-mono);font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1}.stat-card .stat-label{font-size:11px;color:var(--muted);font-weight:500}.stat-card .stat-sparkline{margin-left:auto;flex-shrink:0}.stat-card .stat-warning{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#f59e0b;background:rgba(245,158,11,.1);padding:2px 7px;border-radius:4px;margin-top:2px}
+    /* Bulk Selection */
+    .bulk-check{position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:#fff;cursor:pointer;display:none;place-items:center;transition:all .15s;z-index:2}.bulk-mode .bulk-check{display:grid}.bulk-check.checked{background:var(--accent);border-color:var(--accent)}.bulk-check.checked::after{content:'';display:block;width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);margin-top:-2px}.actor-card.selected{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-soft),var(--shadow-lg)!important}
+    .bulk-bar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);display:flex;align-items:center;gap:16px;padding:14px 28px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 20px 40px -8px rgba(0,0,0,.15);z-index:900;transition:transform .4s var(--ease-out-expo);font-size:13px;font-weight:500}.bulk-bar.visible{transform:translateX(-50%) translateY(0)}.bulk-bar .bulk-count{font-weight:700;color:var(--accent);font-family:var(--font-mono)}.bulk-bar button{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:#fff;font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s var(--ease-out-expo)}.bulk-bar button:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}.bulk-bar .bulk-export{color:var(--accent);border-color:var(--accent)}.bulk-bar .bulk-delete{color:var(--danger);border-color:var(--danger)}.bulk-bar .bulk-delete:hover{background:rgba(239,68,68,.08);color:var(--danger);border-color:var(--danger)}
+    /* Quick Preview */
+    .quick-preview{position:fixed;z-index:800;width:320px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 20px 40px -8px rgba(0,0,0,.12);padding:20px;pointer-events:none;opacity:0;transition:opacity .2s ease}.quick-preview.visible{opacity:1}.quick-preview .qp-arrow{position:absolute;top:24px;width:10px;height:10px;background:#fff;border:1px solid var(--border);transform:rotate(45deg)}.quick-preview .qp-arrow.left{left:-6px;border-right:none;border-top:none}.quick-preview .qp-arrow.right{right:-6px;border-left:none;border-bottom:none}.quick-preview .qp-name{font-size:15px;font-weight:700;margin-bottom:4px}.quick-preview .qp-type{font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:500;text-transform:capitalize}.quick-preview .qp-conf-track{width:100%;height:6px;background:var(--bg);border-radius:3px;margin:8px 0;overflow:hidden}.quick-preview .qp-conf-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent-light));transition:width .5s var(--ease-out-expo)}.quick-preview .qp-country{font-size:12px;color:var(--muted);margin-bottom:6px}.quick-preview .qp-desc{font-size:12px;color:var(--muted);line-height:1.6}
+    /* Import Modal */
+    .import-modal .modal{width:580px}.import-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:40px 24px;text-align:center;transition:all .25s var(--ease-out-expo);cursor:pointer;background:var(--fg-soft)}.import-zone:hover,.import-zone.dragover{border-color:var(--accent);background:var(--accent-soft)}.import-zone svg{width:40px;height:40px;color:var(--muted);margin-bottom:12px;opacity:.4}.import-zone p{margin:0;font-size:13px;color:var(--muted)}.import-zone .import-link{color:var(--accent);font-weight:600;text-decoration:underline;cursor:pointer}.import-zone .import-formats{font-size:11px;margin-top:8px;font-family:var(--font-mono);color:var(--muted);opacity:.7}.import-preview-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px}.import-preview-table th{text-align:left;font-weight:600;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.05em}.import-preview-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--muted)}.import-btn-submit{width:100%;margin-top:16px;padding:12px;border-radius:var(--radius);border:none;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s var(--ease-out-expo)}.import-btn-submit:disabled{background:var(--bg);color:var(--muted);cursor:not-allowed}.import-btn-submit:not(:disabled){background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;box-shadow:0 2px 8px rgba(0,167,157,.25)}.import-btn-submit:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,167,157,.35)}
+    .btn-select-toggle{position:relative}.btn-select-toggle.active{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-select-toggle.active:hover{color:#fff;border-color:var(--accent-dark)}
+
+/* ─── AI Assistant Chat ─── */
+.ai-fab{
+  position:fixed;bottom:24px;right:24px;z-index:10000;
+  width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#00A79D,#008f87);color:white;
+  box-shadow:0 6px 24px rgba(0,167,157,.4);
+  display:grid;place-items:center;
+  transition:all .3s cubic-bezier(0.34,1.56,0.64,1);
+  animation:aiFabIn .5s cubic-bezier(0.16,1,0.3,1) 1.5s both;
+}
+@keyframes aiFabIn{from{opacity:0;transform:scale(0) rotate(-180deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.ai-fab:hover{transform:scale(1.1);box-shadow:0 8px 32px rgba(0,167,157,.5)}
+.ai-fab:active{transform:scale(.95)}
+.ai-fab svg{width:26px;height:26px}
+.ai-fab .ai-fab-close{display:none}
+.ai-fab.active .ai-fab-icon{display:none}
+.ai-fab.active .ai-fab-close{display:block}
+.ai-fab-badge{
+  position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:50%;
+  background:#22c55e;border:2px solid white;font-size:0;
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+
+.ai-chat{
+  position:fixed;bottom:92px;right:24px;z-index:9999;
+  width:400px;max-width:calc(100vw - 48px);height:560px;max-height:calc(100vh - 120px);
+  background:rgba(255,255,255,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(0,0,0,.08);border-radius:20px;
+  box-shadow:0 24px 80px rgba(0,0,0,.15),0 8px 32px rgba(0,0,0,.08);
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:scale(0) translateY(20px);transform-origin:bottom right;
+  opacity:0;pointer-events:none;
+  transition:all .35s cubic-bezier(0.16,1,0.3,1);
+}
+.ai-chat.open{transform:scale(1) translateY(0);opacity:1;pointer-events:auto}
+
+.ai-chat-header{
+  padding:16px 20px;display:flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,#1B2A4A,#0f1729);color:white;flex-shrink:0;
+}
+.ai-chat-avatar{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,#00A79D,#00c9bd);
+  display:grid;place-items:center;flex-shrink:0;
+}
+.ai-chat-avatar svg{width:20px;height:20px}
+.ai-chat-header-info{flex:1}
+.ai-chat-header-name{font-size:14px;font-weight:600}
+.ai-chat-header-status{font-size:11px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px}
+.ai-chat-header-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block}
+.ai-chat-header-actions{display:flex;gap:4px}
+.ai-chat-header-actions button{background:rgba(255,255,255,.1);border:none;color:white;width:28px;height:28px;border-radius:8px;cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.ai-chat-header-actions button:hover{background:rgba(255,255,255,.2)}
+
+.ai-chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ai-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;animation:msgIn .3s cubic-bezier(0.16,1,0.3,1)}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ai-msg.bot{background:#f0faf9;color:#1B2A4A;border-bottom-left-radius:4px;align-self:flex-start;border:1px solid rgba(0,167,157,.1)}
+.ai-msg.user{background:linear-gradient(135deg,#00A79D,#008f87);color:white;border-bottom-right-radius:4px;align-self:flex-end}
+.ai-msg code{font-family:ui-monospace,'SF Mono',monospace;font-size:12px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:4px}
+.ai-msg strong{font-weight:600}
+.ai-typing{align-self:flex-start;display:flex;gap:4px;padding:12px 16px;background:#f0faf9;border-radius:14px;border-bottom-left-radius:4px;border:1px solid rgba(0,167,157,.1)}
+.ai-typing span{width:6px;height:6px;border-radius:50%;background:#00A79D;opacity:.4;animation:typingDot 1.4s ease-in-out infinite}
+.ai-typing span:nth-child(2){animation-delay:.2s}
+.ai-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+.ai-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px}
+.ai-suggestion{
+  padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  background:rgba(0,167,157,.06);color:#00A79D;border:1px solid rgba(0,167,157,.15);
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.ai-suggestion:hover{background:rgba(0,167,157,.12);border-color:#00A79D}
+
+.ai-chat-footer{padding:12px 16px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:8px;flex-shrink:0;background:white}
+.ai-chat-input{
+  flex:1;padding:10px 14px;border:1px solid rgba(0,0,0,.1);border-radius:12px;
+  font-size:13px;font-family:inherit;outline:none;resize:none;
+  transition:border-color .2s;min-height:40px;max-height:100px;
+}
+.ai-chat-input:focus{border-color:#00A79D;box-shadow:0 0 0 3px rgba(0,167,157,.1)}
+.ai-chat-input::placeholder{color:#a0a8b8}
+.ai-chat-send{
+  width:40px;height:40px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#00A79D,#008f87);color:white;
+  cursor:pointer;display:grid;place-items:center;flex-shrink:0;
+  transition:all .2s;
+}
+.ai-chat-send:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,167,157,.3)}
+.ai-chat-send:active{transform:scale(.95)}
+.ai-chat-send:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.ai-chat-send svg{width:18px;height:18px}
+
+@media(max-width:500px){
+  .ai-chat{width:calc(100vw - 16px);right:8px;bottom:80px;height:calc(100vh - 100px);border-radius:16px}
+  .ai-fab{bottom:16px;right:16px;width:50px;height:50px}
+}
+
+/* ══ Responsive: Tablet (920px) ══ */
+@media(max-width:920px){
+  body{grid-template-columns:1fr;overflow:auto}
+  .sidebar{display:none}
+  .main{overflow:auto}
+  .topbar{padding:12px 16px}
+  .topbar h1{font-size:18px}
+  .content{padding:20px 16px 80px}
+  .stats-strip{gap:8px}
+  .stats-strip .stat-card{min-width:140px;padding:14px}
+  .actors-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+  .toolbar{gap:8px}
+  .search-input{min-width:200px}
+  .filter-select{min-width:120px}
+  .quick-preview{display:none}
+}
+
+/* ══ Responsive: Small Tablet (768px) ══ */
+@media(max-width:768px){
+  .stats-strip{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .stats-strip .stat-card{min-width:160px;flex-shrink:0}
+  .actors-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .type-chips{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px;gap:6px}
+  .type-chip{flex-shrink:0;white-space:nowrap}
+  .toolbar{flex-wrap:wrap}
+  .filter-select{min-width:130px;font-size:12px;padding:8px 12px}
+  .modal{width:calc(100vw - 32px);max-width:100%}
+  .modal-stats{grid-template-columns:repeat(2,1fr)}
+  .pagination .page-btn{width:32px;height:32px;font-size:12px}
+}
+
+/* ══ Responsive: Mobile (600px) ══ */
+@media(max-width:600px){
+  .content{padding:16px 12px 80px}
+  .topbar{flex-direction:column;gap:8px;align-items:flex-start}
+  .topbar-right{width:100%;justify-content:flex-end;flex-wrap:wrap;gap:6px}
+  .topbar h1{font-size:16px}
+  .breadcrumb{font-size:11px}
+  .stats-strip{margin-bottom:16px}
+  .stats-strip .stat-card{min-width:140px}
+  .stats-strip .stat-card .stat-value{font-size:17px}
+  .stats-strip .stat-card .stat-label{font-size:10px}
+  .type-chips{gap:4px;margin-bottom:14px}
+  .type-chip{padding:5px 10px;font-size:11px}
+  .toolbar{flex-direction:column;align-items:stretch;gap:8px}
+  .search-input{min-width:0;width:100%}
+  .filter-select{width:100%;min-width:0}
+  .results-meta{flex-direction:column;gap:8px;align-items:flex-start}
+  .actors-grid{grid-template-columns:1fr;gap:10px}
+  .actor-card{padding:16px}
+  .actor-name{font-size:14px}
+  .actor-desc{font-size:12px;-webkit-line-clamp:2}
+  .actor-tags{gap:4px}
+  .tag{font-size:10px;padding:3px 8px}
+  .actor-meta{flex-direction:column;align-items:flex-start;gap:8px}
+  .actor-meta-left{gap:10px}
+  .bulk-bar{padding:10px 16px;gap:10px;border-radius:12px;flex-wrap:wrap;width:calc(100vw - 24px);max-width:none}
+  .bulk-bar button{padding:6px 12px;font-size:11px}
+  .modal{width:calc(100vw - 16px);max-width:100%;border-radius:var(--radius)}
+  .modal-header{padding:20px 16px 0}
+  .modal-body{padding:16px}
+  .modal-stats{grid-template-columns:1fr 1fr;gap:8px}
+  .modal-actions{flex-direction:column}
+  .modal-actions .modal-btn{width:100%;text-align:center}
+  .import-modal .modal{width:calc(100vw - 16px)}
+  .import-zone{padding:24px 16px}
+  .import-preview-table{font-size:11px;display:block;overflow-x:auto}
+  .btn-sm{padding:7px 12px;font-size:12px}
+  .view-toggle{display:none}
+  .quick-preview{display:none}
+}
+
+/* ══ Responsive: Small Mobile (480px) ══ */
+@media(max-width:480px){
+  .stats-strip .stat-card{min-width:130px;padding:12px 14px}
+  .stats-strip .stat-card .stat-value{font-size:16px}
+  .actors-grid.list-view .actor-card{grid-template-columns:auto 1fr;gap:10px}
+  .actors-grid.list-view .actor-card .actor-meta{display:none}
+  .actor-icon{width:36px;height:36px;font-size:11px;border-radius:10px}
+  .actor-card{padding:14px}
+  .pagination{gap:4px}
+  .pagination .page-btn{width:30px;height:30px;font-size:11px}
+  .topbar-right .btn-sm:not(.btn-accent){display:none}
+}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo"><div class="sidebar-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3c-1.2 3.6-4.4 6-8 7 1.6 2 2.8 4.6 3 7.5C8.6 15.2 10.2 13 12 12c1.8 1 3.4 3.2 5 5.5.2-2.9 1.4-5.5 3-7.5-3.6-1-6.8-3.4-8-7z"/></svg></div>VerdeXcelerate</a>
+    <div class="sidebar-section"><div class="sidebar-label">Principal</div><a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a><a href="directorio.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Directorio<span class="sidebar-badge">2,847</span></a><a href="mapa.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Mapa</a></div>
+    <div class="sidebar-section"><div class="sidebar-label">Analisis</div><a href="pais.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Perfiles de pais</a><a href="zonas.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Zonas prioritarias<span class="sidebar-badge">6</span></a><a href="brechas.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Brechas y retos</a></div>
+    <div class="sidebar-section"><div class="sidebar-label">Datos</div><a href="fuentes.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Fuentes</a><a href="gobernanza.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Gobernanza IA</a></div>
+    <div class="sidebar-bottom"><a href="configuracion.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Configuracion</a><div class="sidebar-user"><div class="sidebar-avatar">TS</div><div><div style="color:#fff;font-size:13px;font-weight:500">TechnoServe</div><div style="font-size:11px">Administrador</div></div></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div><div class="breadcrumb"><a href="dashboard.html">VerdeXcelerate</a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg><span>Directorio</span></div><h1>Directorio de actores</h1></div>
+      <div class="topbar-right">
+        <button class="btn-sm btn-accent" onclick="document.getElementById('addModal').style.display='flex'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar actor</button>
+        <button class="btn-sm" onclick="document.getElementById('importModal').style.display='flex'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar</button>
+        <button class="btn-sm" onclick="window.location='configuracion.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Stats Summary Strip -->
+      <div class="stats-strip anim-fade-up">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(0,167,157,.08)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+          <div class="stat-info"><span class="stat-value" style="color:var(--fg)">2,847</span><span class="stat-label">Total Actores</span></div>
+          <svg class="stat-sparkline" width="48" height="24" viewBox="0 0 48 24"><polyline points="0,20 8,16 16,18 24,10 32,12 40,6 48,8" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/><polyline points="0,20 8,16 16,18 24,10 32,12 40,6 48,8 48,24 0,24" fill="rgba(0,167,157,.08)" stroke="none"/></svg>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(0,167,157,.08)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <div class="stat-info"><span class="stat-value" style="color:var(--accent)">1,243</span><span class="stat-label">Startups</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(99,102,241,.08)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.6"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg></div>
+          <div class="stat-info"><span class="stat-value" style="color:#6366f1">331</span><span class="stat-label">Inversores</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(236,72,153,.08)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="1.6"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0113 0"/></svg></div>
+          <div class="stat-info"><span class="stat-value" style="color:#ec4899">29%</span><span class="stat-label">Lid. Femenino</span><span class="stat-warning"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> &lt;40% meta</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(16,185,129,.08)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="1.6"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div class="stat-info"><span class="stat-value" style="color:var(--success)">89%</span><span class="stat-label">Confianza Prom.</span></div>
+        </div>
+      </div>
+
+      <!-- Type chips (9 actor types from TOR) -->
+      <div class="type-chips anim-fade-up">
+        <span class="type-chip active" data-type="all"><span class="chip-dot" style="background:var(--accent)"></span>Todos <span class="chip-count" id="countAll">12</span></span>
+        <span class="type-chip" data-type="startup"><span class="chip-dot" style="background:var(--accent)"></span>Startups <span class="chip-count">4</span></span>
+        <span class="type-chip" data-type="inversor"><span class="chip-dot" style="background:#6366f1"></span>Inversores <span class="chip-count">2</span></span>
+        <span class="type-chip" data-type="eso"><span class="chip-dot" style="background:var(--warning)"></span>ESOs <span class="chip-count">1</span></span>
+        <span class="type-chip" data-type="asociacion"><span class="chip-dot" style="background:#8b5cf6"></span>Asoc. Agricolas <span class="chip-count">1</span></span>
+        <span class="type-chip" data-type="corporativo"><span class="chip-dot" style="background:var(--success)"></span>Corporativos <span class="chip-count">1</span></span>
+        <span class="type-chip" data-type="academia"><span class="chip-dot" style="background:#ec4899"></span>Academia <span class="chip-count">1</span></span>
+        <span class="type-chip" data-type="gobierno"><span class="chip-dot" style="background:var(--fg)"></span>Gobierno <span class="chip-count">1</span></span>
+        <span class="type-chip" data-type="organismo"><span class="chip-dot" style="background:#3b82f6"></span>Org. Internac. <span class="chip-count">0</span></span>
+        <span class="type-chip" data-type="red"><span class="chip-dot" style="background:var(--danger)"></span>Redes <span class="chip-count">1</span></span>
+      </div>
+
+      <div class="toolbar anim-fade-up delay-1">
+        <div class="search-input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Buscar por nombre, pais, area tematica..."/>
+          <span class="search-kbd">⌘K</span>
+        </div>
+        <select class="filter-select" id="filterCountry"><option value="">Todos los paises</option><option value="CO">🇨🇴 Colombia</option><option value="CR">🇨🇷 Costa Rica</option><option value="SV">🇸🇻 El Salvador</option><option value="GT">🇬🇹 Guatemala</option><option value="HN">🇭🇳 Honduras</option><option value="PA">🇵🇦 Panama</option></select>
+        <select class="filter-select" id="filterChain"><option value="">Todas las cadenas</option><option value="cafe">Cafe</option><option value="cacao">Cacao</option><option value="lacteos">Lacteos</option><option value="hortalizas">Hortalizas</option><option value="aguacate">Aguacate</option><option value="granos">Granos basicos</option><option value="frutas">Frutas</option><option value="ganaderia">Ganaderia</option><option value="multichain">Multi-cadena</option></select>
+        <select class="filter-select" id="sortSelect"><option value="recientes">Mas recientes</option><option value="az">Nombre A-Z</option><option value="za">Nombre Z-A</option><option value="conf-desc">Mayor confianza</option><option value="conf-asc">Menor confianza</option></select>
+        <button class="btn-sm btn-select-toggle" id="bulkToggle" onclick="toggleBulkMode()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Seleccionar</button>
+      </div>
+
+      <div class="results-meta anim-fade-up delay-2">
+        <span>Mostrando <strong id="visibleCount">12</strong> actores en 6 paises</span>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="view-btn" data-view="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+        </div>
+      </div>
+
+      <div class="actors-grid" id="actorsGrid">
+        <!-- All 9 actor types + extras -->
+        <div class="actor-card anim-fade-up delay-2" data-type="startup" data-country="CO" data-chain="cafe" data-name="AgroSmart CO" data-gender="f" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon startup">AG</div><div><span class="tag stage">Seed</span> <span class="actor-gender gender-f">♀ Fundadora</span></div></div>
+          <div class="actor-name">AgroSmart CO</div>
+          <div class="actor-desc">Plataforma IoT para monitoreo de cultivos de cafe en tiempo real. Sensores de suelo, clima y plagas con alertas automaticas para pequenos productores.</div>
+          <div class="actor-tags"><span class="tag">AgTech precision</span><span class="tag">Cafe</span><span class="tag">🇨🇴 Colombia</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:92%"></span></span></span></div><span class="actor-source">F6S · hace 3d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-3" data-type="inversor" data-country="" data-chain="multichain" data-name="Pomona Impact" data-gender="m" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon inversor">PI</div><span class="tag stage">Fondo impacto</span></div>
+          <div class="actor-name">Pomona Impact</div>
+          <div class="actor-desc">Fondo de inversion de impacto enfocado en AgrifoodTech LATAM. Ticket USD 250K-2M. Portafolio de 14 startups con enfoque en cadenas de valor sostenibles.</div>
+          <div class="actor-tags"><span class="tag">Financiamiento</span><span class="tag">Regional</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:97%"></span></span></span></div><span class="actor-source">API · hace 1d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-3" data-type="eso" data-country="HN" data-chain="multichain" data-name="Agro-Hub Zamorano" data-gender="m" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon eso">ZA</div><span class="tag stage">Aceleradora</span></div>
+          <div class="actor-name">Agro-Hub Zamorano</div>
+          <div class="actor-desc">Hub de innovacion AgrifoodTech vinculado a la Escuela Agricola Panamericana. 3 cohortes/ano con enfoque en Honduras y Centroamerica.</div>
+          <div class="actor-tags"><span class="tag">ESO</span><span class="tag">🇭🇳 Honduras</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:89%"></span></span></span></div><span class="actor-source">Scraping · hace 5d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-4" data-type="startup" data-country="GT" data-chain="cafe" data-name="CafeTrace GT" data-gender="f" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon startup">CT</div><div><span class="tag stage">Pre-seed</span> <span class="actor-gender gender-f">♀ Fundadora</span></div></div>
+          <div class="actor-name">CafeTrace GT</div>
+          <div class="actor-desc">Trazabilidad blockchain para cafe de especialidad de Alta Verapaz. Conecta directamente a pequenos productores con compradores internacionales.</div>
+          <div class="actor-tags"><span class="tag">Trazabilidad</span><span class="tag">Cafe</span><span class="tag">🇬🇹 Guatemala</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot pending"></span>Pendiente</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:58%"></span></span></span></div><span class="actor-source">LLM · hace 2d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-4" data-type="academia" data-country="CR" data-chain="multichain" data-name="U. EARTH Costa Rica" data-gender="m" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon academia">UC</div><span class="tag stage">Academia</span></div>
+          <div class="actor-name">U. EARTH Costa Rica</div>
+          <div class="actor-desc">Programa de investigacion en agricultura regenerativa y biotecnologia aplicada a cadenas agroalimentarias tropicales. Colaboracion con IICA.</div>
+          <div class="actor-tags"><span class="tag">Biotecnologia</span><span class="tag">🇨🇷 Costa Rica</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:95%"></span></span></span></div><span class="actor-source">Manual · hace 7d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-5" data-type="startup" data-country="SV" data-chain="frutas" data-name="BioFresh SV" data-gender="m" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon startup">BF</div><span class="tag stage">Serie A</span></div>
+          <div class="actor-name">BioFresh SV</div>
+          <div class="actor-desc">FoodTech de procesamiento y preservacion de frutas tropicales con tecnologia de atmosfera controlada. Opera en Morazan, El Salvador.</div>
+          <div class="actor-tags"><span class="tag">FoodTech</span><span class="tag">Frutas</span><span class="tag">🇸🇻 El Salvador</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:88%"></span></span></span></div><span class="actor-source">Contxto · hace 4d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-5" data-type="gobierno" data-country="PA" data-chain="multichain" data-name="SENACYT Panama" data-gender="m" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon gobierno">SE</div><span class="tag stage">Gobierno</span></div>
+          <div class="actor-name">SENACYT Panama</div>
+          <div class="actor-desc">Secretaria Nacional de Ciencia y Tecnologia. Programas de financiamiento para innovacion agropecuaria y transferencia tecnologica.</div>
+          <div class="actor-tags"><span class="tag">Financiamiento</span><span class="tag">🇵🇦 Panama</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:99%"></span></span></span></div><span class="actor-source">Manual · hace 10d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-5" data-type="startup" data-country="HN" data-chain="granos" data-name="RiegoVerde HN" data-gender="m" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon startup">RV</div><span class="tag stage">Seed</span></div>
+          <div class="actor-name">RiegoVerde HN</div>
+          <div class="actor-desc">Sistema de riego inteligente solar para pequenos productores de granos basicos. Reduce consumo de agua 40% con sensores de humedad de bajo costo.</div>
+          <div class="actor-tags"><span class="tag">Riego y agua</span><span class="tag">Granos basicos</span><span class="tag">🇭🇳 Honduras</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:84%"></span></span></span></div><span class="actor-source">F6S · hace 6d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-5" data-type="inversor" data-country="" data-chain="multichain" data-name="INNOGEN Fondo III" data-gender="m" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon inversor">IN</div><span class="tag stage">VC</span></div>
+          <div class="actor-name">INNOGEN Fondo III</div>
+          <div class="actor-desc">Fondo de venture capital apoyado por BID Lab enfocado en agtech y climate tech en Centroamerica. Tickets de USD 500K-3M en etapas seed y Serie A.</div>
+          <div class="actor-tags"><span class="tag">VC</span><span class="tag">Regional</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:96%"></span></span></span></div><span class="actor-source">API · hace 2d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-5" data-type="asociacion" data-country="CO" data-chain="cafe" data-name="FederaCafe Regional" data-gender="m" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon asociacion">FC</div><span class="tag stage">Asociacion</span></div>
+          <div class="actor-name">FederaCafe Regional</div>
+          <div class="actor-desc">Federacion de productores de cafe con presencia en La Guajira y Sucre. 4,500 familias afiliadas. Programa de tecnificacion en zonas prioritarias.</div>
+          <div class="actor-tags"><span class="tag">Productores</span><span class="tag">Cafe</span><span class="tag">🇨🇴 Colombia</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:93%"></span></span></span></div><span class="actor-source">Manual · hace 8d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-5" data-type="corporativo" data-country="CR" data-chain="cafe" data-name="Cafe Britt Tech" data-gender="m" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon corporativo">CB</div><span class="tag stage">Corporativo</span></div>
+          <div class="actor-name">Cafe Britt Tech</div>
+          <div class="actor-desc">Division de innovacion tecnologica de Cafe Britt. Programa de adopcion de AgTech con 200+ fincas en Costa Rica. Piloto de trazabilidad blockchain.</div>
+          <div class="actor-tags"><span class="tag">Corporativo</span><span class="tag">Cafe</span><span class="tag">🇨🇷 Costa Rica</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:91%"></span></span></span></div><span class="actor-source">Manual · hace 12d</span></div>
+        </div>
+        <div class="actor-card anim-fade-up delay-5" data-type="red" data-country="" data-chain="multichain" data-name="AgriTech LATAM Network" data-gender="f" onclick="openModal(this)">
+          <div class="actor-top"><div class="actor-icon red">AL</div><div><span class="tag stage">Red</span> <span class="actor-gender gender-f">♀ Lider</span></div></div>
+          <div class="actor-name">AgriTech LATAM Network</div>
+          <div class="actor-desc">Red regional de startups, inversores y ESOs en AgriTech. Eventos anuales, matchmaking y reportes de tendencias. 450+ miembros en 12 paises.</div>
+          <div class="actor-tags"><span class="tag">Comunidad</span><span class="tag">Regional</span></div>
+          <div class="actor-meta"><div class="actor-meta-left"><span><span class="status-dot approved"></span>Aprobado</span><span>Conf.<span class="confidence-bar"><span class="confidence-fill" style="width:87%"></span></span></span></div><span class="actor-source">Scraping · hace 9d</span></div>
+        </div>
+      </div>
+
+      <div class="no-results" id="noResults" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <h3>Sin resultados</h3>
+        <p>No se encontraron actores con los filtros seleccionados. Prueba ajustando tu busqueda.</p>
+      </div>
+
+      <div class="pagination anim-fade-up" style="animation-delay:.55s">
+        <button class="page-btn disabled">&larr;</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">...</button>
+        <button class="page-btn">32</button>
+        <button class="page-btn">&rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="detailModal" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="actor-icon" id="modalIcon" style="width:56px;height:56px;border-radius:14px;font-size:16px"></div>
+        <div style="flex:1"><div class="modal-name" id="modalName"></div><div class="modal-type" id="modalType"></div></div>
+        <button class="modal-close" onclick="document.getElementById('detailModal').style.display='none'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-stats">
+          <div class="modal-stat"><div class="modal-stat-val" style="color:var(--accent)" id="modalConf">92%</div><div class="modal-stat-label">Confianza IA</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" style="color:#6366f1" id="modalFunding">$1.2M</div><div class="modal-stat-label">Financiamiento</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" style="color:var(--success)" id="modalCO2">-450t</div><div class="modal-stat-label">CO2e impacto</div></div>
+        </div>
+        <div class="modal-section"><h4>Descripcion</h4><p class="modal-desc" id="modalDesc"></p></div>
+        <div class="modal-section"><h4>Areas tematicas</h4><div class="modal-tags" id="modalTags"></div></div>
+        <div class="modal-section"><h4>Fuentes de datos</h4><p class="modal-desc" id="modalSources" style="font-family:var(--font-mono);font-size:12px"></p></div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-primary" onclick="alert('Perfil completo del actor. En la version final, esto abrira la ficha detallada.')">Ver perfil completo</button>
+          <button class="modal-btn modal-btn-secondary" onclick="document.getElementById('detailModal').style.display='none';document.getElementById('addModal').style.display='flex'">Editar</button>
+          <button class="modal-btn modal-btn-secondary" onclick="window.location='mapa.html'">Ver en mapa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Actor Modal -->
+  <div id="addModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:#fff;border-radius:var(--radius-lg);width:560px;max-width:90vw;max-height:80vh;overflow-y:auto;padding:32px;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);animation:scaleIn .3s var(--ease-out-expo)">
+      <h3 style="font-family:var(--font-display);font-size:22px;margin:0 0 6px">Agregar nuevo actor</h3>
+      <p style="color:var(--muted);font-size:13px;margin:0 0 24px">Registra un actor del ecosistema AgrifoodTech.</p>
+      <form onsubmit="event.preventDefault();this.closest('[id]').style.display='none'">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Nombre</label><input type="text" placeholder="Nombre del actor" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></div><div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Tipo de actor</label><select style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);background:#fff"><option>Startup AgriTech</option><option>Inversor</option><option>ESO</option><option>Asociacion agricola</option><option>Corporativo</option><option>Academia</option><option>Gobierno</option><option>Organismo internacional</option><option>Red/Comunidad</option></select></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Pais</label><select style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);background:#fff"><option>Colombia</option><option>Costa Rica</option><option>El Salvador</option><option>Guatemala</option><option>Honduras</option><option>Panama</option></select></div><div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Genero fundador(a)</label><select style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);background:#fff"><option>Mujer</option><option>Hombre</option><option>No binario</option><option>Equipo mixto</option></select></div></div>
+        <div style="margin-bottom:16px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Cadena de valor</label><select style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);background:#fff"><option>Cafe</option><option>Cacao</option><option>Lacteos</option><option>Hortalizas</option><option>Aguacate</option><option>Granos basicos</option><option>Frutas</option><option>Ganaderia</option><option>Multi-cadena</option></select></div>
+        <div style="margin-bottom:24px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)">Descripcion</label><textarea rows="3" placeholder="Breve descripcion del actor y sus actividades..." style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;resize:vertical" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+        <div style="display:flex;gap:12px;justify-content:flex-end"><button type="button" onclick="this.closest('[id]').style.display='none'" style="padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--muted);cursor:pointer">Cancelar</button><button type="submit" class="btn-sm btn-accent" style="padding:10px 20px">Agregar actor</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-overlay import-modal" id="importModal" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal">
+      <div class="modal-header">
+        <div style="flex:1"><div class="modal-name">Importar actores</div><div class="modal-type">Carga masiva de actores desde archivo CSV o Excel</div></div>
+        <button class="modal-close" onclick="document.getElementById('importModal').style.display='none'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="import-zone" id="importZone">
+          <input type="file" id="importFileInput" accept=".csv,.xlsx,.xls" style="display:none"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Arrastra y suelta tu archivo aqui</p>
+          <p><span class="import-link" onclick="document.getElementById('importFileInput').click()">O selecciona un archivo</span></p>
+          <p class="import-formats">CSV con columnas: nombre, tipo, pais, descripcion, cadena_valor</p>
+        </div>
+        <table class="import-preview-table" id="importPreview">
+          <thead><tr><th>Nombre</th><th>Tipo</th><th>Pais</th><th>Descripcion</th><th>Cadena</th></tr></thead>
+          <tbody id="importPreviewBody"></tbody>
+        </table>
+        <button class="import-btn-submit" id="importSubmitBtn" disabled>Importar 0 registros</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Selection Bar -->
+  <div class="bulk-bar" id="bulkBar">
+    <span><span class="bulk-count" id="bulkCount">0</span> seleccionados</span>
+    <button class="bulk-export" onclick="alert('Exportando seleccionados...')">Exportar</button>
+    <button class="bulk-delete" onclick="alert('Eliminar seleccionados?')">Eliminar</button>
+    <button onclick="toggleBulkMode()">Cancelar</button>
+  </div>
+
+  <!-- Quick Preview Tooltip -->
+  <div class="quick-preview" id="quickPreview">
+    <div class="qp-arrow left" id="qpArrow"></div>
+    <div class="qp-name" id="qpName"></div>
+    <div class="qp-type" id="qpType"></div>
+    <div class="qp-country" id="qpCountry"></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Confianza IA</div>
+    <div class="qp-conf-track"><div class="qp-conf-fill" id="qpConfFill"></div></div>
+    <div class="qp-desc" id="qpDesc"></div>
+  </div>
+
+  <script>
+    // Search filter
+    const searchInput=document.getElementById('searchInput');
+    const filterCountry=document.getElementById('filterCountry');
+    const filterChain=document.getElementById('filterChain');
+    const grid=document.getElementById('actorsGrid');
+    const cards=grid.querySelectorAll('.actor-card');
+    const noResults=document.getElementById('noResults');
+    const visibleCount=document.getElementById('visibleCount');
+    let activeType='all';
+
+    function filterCards(){
+      const q=searchInput.value.toLowerCase();
+      const country=filterCountry.value;
+      const chain=filterChain.value;
+      let count=0;
+      cards.forEach(c=>{
+        const name=c.dataset.name.toLowerCase();
+        const text=c.textContent.toLowerCase();
+        const cCountry=c.dataset.country;
+        const cChain=c.dataset.chain;
+        const cType=c.dataset.type;
+        const matchSearch=!q||name.includes(q)||text.includes(q);
+        const matchCountry=!country||cCountry===country||cCountry==='';
+        const matchChain=!chain||cChain===chain||cChain==='multichain';
+        const matchType=activeType==='all'||cType===activeType;
+        const show=matchSearch&&matchCountry&&matchChain&&matchType;
+        c.classList.toggle('hidden',!show);
+        if(show)count++;
+      });
+      visibleCount.textContent=count;
+      noResults.style.display=count===0?'block':'none';
+    }
+    searchInput.addEventListener('input',filterCards);
+    filterCountry.addEventListener('change',filterCards);
+    filterChain.addEventListener('change',filterCards);
+
+    // Type chips
+    document.querySelectorAll('.type-chip').forEach(chip=>{
+      chip.addEventListener('click',()=>{
+        document.querySelectorAll('.type-chip').forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active');
+        activeType=chip.dataset.type;
+        filterCards();
+      });
+    });
+
+    // View toggle
+    document.querySelectorAll('.view-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        grid.classList.toggle('list-view',btn.dataset.view==='list');
+      });
+    });
+
+    // Detail modal
+    function openModal(card){
+      const m=document.getElementById('detailModal');
+      const icon=card.querySelector('.actor-icon');
+      document.getElementById('modalIcon').className=icon.className;
+      document.getElementById('modalIcon').textContent=icon.textContent;
+      document.getElementById('modalName').textContent=card.querySelector('.actor-name').textContent;
+      document.getElementById('modalType').textContent=card.querySelector('.tag.stage').textContent+' · '+card.dataset.type.charAt(0).toUpperCase()+card.dataset.type.slice(1);
+      document.getElementById('modalDesc').textContent=card.querySelector('.actor-desc').textContent;
+      const tags=card.querySelectorAll('.actor-tags .tag');
+      const tagsHtml=Array.from(tags).map(t=>'<span class="tag" style="padding:6px 12px;font-size:12px">'+t.textContent+'</span>').join('');
+      document.getElementById('modalTags').innerHTML=tagsHtml;
+      document.getElementById('modalSources').textContent=card.querySelector('.actor-source').textContent;
+      const conf=card.querySelector('.confidence-fill');
+      if(conf)document.getElementById('modalConf').textContent=conf.style.width;
+      m.style.display='flex';
+    }
+
+    // Keyboard shortcut
+    document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();searchInput.focus()}});
+
+    // Animate confidence bars on scroll
+    const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.confidence-fill').forEach(f=>{const w=f.style.width;f.style.width='0';setTimeout(()=>f.style.width=w,200)});obs.unobserve(e.target)}})},{threshold:.1});
+    document.querySelectorAll('.actors-grid').forEach(g=>obs.observe(g));
+
+    // Pagination
+    document.querySelectorAll('.page-btn').forEach(btn=>{
+      if(btn.classList.contains('disabled')||btn.textContent==='...') return;
+      btn.addEventListener('click',function(){
+        document.querySelectorAll('.page-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Dynamic modal stats based on card data
+    const fundingMap={startup:'$0.8M',inversor:'$24M',eso:'$1.5M',asociacion:'—',corporativo:'$12M',academia:'$0.3M',gobierno:'$5.2M',internacional:'$8.6M',red:'$0.4M'};
+    const co2Map={startup:'-320t',inversor:'—',eso:'-180t',asociacion:'-45t',corporativo:'-1,200t',academia:'-50t',gobierno:'-600t',internacional:'-400t',red:'-90t'};
+    const origOpenModal=openModal;
+    openModal=function(card){
+      origOpenModal(card);
+      const type=card.dataset.type||'startup';
+      document.getElementById('modalFunding').textContent=fundingMap[type]||'—';
+      document.getElementById('modalCO2').textContent=co2Map[type]||'—';
+    };
+
+    // === SORT DROPDOWN ===
+    const sortSelect=document.getElementById('sortSelect');
+    sortSelect.addEventListener('change',function(){
+      const val=this.value;
+      const cardsArr=Array.from(cards);
+      cardsArr.sort((a,b)=>{
+        if(val==='az') return a.dataset.name.localeCompare(b.dataset.name);
+        if(val==='za') return b.dataset.name.localeCompare(a.dataset.name);
+        if(val==='conf-desc'||val==='conf-asc'){
+          const confA=parseInt(a.querySelector('.confidence-fill')?.style.width)||0;
+          const confB=parseInt(b.querySelector('.confidence-fill')?.style.width)||0;
+          return val==='conf-desc'?confB-confA:confA-confB;
+        }
+        return 0;
+      });
+      cardsArr.forEach(c=>grid.appendChild(c));
+    });
+
+    // === BULK SELECTION MODE ===
+    let bulkMode=false;
+    const bulkBar=document.getElementById('bulkBar');
+    const bulkCountEl=document.getElementById('bulkCount');
+    // Inject checkboxes into each card
+    cards.forEach(card=>{
+      const cb=document.createElement('div');
+      cb.className='bulk-check';
+      cb.addEventListener('click',function(e){
+        e.stopPropagation();
+        this.classList.toggle('checked');
+        card.classList.toggle('selected',this.classList.contains('checked'));
+        updateBulkCount();
+      });
+      card.appendChild(cb);
+    });
+    function toggleBulkMode(){
+      bulkMode=!bulkMode;
+      const btn=document.getElementById('bulkToggle');
+      btn.classList.toggle('active',bulkMode);
+      grid.classList.toggle('bulk-mode',bulkMode);
+      if(!bulkMode){
+        cards.forEach(c=>{c.classList.remove('selected');c.querySelector('.bulk-check').classList.remove('checked')});
+        bulkBar.classList.remove('visible');
+      }
+    }
+    function updateBulkCount(){
+      const count=grid.querySelectorAll('.bulk-check.checked').length;
+      bulkCountEl.textContent=count;
+      bulkBar.classList.toggle('visible',count>0);
+    }
+
+    // === QUICK PREVIEW (HOVER CARD) ===
+    const qp=document.getElementById('quickPreview');
+    let hoverTimer=null;
+    const countryNames={CO:'Colombia',CR:'Costa Rica',SV:'El Salvador',GT:'Guatemala',HN:'Honduras',PA:'Panama'};
+    cards.forEach(card=>{
+      card.addEventListener('mouseenter',function(e){
+        if(bulkMode) return;
+        hoverTimer=setTimeout(()=>{
+          const rect=card.getBoundingClientRect();
+          const name=card.querySelector('.actor-name').textContent;
+          const type=card.dataset.type;
+          const desc=card.querySelector('.actor-desc').textContent;
+          const conf=card.querySelector('.confidence-fill')?.style.width||'0%';
+          const country=countryNames[card.dataset.country]||'Regional';
+          document.getElementById('qpName').textContent=name;
+          document.getElementById('qpType').textContent=type;
+          document.getElementById('qpCountry').textContent=country;
+          document.getElementById('qpConfFill').style.width=conf;
+          document.getElementById('qpDesc').textContent=desc.substring(0,100)+(desc.length>100?'...':'');
+          const arrow=document.getElementById('qpArrow');
+          // Position: right of card, or left if near right edge
+          const spaceRight=window.innerWidth-rect.right;
+          if(spaceRight>340){
+            qp.style.left=(rect.right+14)+'px';
+            arrow.className='qp-arrow left';
+          }else{
+            qp.style.left=(rect.left-334)+'px';
+            arrow.className='qp-arrow right';
+          }
+          qp.style.top=Math.max(8,rect.top)+'px';
+          qp.classList.add('visible');
+        },500);
+      });
+      card.addEventListener('mouseleave',function(){
+        clearTimeout(hoverTimer);
+        qp.classList.remove('visible');
+      });
+    });
+
+    // === IMPORT MODAL ===
+    const importZone=document.getElementById('importZone');
+    const importFileInput=document.getElementById('importFileInput');
+    const importPreviewBody=document.getElementById('importPreviewBody');
+    const importSubmitBtn=document.getElementById('importSubmitBtn');
+    importZone.addEventListener('dragover',function(e){e.preventDefault();this.classList.add('dragover')});
+    importZone.addEventListener('dragleave',function(){this.classList.remove('dragover')});
+    importZone.addEventListener('drop',function(e){
+      e.preventDefault();this.classList.remove('dragover');
+      if(e.dataTransfer.files.length)handleImportFile(e.dataTransfer.files[0]);
+    });
+    importFileInput.addEventListener('change',function(){if(this.files.length)handleImportFile(this.files[0])});
+    function handleImportFile(file){
+      const reader=new FileReader();
+      reader.onload=function(e){
+        const text=e.target.result;
+        const lines=text.split('\n').filter(l=>l.trim());
+        if(lines.length<2){importSubmitBtn.disabled=true;importSubmitBtn.textContent='Importar 0 registros';return}
+        const rows=lines.slice(1,6);
+        importPreviewBody.innerHTML='';
+        rows.forEach(row=>{
+          const cols=row.split(',');
+          const tr=document.createElement('tr');
+          for(let i=0;i<5;i++){
+            const td=document.createElement('td');
+            td.textContent=(cols[i]||'').trim().substring(0,40);
+            tr.appendChild(td);
+          }
+          importPreviewBody.appendChild(tr);
+        });
+        const total=lines.length-1;
+        importSubmitBtn.disabled=false;
+        importSubmitBtn.textContent='Importar '+total+' registros';
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>

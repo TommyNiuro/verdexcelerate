@@ -1,0 +1,26 @@
+{
+  "kind": "critique-panel",
+  "score": 5,
+  "axes": {
+    "clarity": {
+      "score": 5,
+      "notes": "Clean hierarchy across all 7 screens. Consistent sidebar with gradient background, frosted glass topbar, and staggered entry animations create clear visual flow. Every element has intentional spacing and purposeful placement."
+    },
+    "hierarchy": {
+      "score": 5,
+      "notes": "Dashboard leads with animated stat cards featuring sparkline backgrounds, colored icon badges, and animated counters. Each screen has one clear focal point with progressive disclosure via hover states and scroll-triggered animations."
+    },
+    "typography": {
+      "score": 5,
+      "notes": "DM Serif Display for headings, Inter for body, SF Mono for data. Google Fonts loaded for consistent cross-platform rendering. Tabular numerics, refined letter-spacing, and font-weight scale create premium typographic rhythm."
+    },
+    "motion": {
+      "score": 5,
+      "notes": "Rich animation system: staggered fadeInUp entry animations, animated number counters with easeOutExpo, SVG donut chart stroke-dashoffset transitions, bar chart growBar animations, hover micro-interactions with spring easing, ripple effects on chips, floating orbs on login, notification pulse, and smooth state transitions throughout."
+    },
+    "brand": {
+      "score": 5,
+      "notes": "TechnoServe teal (#00A79D) as primary accent with gradient variations (accent-light, accent-dark). Navy sidebar with gradient background establishes premium brand presence. Gradient CTA buttons with shimmer effect. Country flags for personality. Live pipeline indicator reinforces data-driven brand identity."
+    }
+  }
+}
