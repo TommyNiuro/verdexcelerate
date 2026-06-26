@@ -56,42 +56,7 @@ const MAX_TOTAL = 1024
 
 export default function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState('all')
-  const [chatOpen, setChatOpen] = useState(false)
-  const [chatInput, setChatInput] = useState('')
   const [notifOpen, setNotifOpen] = useState(false)
-  const [cmdOpen, setCmdOpen] = useState(false)
-  const [cmdQuery, setCmdQuery] = useState('')
-  const [messages, setMessages] = useState<{ role: 'bot' | 'user'; text: string }[]>([
-    { role: 'bot', text: 'Hola, soy el asistente IA de VerdeXcelerate. Puedo responder preguntas sobre el ecosistema AgrifoodTech, brechas, actores y cobertura.' },
-  ])
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setCmdOpen(o => !o)
-      }
-    }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [])
-
-  function sendChat() {
-    if (!chatInput.trim()) return
-    const q = chatInput
-    setMessages(m => [...m, { role: 'user' as const, text: q }])
-    setChatInput('')
-    setTimeout(() => {
-      setMessages(m => [...m, {
-        role: 'bot' as const,
-        text: q.toLowerCase().includes('brecha')
-          ? 'Hay 38 brechas identificadas. Las mas criticas son financiamiento (12) y conectividad (8), concentradas en La Guajira, Morazan y Alta Verapaz.'
-          : q.toLowerCase().includes('colombia')
-          ? 'Colombia lidera con 1,024 actores (68% startups). La Guajira y Sucre son zonas prioritarias con baja cobertura (28% y 34%).'
-          : 'Base de conocimiento activa: 2,847 actores en 6 paises, $147M rastreados, cobertura digital 78%.',
-      }])
-    }, 900)
-  }
 
   return (
     <AppLayout title="Dashboard comparativo">
@@ -112,7 +77,7 @@ export default function DashboardPage() {
             <span className="live-dot"></span>
             <span>En vivo</span>&nbsp;&mdash; pipeline activo
           </div>
-          <div className="search-box" tabIndex={0} onClick={() => setCmdOpen(true)}>
+          <div className="search-box" tabIndex={0} onClick={() => window.dispatchEvent(new Event('verdex:cmdk'))}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             Buscar actores, paises...
             <kbd>&#8984;K</kbd>
@@ -479,97 +444,6 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
-
-      {/* ── AI FAB + Chat ── */}
-      <button className={`ai-fab${chatOpen ? ' active' : ''}`} onClick={() => setChatOpen(o => !o)}>
-        <div className="ai-fab-badge"></div>
-        <svg className="ai-fab-icon" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.6">
-          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-        </svg>
-        <svg className="ai-fab-close" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-
-      <div className={`ai-chat${chatOpen ? ' open' : ''}`}>
-        <div className="ai-chat-header">
-          <div className="ai-chat-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.6"><path d="M12 2a7 7 0 017 7c0 3.5-2 6-4 8l-3 3-3-3c-2-2-4-4.5-4-8a7 7 0 017-7z"/><circle cx="12" cy="9" r="2"/></svg>
-          </div>
-          <div className="ai-chat-header-info">
-            <div className="ai-chat-header-name">Asistente VerdeXcelerate</div>
-            <div className="ai-chat-header-status">Conectado · base de conocimiento activa</div>
-          </div>
-          <div className="ai-chat-header-actions">
-            <button onClick={() => setChatOpen(false)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-        </div>
-        <div className="ai-chat-body">
-          {messages.map((m, i) => (
-            <div key={i} className={`ai-msg ${m.role}`}>{m.text}</div>
-          ))}
-        </div>
-        <div className="ai-suggestions">
-          {['Brechas criticas', 'Colombia vs CR', 'Zonas prioritarias'].map(s => (
-            <button key={s} className="ai-suggestion" onClick={() => setChatInput(s)}>
-              {s}
-            </button>
-          ))}
-        </div>
-        <div className="ai-chat-footer">
-          <textarea
-            className="ai-chat-input"
-            placeholder="Pregunta sobre el ecosistema..."
-            value={chatInput}
-            onChange={e => setChatInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat() } }}
-            rows={1}
-          />
-          <button className="ai-chat-send" onClick={sendChat} disabled={!chatInput.trim()}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
-      </div>
-
-      {/* ── Command Palette ── */}
-      {cmdOpen && (
-        <div className="cmd-overlay open" onClick={(e) => { if (e.target === e.currentTarget) setCmdOpen(false) }}>
-          <div className="cmd-box">
-            <div className="cmd-input-wrap">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input className="cmd-input" type="text" placeholder="Buscar actores, paises, secciones..." autoComplete="off" autoFocus
-                value={cmdQuery} onChange={e => setCmdQuery(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Escape') { setCmdOpen(false); setCmdQuery('') } }} />
-              <kbd>ESC</kbd>
-            </div>
-            <div className="cmd-group">
-              <div className="cmd-group-label">Navegacion rapida</div>
-              {[
-                {href:'/dashboard',label:'Dashboard'},
-                {href:'/directorio',label:'Directorio de actores'},
-                {href:'/mapa',label:'Mapa interactivo'},
-                {href:'/pais',label:'Perfiles de pais'},
-                {href:'/zonas',label:'Zonas prioritarias'},
-                {href:'/brechas',label:'Brechas y retos'},
-                {href:'/fuentes',label:'Fuentes de datos'},
-                {href:'/gobernanza',label:'Gobernanza IA'},
-                {href:'/configuracion',label:'Configuracion'},
-              ].filter(i => !cmdQuery || i.label.toLowerCase().includes(cmdQuery.toLowerCase()))
-                .map(i => (
-                <a key={i.href} className="cmd-item" href={i.href} onClick={() => setCmdOpen(false)}>
-                  {i.label}
-                </a>
-              ))}
-            </div>
-            <div className="cmd-footer">
-              <span><kbd>Enter</kbd> Abrir</span>
-              <span><kbd>ESC</kbd> Cerrar</span>
-            </div>
-          </div>
-        </div>
-      )}
     </AppLayout>
   )
 }

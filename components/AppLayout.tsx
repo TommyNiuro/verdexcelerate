@@ -1,4 +1,6 @@
 import Sidebar from './Sidebar'
+import CommandPalette from './CommandPalette'
+import AIChat from './AIChat'
 
 export default function AppLayout({ children }: { children: React.ReactNode; title?: string }) {
   return (
@@ -7,6 +9,8 @@ export default function AppLayout({ children }: { children: React.ReactNode; tit
       <main className="main">
         {children}
       </main>
+      <CommandPalette />
+      <AIChat />
     </div>
   )
 }
