@@ -1,18 +1,3 @@
 {
-  "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "routes": [
-    { "src": "/login", "dest": "/login.html" },
-    { "src": "/dashboard", "dest": "/dashboard.html" },
-    { "src": "/directorio", "dest": "/directorio.html" },
-    { "src": "/mapa", "dest": "/mapa.html" },
-    { "src": "/pais", "dest": "/pais.html" },
-    { "src": "/zonas", "dest": "/zonas.html" },
-    { "src": "/brechas", "dest": "/brechas.html" },
-    { "src": "/fuentes", "dest": "/fuentes.html" },
-    { "src": "/gobernanza", "dest": "/gobernanza.html" },
-    { "src": "/configuracion", "dest": "/configuracion.html" },
-    { "src": "/(.*)", "dest": "/$1" }
-  ]
+  "framework": "nextjs"
 }
