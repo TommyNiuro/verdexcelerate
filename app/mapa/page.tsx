@@ -104,11 +104,24 @@ export default function MapaPage() {
       if (cpFunding) cpFunding.textContent = d.funding
       if (cpGender) cpGender.textContent = d.gender
       if (p) p.classList.add('show')
+      const cpBtn = document.getElementById('cpBtn') as HTMLElement | null
+      if (cpBtn) cpBtn.dataset.country = code
       document.querySelectorAll<HTMLElement>('.dot').forEach(dot => {
         if (dot.dataset.country === code) { dot.style.opacity = '1'; dot.style.transform = 'scale(1.3)' }
         else { dot.style.opacity = '.3'; dot.style.transform = 'scale(.8)' }
       })
     }
+
+    // #5: todo dot tiene tooltip (los vacios reciben el nombre del pais)
+    const COUNTRY_NAMES: Record<string, string> = { CO:'Colombia', CR:'Costa Rica', GT:'Guatemala', HN:'Honduras', SV:'El Salvador', PA:'Panama', REG:'Regional' }
+    document.querySelectorAll<HTMLElement>('.dot').forEach(dot => {
+      if (!dot.querySelector('.dot-tooltip')) {
+        const span = document.createElement('span')
+        span.className = 'dot-tooltip'
+        span.textContent = COUNTRY_NAMES[dot.dataset.country ?? ''] ?? 'Actor'
+        dot.appendChild(span)
+      }
+    })
 
     document.querySelectorAll<HTMLElement>('.dot[data-country]').forEach(dot => {
       dot.addEventListener('click', (e) => {
@@ -117,14 +130,16 @@ export default function MapaPage() {
       })
     })
 
+    // Mapea la clave del chip/leyenda a la clase real del dot
+    const DOT_CLASS: Record<string, string> = { i: 'inv', e: 'eso', g: 'gov', a: 'aca', c: 'cor', r: 'red' }
+    const NON_STARTUP = ['inv', 'eso', 'gov', 'aca', 'cor', 'red']
     function filterMapDots(type: string) {
       document.querySelectorAll<HTMLElement>('.dot').forEach(d => {
-        if (type === 'all') { d.style.opacity = '.8'; d.style.display = '' }
-        else {
-          const isStartup = type === 's' && !d.classList.contains('inv') && !d.classList.contains('eso') && !d.classList.contains('gov') && !d.classList.contains('aca')
-          const hasClass = d.classList.contains(type) || isStartup
-          d.style.opacity = hasClass ? '.8' : '.15'
-        }
+        if (type === 'all') { d.style.opacity = '.8'; d.style.display = ''; return }
+        const match = type === 's'
+          ? NON_STARTUP.every(cls => !d.classList.contains(cls))
+          : d.classList.contains(DOT_CLASS[type] ?? type)
+        d.style.opacity = match ? '.8' : '.15'
       })
     }
 
@@ -296,6 +311,8 @@ export default function MapaPage() {
         if (s2) animateCounter(s2, countries)
         if (s3) animateCounter(s3, avgDensity)
         if (s4) animateCounter(s4, avgGender, '%')
+        const pill = document.getElementById('pillActors')
+        if (pill) animateCounter(pill, totalActors)
       }, 300)
     }
     populateStats()
@@ -437,7 +454,7 @@ export default function MapaPage() {
           <span className="country-label" style={{top:'33%',left:'36%'}}>Panama</span>
 
           <div className="map-stats">
-            <div className="map-stat-pill"><strong>2,847</strong> actores</div>
+            <div className="map-stat-pill"><strong id="pillActors">0</strong> actores</div>
             <div className="map-stat-pill"><strong>6</strong> paises</div>
             <div className="map-stat-pill"><strong>9</strong> cadenas</div>
           </div>
@@ -531,7 +548,7 @@ export default function MapaPage() {
               <div className="country-panel-stat"><div className="country-panel-val" id="cpFunding">$42M</div><div className="country-panel-label">Inversion</div></div>
               <div className="country-panel-stat"><div className="country-panel-val" id="cpGender">22%</div><div className="country-panel-label">Mujeres</div></div>
             </div>
-            <button className="country-panel-btn" onClick={() => { window.location.href = '/pais' }}>Ver perfil completo →</button>
+            <button id="cpBtn" className="country-panel-btn" onClick={(e) => { const c = (e.currentTarget as HTMLElement).dataset.country; window.location.href = c ? `/pais?c=${c}` : '/pais' }}>Ver perfil completo →</button>
           </div>
         </div>
       </div>
