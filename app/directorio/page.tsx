@@ -153,6 +153,8 @@ export default function DirectorioPage() {
 
   useEffect(() => {
     getDirectoryStats().then(setStats).catch(() => setStats(null))
+    const q = new URLSearchParams(window.location.search).get('q')
+    if (q) setSearch(q)
   }, [])
 
   function showToast(msg: string) {

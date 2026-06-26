@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AppLayout from '@/components/AppLayout'
 
 type CountryKey = 'CO' | 'CR' | 'SV' | 'GT' | 'HN' | 'PA'
@@ -300,9 +300,45 @@ export default function PaisPage() {
   const [compB, setCompB] = useState<CountryKey>('CR')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
+  const [toast, setToast] = useState('')
+
+  // Deep-link: /pais?c=CO selecciona el pais
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get('c')
+    if (c && TABS.some(t => t.key === c)) setActive(c as CountryKey)
+  }, [])
 
   const d = DATA[active]
   const tab = TABS.find(t => t.key === active)!
+
+  function showToast(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(''), 3000)
+  }
+  function buildReport(): string {
+    const lines = [
+      'VerdeXcelerate — Perfil de ecosistema',
+      `${tab.name} — ${d.phase}`, '', d.desc, '', 'Indicadores:',
+    ]
+    d.stats.forEach(s => lines.push(`- ${s.l}: ${s.pf || ''}${s.v}${s.sf || ''} (${s.s})`))
+    lines.push('', 'Cadenas de valor principales:')
+    d.chains.slice(0, 5).forEach(c => lines.push(`- ${c.l}: ${c.v} actores`))
+    lines.push('', d.zones.title + ':')
+    d.zones.rows.forEach(z => lines.push(`- ${z[0]} (${z[1]}): ${z[2]} actores, cobertura ${z[3]} — ${z[4]}`))
+    return lines.join('\n')
+  }
+  async function copyReport() {
+    try { await navigator.clipboard.writeText(buildReport()); showToast('Reporte copiado al portapapeles') }
+    catch { showToast('No se pudo copiar el reporte') }
+  }
+  function downloadReport() {
+    const blob = new Blob([buildReport()], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `verdexcelerate-${active}.txt`; a.click()
+    URL.revokeObjectURL(url)
+    showToast('Reporte descargado')
+  }
 
   return (
     <AppLayout>
@@ -474,7 +510,7 @@ export default function PaisPage() {
               <thead><tr><th>Zona</th><th>Tipo</th><th className="num-col">Actores</th><th className="num-col">Cobertura</th><th>Razon</th></tr></thead>
               <tbody>
                 {d.zones.rows.map(z => (
-                  <tr key={z[0]}>
+                  <tr key={z[0]} style={{cursor:'pointer'}} title="Ver diagnostico de zonas" onClick={() => window.location.href='/zonas'}>
                     <td style={{fontWeight:600}}>{z[0]}</td>
                     <td>{z[1]}</td>
                     <td className="num-col">{z[2]}</td>
@@ -509,9 +545,17 @@ export default function PaisPage() {
             </div>
             <div className="modal-footer">
               <button className="btn-modal-close" onClick={() => setModalOpen(false)}>Cerrar</button>
-              <button className="btn-copy">
+              <button className="btn-copy" onClick={downloadReport}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Descargar TXT
+              </button>
+              <button className="btn-copy" onClick={() => window.print()}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Guardar PDF
+              </button>
+              <button className="btn-copy" onClick={copyReport}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                Copiar al portapapeles
+                Copiar
               </button>
             </div>
           </div>
@@ -534,7 +578,7 @@ export default function PaisPage() {
         </div>
         <div className="actors-list">
           {(ACTORS[active] || []).map((a, i) => (
-            <div key={a.name} className="actor-card" style={{animationDelay:`${i*80}ms`}}>
+            <div key={a.name} className="actor-card" style={{animationDelay:`${i*80}ms`,cursor:'pointer'}} title={`Ver ${a.name} en el directorio`} onClick={() => window.location.href = `/directorio?q=${encodeURIComponent(a.name)}`}>
               <div className="actor-card-name">{a.name}</div>
               <div className="actor-card-meta">
                 <span className={`actor-type-badge ${a.type}`}>{a.type}</span>
@@ -545,6 +589,11 @@ export default function PaisPage() {
           ))}
         </div>
       </aside>
+
+      <div className={`toast${toast ? ' show' : ''}`}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>{toast}</span>
+      </div>
     </AppLayout>
   )
 }
