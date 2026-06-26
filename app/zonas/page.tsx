@@ -1,7 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import AppLayout from '@/components/AppLayout'
+
+// Codigo de pais por zona (para deep-link al perfil)
+const ZONE_CC: Record<string, string> = {
+  'la-guajira': 'CO', 'sucre': 'CO', 'cordoba': 'CO', 'magdalena': 'CO',
+  'morazan': 'SV', 'alta-verapaz': 'GT',
+}
 
 const ZONES = [
   {
@@ -215,6 +221,7 @@ export default function ZonasPage() {
                     ))}
                   </div>
                 </div>
+                <a className="panel-action" href={`/pais?c=${ZONE_CC[z.id] ?? 'CO'}`} style={{display:'inline-block',marginTop:12}}>Ver perfil del pais &rarr;</a>
               </div>
             )
           })}
@@ -296,15 +303,15 @@ export default function ZonasPage() {
               <div className="heatmap-header"></div>
               {HEATMAP_DIMS.map(d => <div key={d} className="heatmap-header">{d}</div>)}
               {HEATMAP_ZONES.map((zone, zi) => (
-                <>
-                  <div key={`${zone}-label`} className="heatmap-row-label">{zone}</div>
+                <Fragment key={zone}>
+                  <div className="heatmap-row-label">{zone}</div>
                   {HEATMAP_VALUES[zi].map((val, di) => (
                     <div key={`${zone}-${di}`} className="heatmap-cell" style={{background: heatColor(val)}}>
                       {val}%
                       <div className="heatmap-cell-tooltip">{zone} · {HEATMAP_DIMS[di]}: {val}%</div>
                     </div>
                   ))}
-                </>
+                </Fragment>
               ))}
             </div>
             <div className="heatmap-legend">
@@ -317,7 +324,7 @@ export default function ZonasPage() {
 
         {/* Gaps table */}
         <div className="panel anim-fade-up" style={{animationDelay:'.6s'}}>
-          <div className="panel-header"><span className="panel-title">Brechas criticas identificadas en zonas prioritarias</span></div>
+          <div className="panel-header"><span className="panel-title">Brechas criticas identificadas en zonas prioritarias</span><a className="panel-action" href="/brechas">Ver todas las brechas &rarr;</a></div>
           <div className="panel-body-flush">
             <table className="data-table">
               <thead>
