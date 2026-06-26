@@ -1132,7 +1132,7 @@ body.fullscreen-mode .topbar{display:none!important}
     .data-lineage-title{font-family:var(--font-display);font-size:20px;margin:0 0 8px}.data-lineage-sub{font-size:13px;color:var(--muted);margin:0 0 24px}
 .lineage-container{position:relative;width:100%;overflow-x:auto}
     .lineage-svg{width:100%;min-width:700px;height:200px}
-.lineage-node{cursor:pointer;transition:transform .2s var(--ease-out-expo)}.lineage-node:hover{transform:scale(1.05)}
+.lineage-node{cursor:pointer;transform-box:fill-box;transform-origin:center;transition:transform .2s var(--ease-out-expo)}.lineage-node:hover{transform:scale(1.05)}
     .lineage-node rect{rx:12;ry:12;transition:all .3s var(--ease-out-expo)}
 .lineage-node .node-sub{font-size:9px;font-weight:400;opacity:.8}
     @keyframes flowDot{0%{offset-distance:0%}100%{offset-distance:100%}}
