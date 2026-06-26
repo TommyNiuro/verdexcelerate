@@ -1,5 +1,7 @@
 # VerdeXcelerate — Mapeo Vivo AgrifoodTech
 
+**Live:** [verdexcelerate.vercel.app](https://verdexcelerate.vercel.app)  
+**GitHub:** [TommyNiuro/verdexcelerate](https://github.com/TommyNiuro/verdexcelerate)  
 **Cliente:** TechnoServe / BID Lab  
 **Cobertura:** Colombia, Costa Rica, El Salvador, Guatemala, Honduras y Panama  
 **Estado:** Prototipo de alta fidelidad — desplegado en produccion
