@@ -1,7 +1,10 @@
 'use client'
 
-import { useState, Fragment } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import AppLayout from '@/components/AppLayout'
+import { getDashboardStats, getBenchmarks } from '@/lib/queries'
+
+const ZONE_CID: Record<string, number> = { CO: 1, CR: 2, SV: 3, GT: 4, HN: 5, PA: 6 }
 
 // Codigo de pais por zona (para deep-link al perfil)
 const ZONE_CC: Record<string, string> = {
@@ -142,6 +145,27 @@ function heatColor(v: number) {
 export default function ZonasPage() {
   const [openRecs, setOpenRecs] = useState<string[]>([])
   const [modalOpen, setModalOpen] = useState(false)
+  const [ctx, setCtx] = useState<Record<string, { actors: number; rural: number | null; pib: number | null }>>({})
+
+  // Contexto real por zona: actores del pais (dataset) + benchmarks Banco Mundial
+  useEffect(() => {
+    Promise.all([getDashboardStats(), getBenchmarks()]).then(([ds, bench]) => {
+      const totalByIso: Record<string, number> = {}
+      for (const r of ds) totalByIso[(r as any).iso2] = (r as any).total
+      const bget = (cid: number, metric: string) => bench.find(b => b.country_id === cid && b.metric === metric)?.value ?? null
+      const next: Record<string, { actors: number; rural: number | null; pib: number | null }> = {}
+      for (const z of ZONES) {
+        const iso = ZONE_CC[z.id] ?? 'CO'
+        const cid = ZONE_CID[iso]
+        next[z.id] = {
+          actors: totalByIso[iso] ?? 0,
+          rural: bget(cid, 'poblacion_rural_pct'),
+          pib: bget(cid, 'pib_agricola_pct'),
+        }
+      }
+      setCtx(next)
+    }).catch(() => {})
+  }, [])
 
   const toggleRec = (id: string) => {
     setOpenRecs(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
@@ -163,7 +187,7 @@ export default function ZonasPage() {
       <div className="content">
         <div className="page-intro anim-fade-up">
           <h2>6 zonas de alta vulnerabilidad</h2>
-          <p>Zonas donde la cobertura digital es baja y se requiere investigacion primaria (Fase II). La priorizacion se basa en vulnerabilidad, poblacion indigena, ruralidad y potencial agroalimentario.</p>
+          <p>Zonas reales priorizadas por vulnerabilidad, poblacion indigena, ruralidad y potencial agroalimentario (datos de priority_zones). Los indicadores de cada tarjeta son contexto del pais: actores mapeados (dataset) y poblacion rural y PIB agricola (Banco Mundial, 2024). El conteo de actores por zona aun no se captura individualmente, por eso se muestra el del pais. El analisis cualitativo y las recomendaciones son insumos de la Fase II.</p>
         </div>
 
         <div className="zones-grid">
@@ -180,16 +204,16 @@ export default function ZonasPage() {
                 </div>
                 <div className="zone-stats">
                   <div className="zone-stat">
-                    <div className="zone-stat-val">{z.actores}</div>
-                    <div className="zone-stat-label">Actores</div>
+                    <div className="zone-stat-val">{ctx[z.id]?.actors ?? '-'}</div>
+                    <div className="zone-stat-label">Actores (pais)</div>
                   </div>
                   <div className="zone-stat">
-                    <div className="zone-stat-val" style={{color: z.cobColor}}>{z.cobertura}%</div>
-                    <div className="zone-stat-label">Cobertura</div>
+                    <div className="zone-stat-val" style={{color: z.cobColor}}>{ctx[z.id]?.rural != null ? `${ctx[z.id]!.rural}%` : '-'}</div>
+                    <div className="zone-stat-label">Pob. rural</div>
                   </div>
                   <div className="zone-stat">
-                    <div className="zone-stat-val">{z.lidFem}</div>
-                    <div className="zone-stat-label">Lid. femenino</div>
+                    <div className="zone-stat-val">{ctx[z.id]?.pib != null ? `${ctx[z.id]!.pib}%` : '-'}</div>
+                    <div className="zone-stat-label">PIB agro</div>
                   </div>
                 </div>
                 <div className="zone-bars">
