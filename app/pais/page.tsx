@@ -14,198 +14,293 @@ const TABS: { key: CountryKey; flag: string; name: string }[] = [
   { key: 'PA', flag: '🇵🇦', name: 'Panama' },
 ]
 
+type StatItem = { l: string; v: number | string; s: string; pf?: string; sf?: string }
+
 const DATA: Record<CountryKey, {
   phase: string; phaseClass: string; desc: string;
-  startups: number; inversores: number; esos: number; lidFem: string; inversion: string;
-  thematic: { label: string; pct: number }[];
-  chains: { label: string; pct: number }[];
-  funding: { name: string; tipo: string; monto: string; fecha: string }[];
-  zones: { name: string; actores: number; cobertura: string }[];
+  stats: StatItem[];
+  thematic: { l: string; w: number; v: number }[];
+  chains: { l: string; w: number; v: number }[];
+  funding: [string, string, string, string, string][];
+  zones: { title: string; rows: [string, string, number, string, string][] };
 }> = {
   CO: {
-    phase: 'Maduro', phaseClass: 'phase-maduro',
-    desc: 'Ecosistema mas desarrollado de la region con fuerte concentracion en Bogota y Medellin. Lider en capital de riesgo y diversidad de cadenas de valor AgriTech.',
-    startups: 486, inversores: 127, esos: 89, lidFem: '18%', inversion: '$68M',
+    phase: 'Ecosistema maduro', phaseClass: 'phase-maduro',
+    desc: 'Ecosistema mas maduro de la region. Foco en region Caribe: La Guajira, Sucre, Cordoba (excl. Monteria), Magdalena. Base solida de startups AgrifoodTech con ecosistema de inversion activo.',
+    stats: [
+      { l: 'Startups', v: 486, s: '73 en zonas prioritarias' },
+      { l: 'Inversores', v: 127, s: '34 con foco agrifoodtech' },
+      { l: 'ESOs', v: 89, s: '12 aceleradoras activas' },
+      { l: 'Liderazgo femenino', v: 18, s: '88 con CEO mujer', sf: '%' },
+      { l: 'Inversion total', v: 68, s: 'USD acumulado', pf: '$', sf: 'M' },
+    ],
     thematic: [
-      { label: 'Precision farming', pct: 78 },
-      { label: 'Fintech agro', pct: 65 },
-      { label: 'Supply chain', pct: 58 },
-      { label: 'Biotech', pct: 45 },
+      { l: 'AgTech precision', w: 72, v: 142 }, { l: 'FoodTech', w: 48, v: 96 },
+      { l: 'Logistica', w: 35, v: 68 }, { l: 'Fintech agro', w: 30, v: 58 },
+      { l: 'Trazabilidad', w: 25, v: 49 }, { l: 'Clima/carbono', w: 18, v: 36 },
+      { l: 'Riego y agua', w: 12, v: 22 }, { l: 'Biotecnologia', w: 8, v: 15 },
     ],
     chains: [
-      { label: 'Cafe', pct: 85 },
-      { label: 'Hortalizas', pct: 72 },
-      { label: 'Cacao', pct: 61 },
-      { label: 'Frutas exoticas', pct: 48 },
+      { l: 'Cafe', w: 80, v: 156 }, { l: 'Hortalizas', w: 45, v: 89 },
+      { l: 'Cacao', w: 38, v: 74 }, { l: 'Frutas', w: 32, v: 62 },
+      { l: 'Aguacate', w: 22, v: 43 }, { l: 'Lacteos', w: 16, v: 31 },
+      { l: 'Granos basicos', w: 10, v: 19 }, { l: 'Cana', w: 6, v: 12 },
     ],
     funding: [
-      { name: 'AgroSmart CO', tipo: 'Seed', monto: '$1.2M', fecha: 'Mar 2026' },
-      { name: 'CafeChain', tipo: 'Serie A', monto: '$4.5M', fecha: 'Feb 2026' },
-      { name: 'LogiSiembra', tipo: 'Seed', monto: '$800K', fecha: 'Ene 2026' },
-      { name: 'BioInsumos CO', tipo: 'Pre-seed', monto: '$250K', fecha: 'Dic 2025' },
-      { name: 'AquaColombia', tipo: 'Seed', monto: '$600K', fecha: 'Nov 2025' },
+      ['AgroSmart CO', 'Seed', 'Pomona Impact, INNOGEN III', '$1.2M', 'Mar 2026'],
+      ['CafeChain', 'Serie A', 'SPventures', '$4.5M', 'Feb 2026'],
+      ['LogiSiembra', 'Seed', 'Village Capital', '$800K', 'Ene 2026'],
+      ['BioInsumos CO', 'Pre-seed', 'Angel investors', '$250K', 'Dic 2025'],
+      ['AquaColombia', 'Seed', 'INNOGEN III', '$600K', 'Nov 2025'],
     ],
-    zones: [
-      { name: 'La Guajira', actores: 12, cobertura: '28%' },
-      { name: 'Sucre', actores: 18, cobertura: '34%' },
-      { name: 'Cordoba', actores: 24, cobertura: '41%' },
-      { name: 'Magdalena', actores: 19, cobertura: '36%' },
-    ],
+    zones: { title: 'Zonas prioritarias — Region Caribe', rows: [
+      ['La Guajira', 'Departamento', 12, '28%', 'Alta vulnerabilidad'],
+      ['Sucre', 'Departamento', 18, '34%', 'Alta vulnerabilidad'],
+      ['Cordoba (excl. Monteria)', 'Departamento', 24, '41%', 'Region Caribe'],
+      ['Magdalena', 'Departamento', 19, '36%', 'Alta vulnerabilidad'],
+    ]},
   },
   CR: {
-    phase: 'Emergente', phaseClass: 'phase-emergente',
-    desc: 'Ecosistema emergente con fuerte apoyo gubernamental via PROCOMER y SENASA. Alta calidad de biodiversidad y posicionamiento en AgriTech de exportacion de cafe y frutas tropicales.',
-    startups: 198, inversores: 45, esos: 67, lidFem: '28%', inversion: '$22M',
+    phase: 'Ecosistema emergente', phaseClass: 'phase-emergente',
+    desc: 'Hub de innovacion centroamericano con ecosistema solido de ESOs y aceleradoras. Fuerte en biotecnologia y agricultura regenerativa. Conexion activa con Silicon Valley.',
+    stats: [
+      { l: 'Startups', v: 198, s: '34 en AgTech precision' },
+      { l: 'Inversores', v: 45, s: '12 con foco agrifoodtech' },
+      { l: 'ESOs', v: 67, s: '8 aceleradoras activas' },
+      { l: 'Liderazgo femenino', v: 28, s: '55 con CEO mujer', sf: '%' },
+      { l: 'Inversion total', v: 22, s: 'USD acumulado', pf: '$', sf: 'M' },
+    ],
     thematic: [
-      { label: 'Exportacion digital', pct: 82 },
-      { label: 'Sostenibilidad', pct: 74 },
-      { label: 'Precision farming', pct: 55 },
-      { label: 'Biotech', pct: 40 },
+      { l: 'Biotecnologia', w: 65, v: 48 }, { l: 'AgTech precision', w: 52, v: 38 },
+      { l: 'FoodTech', w: 40, v: 29 }, { l: 'Clima/carbono', w: 35, v: 26 },
+      { l: 'Trazabilidad', w: 20, v: 15 }, { l: 'Logistica', w: 15, v: 11 },
+      { l: 'Fintech agro', w: 10, v: 7 }, { l: 'Riego y agua', w: 6, v: 4 },
     ],
     chains: [
-      { label: 'Cafe', pct: 88 },
-      { label: 'Pina', pct: 76 },
-      { label: 'Banano', pct: 65 },
-      { label: 'Flores', pct: 42 },
+      { l: 'Cafe', w: 65, v: 52 }, { l: 'Frutas', w: 50, v: 40 },
+      { l: 'Hortalizas', w: 38, v: 30 }, { l: 'Cacao', w: 28, v: 22 },
+      { l: 'Cana', w: 18, v: 14 }, { l: 'Lacteos', w: 12, v: 10 },
+      { l: 'Aguacate', w: 8, v: 6 }, { l: 'Granos basicos', w: 5, v: 4 },
     ],
     funding: [
-      { name: 'Cafe Britt Tech', tipo: 'Serie A', monto: '$3.2M', fecha: 'Abr 2026' },
-      { name: 'BioTrop CR', tipo: 'Seed', monto: '$900K', fecha: 'Feb 2026' },
-      { name: 'ExportDigital', tipo: 'Pre-seed', monto: '$180K', fecha: 'Ene 2026' },
-      { name: 'AguaVerde CR', tipo: 'Seed', monto: '$450K', fecha: 'Nov 2025' },
-      { name: 'PolinizAI', tipo: 'Pre-seed', monto: '$120K', fecha: 'Oct 2025' },
+      ['TicaAgro', 'Seed', 'Carao Ventures', '$900K', 'Mar 2026'],
+      ['BioVerde CR', 'Serie A', 'Ibo Capital', '$3.2M', 'Feb 2026'],
+      ['CafeDigital', 'Pre-seed', 'Angels', '$180K', 'Ene 2026'],
     ],
-    zones: [
-      { name: 'Guanacaste', actores: 22, cobertura: '47%' },
-      { name: 'Puntarenas', actores: 16, cobertura: '38%' },
-      { name: 'Limon', actores: 12, cobertura: '31%' },
-      { name: 'Cartago', actores: 28, cobertura: '58%' },
-    ],
+    zones: { title: 'Zonas prioritarias — Costa Rica', rows: [
+      ['Zona Norte', 'Region', 14, '45%', 'Alta ruralidad'],
+      ['Osa / Golfito', 'Canton', 8, '32%', 'Biodiversidad'],
+    ]},
   },
   SV: {
-    phase: 'Naciente', phaseClass: 'phase-naciente',
-    desc: 'Ecosistema naciente con alto potencial en cadenas de cafe y frutas. Limitado por acceso a capital y conectividad rural. Bitcoin adoption como vector de innovacion financiera para el sector.',
-    startups: 94, inversores: 12, esos: 23, lidFem: '19%', inversion: '$4M',
+    phase: 'Ecosistema naciente', phaseClass: 'phase-naciente',
+    desc: 'Ecosistema en crecimiento con enfoque en zona prioritaria de Morazan. FoodTech y trazabilidad son areas de mayor actividad. Programa de adopcion tecnologica con pequenos productores.',
+    stats: [
+      { l: 'Startups', v: 94, s: '18 en zonas prioritarias' },
+      { l: 'Inversores', v: 12, s: '4 con foco agrifoodtech' },
+      { l: 'ESOs', v: 23, s: '3 aceleradoras activas' },
+      { l: 'Liderazgo femenino', v: 19, s: '18 con CEO mujer', sf: '%' },
+      { l: 'Inversion total', v: 4, s: 'USD acumulado', pf: '$', sf: 'M' },
+    ],
     thematic: [
-      { label: 'Fintech agro', pct: 70 },
-      { label: 'Trazabilidad', pct: 58 },
-      { label: 'Mercados digitales', pct: 44 },
-      { label: 'Precision farming', pct: 28 },
+      { l: 'FoodTech', w: 55, v: 18 }, { l: 'Trazabilidad', w: 42, v: 14 },
+      { l: 'AgTech precision', w: 30, v: 10 }, { l: 'Logistica', w: 22, v: 7 },
+      { l: 'Granos basicos', w: 18, v: 6 }, { l: 'Clima/carbono', w: 12, v: 4 },
+      { l: 'Fintech agro', w: 8, v: 3 }, { l: 'Riego y agua', w: 5, v: 2 },
     ],
     chains: [
-      { label: 'Cafe', pct: 80 },
-      { label: 'Cana de azucar', pct: 62 },
-      { label: 'Frutas', pct: 48 },
-      { label: 'Granos basicos', pct: 35 },
+      { l: 'Cafe', w: 60, v: 22 }, { l: 'Granos basicos', w: 48, v: 18 },
+      { l: 'Hortalizas', w: 30, v: 11 }, { l: 'Cana', w: 22, v: 8 },
+      { l: 'Frutas', w: 15, v: 6 }, { l: 'Cacao', w: 10, v: 4 },
+      { l: 'Aguacate', w: 6, v: 2 }, { l: 'Lacteos', w: 4, v: 1 },
     ],
     funding: [
-      { name: 'BioFresh SV', tipo: 'Pre-seed', monto: '$200K', fecha: 'Mar 2026' },
-      { name: 'CafeChain SV', tipo: 'Seed', monto: '$500K', fecha: 'Dic 2025' },
-      { name: 'AgroWallet', tipo: 'Pre-seed', monto: '$150K', fecha: 'Oct 2025' },
-      { name: 'FrutaDigital', tipo: 'Pre-seed', monto: '$90K', fecha: 'Sep 2025' },
-      { name: 'RiegoSV', tipo: 'Pre-seed', monto: '$120K', fecha: 'Jul 2025' },
+      ['AgroTech SV', 'Pre-seed', 'CONAMYPE', '$120K', 'Feb 2026'],
+      ['CafeMorazan', 'Seed', 'INNOGEN III', '$450K', 'Dic 2025'],
     ],
-    zones: [
-      { name: 'Morazan', actores: 8, cobertura: '22%' },
-      { name: 'Chalatenango', actores: 11, cobertura: '28%' },
-      { name: 'Santa Ana', actores: 19, cobertura: '41%' },
-      { name: 'Sonsonate', actores: 14, cobertura: '33%' },
-    ],
+    zones: { title: 'Zonas prioritarias — El Salvador', rows: [
+      ['Morazan', 'Departamento', 8, '22%', 'Alta vulnerabilidad'],
+    ]},
   },
   GT: {
-    phase: 'Naciente', phaseClass: 'phase-naciente',
-    desc: 'Ecosistema naciente con clusters emergentes en Ciudad de Guatemala. Alta diversidad de cultivos (cafe, cardamomo, palma) y comunidades indigenas como potencial de impacto social diferenciador.',
-    startups: 147, inversores: 18, esos: 31, lidFem: '15%', inversion: '$8M',
+    phase: 'Ecosistema naciente', phaseClass: 'phase-naciente',
+    desc: 'Enfoque en cafe de especialidad y cadena de cacao en Alta Verapaz (zona prioritaria). Trazabilidad blockchain y conexion directa productor-comprador como temas emergentes.',
+    stats: [
+      { l: 'Startups', v: 147, s: '28 en zonas prioritarias' },
+      { l: 'Inversores', v: 18, s: '6 con foco agrifoodtech' },
+      { l: 'ESOs', v: 31, s: '4 aceleradoras activas' },
+      { l: 'Liderazgo femenino', v: 15, s: '22 con CEO mujer', sf: '%' },
+      { l: 'Inversion total', v: 8, s: 'USD acumulado', pf: '$', sf: 'M' },
+    ],
     thematic: [
-      { label: 'Trazabilidad', pct: 75 },
-      { label: 'Supply chain', pct: 60 },
-      { label: 'Precision farming', pct: 42 },
-      { label: 'Fintech agro', pct: 35 },
+      { l: 'Trazabilidad', w: 60, v: 34 }, { l: 'AgTech precision', w: 45, v: 26 },
+      { l: 'FoodTech', w: 32, v: 18 }, { l: 'Clima/carbono', w: 25, v: 14 },
+      { l: 'Logistica', w: 18, v: 10 }, { l: 'Biotecnologia', w: 12, v: 7 },
+      { l: 'Fintech agro', w: 8, v: 5 }, { l: 'Riego y agua', w: 5, v: 3 },
     ],
     chains: [
-      { label: 'Cafe', pct: 82 },
-      { label: 'Cardamomo', pct: 70 },
-      { label: 'Palma africana', pct: 55 },
-      { label: 'Banano', pct: 48 },
+      { l: 'Cafe', w: 75, v: 46 }, { l: 'Cacao', w: 55, v: 34 },
+      { l: 'Cardamomo', w: 35, v: 22 }, { l: 'Hortalizas', w: 25, v: 15 },
+      { l: 'Granos basicos', w: 18, v: 11 }, { l: 'Frutas', w: 12, v: 7 },
+      { l: 'Aguacate', w: 8, v: 5 }, { l: 'Lacteos', w: 5, v: 3 },
     ],
     funding: [
-      { name: 'CafeTrace GT', tipo: 'Seed', monto: '$650K', fecha: 'Abr 2026' },
-      { name: 'CardamomoTech', tipo: 'Pre-seed', monto: '$180K', fecha: 'Feb 2026' },
-      { name: 'AgroGT Connect', tipo: 'Pre-seed', monto: '$130K', fecha: 'Dic 2025' },
-      { name: 'RiegoMaya', tipo: 'Pre-seed', monto: '$90K', fecha: 'Oct 2025' },
-      { name: 'BiomassGT', tipo: 'Pre-seed', monto: '$200K', fecha: 'Sep 2025' },
+      ['CafeTrace GT', 'Seed', 'INNOGEN III', '$600K', 'Mar 2026'],
+      ['AgroQ eqchi', 'Pre-seed', 'TechnoServe', '$200K', 'Ene 2026'],
     ],
-    zones: [
-      { name: 'Alta Verapaz', actores: 14, cobertura: '26%' },
-      { name: 'Peten', actores: 9, cobertura: '19%' },
-      { name: 'Quiche', actores: 11, cobertura: '23%' },
-      { name: 'Izabal', actores: 16, cobertura: '34%' },
-    ],
+    zones: { title: 'Zonas prioritarias — Guatemala', rows: [
+      ['Alta Verapaz', 'Departamento', 14, '26%', 'Poblacion indigena'],
+    ]},
   },
   HN: {
-    phase: 'Naciente', phaseClass: 'phase-naciente',
-    desc: 'Ecosistema naciente con fuerte presencia de organismos internacionales (USAID, FAO). Potencial en granos basicos y cadena de cafe. Zamorano como hub academico regional con influencia en el ecosistema.',
-    startups: 132, inversores: 14, esos: 28, lidFem: '12%', inversion: '$6M',
+    phase: 'Ecosistema naciente', phaseClass: 'phase-naciente',
+    desc: 'Crecimiento acelerado en AgTech gracias al Hub Zamorano. Riego inteligente y granos basicos son areas clave. Zona prioritaria en corredor seco.',
+    stats: [
+      { l: 'Startups', v: 132, s: '22 en zonas prioritarias' },
+      { l: 'Inversores', v: 14, s: '5 con foco agrifoodtech' },
+      { l: 'ESOs', v: 28, s: '3 aceleradoras activas' },
+      { l: 'Liderazgo femenino', v: 12, s: '16 con CEO mujer', sf: '%' },
+      { l: 'Inversion total', v: 6, s: 'USD acumulado', pf: '$', sf: 'M' },
+    ],
     thematic: [
-      { label: 'Granos basicos', pct: 72 },
-      { label: 'Supply chain', pct: 55 },
-      { label: 'Fintech agro', pct: 42 },
-      { label: 'Precision farming', pct: 30 },
+      { l: 'Riego y agua', w: 58, v: 28 }, { l: 'Granos basicos', w: 45, v: 22 },
+      { l: 'AgTech precision', w: 38, v: 18 }, { l: 'FoodTech', w: 28, v: 14 },
+      { l: 'Clima/carbono', w: 20, v: 10 }, { l: 'Logistica', w: 15, v: 7 },
+      { l: 'Trazabilidad', w: 10, v: 5 }, { l: 'Fintech agro', w: 6, v: 3 },
     ],
     chains: [
-      { label: 'Cafe', pct: 78 },
-      { label: 'Granos basicos', pct: 70 },
-      { label: 'Palma africana', pct: 58 },
-      { label: 'Camaron', pct: 44 },
+      { l: 'Cafe', w: 70, v: 38 }, { l: 'Granos basicos', w: 52, v: 28 },
+      { l: 'Hortalizas', w: 32, v: 17 }, { l: 'Frutas', w: 22, v: 12 },
+      { l: 'Cacao', w: 15, v: 8 }, { l: 'Lacteos', w: 10, v: 5 },
+      { l: 'Aguacate', w: 6, v: 3 }, { l: 'Cana', w: 4, v: 2 },
     ],
     funding: [
-      { name: 'RiegoVerde HN', tipo: 'Seed', monto: '$400K', fecha: 'Mar 2026' },
-      { name: 'GranoTech', tipo: 'Pre-seed', monto: '$140K', fecha: 'Ene 2026' },
-      { name: 'CafeHN Digital', tipo: 'Pre-seed', monto: '$110K', fecha: 'Nov 2025' },
-      { name: 'PalmaData', tipo: 'Pre-seed', monto: '$160K', fecha: 'Sep 2025' },
-      { name: 'AquaHN', tipo: 'Pre-seed', monto: '$90K', fecha: 'Jul 2025' },
+      ['HydroHN', 'Seed', 'Village Capital', '$500K', 'Feb 2026'],
+      ['GranosDigital', 'Pre-seed', 'Angels', '$150K', 'Dic 2025'],
     ],
-    zones: [
-      { name: 'Olancho', actores: 10, cobertura: '21%' },
-      { name: 'Colon', actores: 8, cobertura: '18%' },
-      { name: 'Santa Barbara', actores: 14, cobertura: '30%' },
-      { name: 'Yoro', actores: 12, cobertura: '26%' },
-    ],
+    zones: { title: 'Zonas prioritarias — Honduras', rows: [
+      ['Corredor Seco', 'Region', 10, '30%', 'Vulnerabilidad climatica'],
+      ['Olancho', 'Departamento', 6, '24%', 'Ruralidad alta'],
+    ]},
   },
   PA: {
-    phase: 'Emergente', phaseClass: 'phase-emergente',
-    desc: 'Ecosistema emergente con ventaja competitiva en logistica y finanzas por el Canal. SENACYT activo en financiamiento. Potencial en AgriTech de exportacion y soluciones de riego para el arco seco.',
-    startups: 162, inversores: 38, esos: 34, lidFem: '24%', inversion: '$22M',
+    phase: 'Ecosistema emergente', phaseClass: 'phase-emergente',
+    desc: 'Hub financiero regional con potencial para vehiculo de inversion AgriTech. SENACYT impulsa innovacion agropecuaria. Conectividad digital superior a otros paises CA.',
+    stats: [
+      { l: 'Startups', v: 162, s: '18 en sostenibilidad' },
+      { l: 'Inversores', v: 38, s: '15 con foco agrifoodtech' },
+      { l: 'ESOs', v: 34, s: '5 aceleradoras activas' },
+      { l: 'Liderazgo femenino', v: 24, s: '39 con CEO mujer', sf: '%' },
+      { l: 'Inversion total', v: 22, s: 'USD acumulado', pf: '$', sf: 'M' },
+    ],
     thematic: [
-      { label: 'Logistica agro', pct: 80 },
-      { label: 'Exportacion digital', pct: 68 },
-      { label: 'Riego inteligente', pct: 55 },
-      { label: 'Fintech agro', pct: 48 },
+      { l: 'Fintech agro', w: 55, v: 34 }, { l: 'AgTech precision', w: 42, v: 26 },
+      { l: 'FoodTech', w: 35, v: 22 }, { l: 'Logistica', w: 28, v: 17 },
+      { l: 'Biotecnologia', w: 22, v: 14 }, { l: 'Trazabilidad', w: 15, v: 9 },
+      { l: 'Clima/carbono', w: 10, v: 6 }, { l: 'Riego y agua', w: 6, v: 4 },
     ],
     chains: [
-      { label: 'Arroz', pct: 75 },
-      { label: 'Maiz', pct: 62 },
-      { label: 'Camaron', pct: 58 },
-      { label: 'Frutas tropicales', pct: 45 },
+      { l: 'Frutas', w: 55, v: 36 }, { l: 'Cafe', w: 42, v: 28 },
+      { l: 'Hortalizas', w: 35, v: 23 }, { l: 'Cacao', w: 25, v: 16 },
+      { l: 'Aguacate', w: 18, v: 12 }, { l: 'Cana', w: 14, v: 9 },
+      { l: 'Granos basicos', w: 8, v: 5 }, { l: 'Lacteos', w: 5, v: 3 },
     ],
     funding: [
-      { name: 'AquaCrop PA', tipo: 'Serie A', monto: '$2.8M', fecha: 'Abr 2026' },
-      { name: 'LogiAgro PA', tipo: 'Seed', monto: '$900K', fecha: 'Feb 2026' },
-      { name: 'ArroceTech', tipo: 'Seed', monto: '$600K', fecha: 'Dic 2025' },
-      { name: 'ExportFresh PA', tipo: 'Pre-seed', monto: '$200K', fecha: 'Oct 2025' },
-      { name: 'RiegoSeco', tipo: 'Seed', monto: '$450K', fecha: 'Ago 2025' },
+      ['AquaCrop PA', 'Seed', 'SENACYT, Angels', '$700K', 'Mar 2026'],
+      ['PanamaFresh', 'Serie A', 'Carao Ventures', '$2.8M', 'Ene 2026'],
+      ['LogiPanama', 'Pre-seed', 'Angels', '$200K', 'Nov 2025'],
     ],
-    zones: [
-      { name: 'Chiriqui', actores: 28, cobertura: '52%' },
-      { name: 'Cocle', actores: 18, cobertura: '38%' },
-      { name: 'Herrera', actores: 14, cobertura: '31%' },
-      { name: 'Los Santos', actores: 12, cobertura: '27%' },
-    ],
+    zones: { title: 'Zonas prioritarias — Panama', rows: [
+      ['Comarca Ngabe-Bugle', 'Comarca', 5, '18%', 'Poblacion indigena'],
+      ['Darien', 'Provincia', 4, '20%', 'Frontera agricola'],
+    ]},
   },
+}
+
+const ACTORS: Record<CountryKey, { name: string; type: 'startup' | 'investor' | 'eso' | 'gobierno'; conf: number }[]> = {
+  CO: [
+    { name: 'AgroSmart CO', type: 'startup', conf: 0.92 },
+    { name: 'Pomona Impact', type: 'investor', conf: 0.88 },
+    { name: 'LogiSiembra', type: 'startup', conf: 0.85 },
+    { name: 'INNOGEN Fondo III', type: 'investor', conf: 0.90 },
+    { name: 'Coomeva Agro', type: 'eso', conf: 0.78 },
+  ],
+  CR: [
+    { name: 'Cafe Britt Tech', type: 'startup', conf: 0.87 },
+    { name: 'PROCOMER', type: 'gobierno', conf: 0.95 },
+    { name: 'Carao Ventures', type: 'investor', conf: 0.89 },
+  ],
+  SV: [
+    { name: 'BioFresh SV', type: 'startup', conf: 0.82 },
+    { name: 'AgroTech SV', type: 'startup', conf: 0.75 },
+  ],
+  GT: [
+    { name: 'CafeTrace GT', type: 'startup', conf: 0.88 },
+    { name: 'AgroQ eqchi', type: 'startup', conf: 0.72 },
+  ],
+  HN: [
+    { name: 'Agro-Hub Zamorano', type: 'eso', conf: 0.93 },
+    { name: 'RiegoVerde HN', type: 'startup', conf: 0.80 },
+  ],
+  PA: [
+    { name: 'AquaCrop PA', type: 'startup', conf: 0.88 },
+    { name: 'SENACYT Panama', type: 'gobierno', conf: 0.97 },
+    { name: 'LogiPanama', type: 'startup', conf: 0.76 },
+  ],
+}
+
+// Simple radar chart SVG for ecosystem maturity
+const RADAR_LABELS = ['Startups', 'Inversion', 'ESOs', 'Talento', 'Politica', 'Mercado']
+
+function RadarChart({ d }: { d: typeof DATA[CountryKey] }) {
+  const statMax = [500, 100, 100, 100, 100, 100]
+  const vals = [
+    Math.min(Number(d.stats[0].v) / statMax[0], 1),
+    Math.min(Number(d.stats[4].v) / 70, 1),
+    Math.min(Number(d.stats[2].v) / 100, 1),
+    0.65, 0.55, 0.70,
+  ]
+  const cx = 160, cy = 160, r = 110
+  const pts = vals.map((v, i) => {
+    const angle = (i / vals.length) * 2 * Math.PI - Math.PI / 2
+    return [cx + r * v * Math.cos(angle), cy + r * v * Math.sin(angle)]
+  })
+  const polygon = pts.map(([x, y]) => `${x},${y}`).join(' ')
+  const rings = [0.25, 0.5, 0.75, 1]
+
+  return (
+    <svg viewBox="0 0 320 320" style={{ width: '100%', maxWidth: 320, height: 'auto' }}>
+      {rings.map(ring => {
+        const rPts = RADAR_LABELS.map((_, i) => {
+          const angle = (i / RADAR_LABELS.length) * 2 * Math.PI - Math.PI / 2
+          return `${cx + r * ring * Math.cos(angle)},${cy + r * ring * Math.sin(angle)}`
+        }).join(' ')
+        return <polygon key={ring} points={rPts} fill="none" stroke="var(--border)" strokeWidth="0.5" />
+      })}
+      {RADAR_LABELS.map((_, i) => {
+        const angle = (i / RADAR_LABELS.length) * 2 * Math.PI - Math.PI / 2
+        return <line key={i} x1={cx} y1={cy} x2={cx + r * Math.cos(angle)} y2={cy + r * Math.sin(angle)} stroke="var(--border)" strokeWidth="1" />
+      })}
+      <polygon points={polygon} fill="var(--accent)" fillOpacity="0.18" stroke="var(--accent)" strokeWidth="2" className="radar-polygon" />
+      {pts.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={4} fill="var(--accent)" />)}
+      {RADAR_LABELS.map((label, i) => {
+        const angle = (i / RADAR_LABELS.length) * 2 * Math.PI - Math.PI / 2
+        const lx = cx + (r + 20) * Math.cos(angle)
+        const ly = cy + (r + 20) * Math.sin(angle)
+        return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" className="radar-label">{label}</text>
+      })}
+    </svg>
+  )
 }
 
 export default function PaisPage() {
   const [active, setActive] = useState<CountryKey>('CO')
+  const [comparing, setComparing] = useState(false)
+  const [compA, setCompA] = useState<CountryKey>('CO')
+  const [compB, setCompB] = useState<CountryKey>('CR')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
+
   const d = DATA[active]
   const tab = TABS.find(t => t.key === active)!
 
@@ -216,21 +311,15 @@ export default function PaisPage() {
           <div className="breadcrumb">
             <a href="/dashboard">VerdeXcelerate</a>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-            <span>Paises</span>
+            <a href="/pais">Perfiles</a>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <span>{tab.name}</span>
           </div>
-          <h1>Analisis por pais</h1>
-        </div>
-        <div style={{display:'flex',gap:'0.5rem'}}>
-          <button className="btn btn-secondary">Comparar</button>
-          <button className="btn btn-secondary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Exportar
-          </button>
+          <h1>Perfil de ecosistema</h1>
         </div>
       </header>
 
       <div className="content">
-        {/* Country tabs */}
         <div className="country-tabs anim-fade-up">
           {TABS.map(t => (
             <button
@@ -238,66 +327,115 @@ export default function PaisPage() {
               className={`country-tab${active === t.key ? ' active' : ''}`}
               onClick={() => setActive(t.key)}
             >
-              <span>{t.flag}</span> {t.name}
+              {t.flag} {t.name}
             </button>
           ))}
         </div>
 
-        {/* Profile header */}
-        <div className="country-profile anim-fade-up delay-1">
-          <div className="country-profile-header">
-            <h2>{tab.flag} {tab.name}</h2>
-            <span className={`phase-badge ${d.phaseClass}`}>{d.phase}</span>
+        {/* Comparison toolbar */}
+        <div className="comparison-bar anim-fade-up delay-1">
+          <button
+            className={`btn-compare${comparing ? ' active' : ''}`}
+            onClick={() => setComparing(!comparing)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M21 3l-7 7"/><path d="M3 3l7 7"/><path d="M16 21h5v-5"/><path d="M8 21H3v-5"/><path d="M21 21l-7-7"/><path d="M3 21l7-7"/></svg>
+            {comparing ? 'Cerrar comparacion' : 'Comparar'}
+          </button>
+          {comparing && (
+            <div className="comparison-selectors">
+              <select value={compA} onChange={e => setCompA(e.target.value as CountryKey)}>
+                {TABS.map(t => <option key={t.key} value={t.key}>{t.flag} {t.name}</option>)}
+              </select>
+              <span>vs</span>
+              <select value={compB} onChange={e => setCompB(e.target.value as CountryKey)}>
+                {TABS.map(t => <option key={t.key} value={t.key}>{t.flag} {t.name}</option>)}
+              </select>
+            </div>
+          )}
+          <button className="btn-export" onClick={() => setModalOpen(true)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Exportar PDF
+          </button>
+        </div>
+
+        {/* Comparison panels */}
+        {comparing && (
+          <div className="comparison-mode visible" style={{marginBottom:'32px'}}>
+            {([compA, compB] as CountryKey[]).map((key, pi) => {
+              const cd = DATA[key]; const ct = TABS.find(t => t.key === key)!
+              return (
+                <div key={pi} className="comparison-panel">
+                  <h3>{ct.flag} {ct.name}</h3>
+                  <div className={`phase-badge ${cd.phaseClass}`} style={{marginBottom:'18px'}}>{cd.phase}</div>
+                  {cd.stats.map(s => (
+                    <div key={s.l} className="comp-stat">
+                      <span className="comp-stat-label">{s.l}</span>
+                      <span className="comp-stat-value">{s.pf||''}{s.v}{s.sf||''}</span>
+                    </div>
+                  ))}
+                  <div className="comp-bars">
+                    {cd.thematic.slice(0,5).map((b, i) => (
+                      <div key={b.l} className="hbar">
+                        <span className="hbar-label">{b.l}</span>
+                        <div className="hbar-track"><div className="hbar-fill" style={{width:`${b.w}%`,animationDelay:`${0.2+i*0.08}s`}}></div></div>
+                        <span className="hbar-val">{b.v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
           </div>
-          <p className="country-desc">{d.desc}</p>
+        )}
+
+        {/* Profile header */}
+        <div className="profile-header anim-fade-up delay-1">
+          <div className="profile-info">
+            <h2>{tab.flag} {tab.name}</h2>
+            <p>{d.desc}</p>
+            <div className={`phase-badge ${d.phaseClass}`}>{d.phase}</div>
+          </div>
         </div>
 
         {/* Stats grid */}
-        <div className="stats-grid-5 anim-fade-up delay-1">
-          <div className="stat-card compact">
-            <div className="stat-card-val">{d.startups}</div>
-            <div className="stat-card-label">Startups</div>
-          </div>
-          <div className="stat-card compact">
-            <div className="stat-card-val">{d.inversores}</div>
-            <div className="stat-card-label">Inversores</div>
-          </div>
-          <div className="stat-card compact">
-            <div className="stat-card-val">{d.esos}</div>
-            <div className="stat-card-label">ESOs</div>
-          </div>
-          <div className="stat-card compact">
-            <div className="stat-card-val">{d.lidFem}</div>
-            <div className="stat-card-label">Liderazgo femenino</div>
-          </div>
-          <div className="stat-card compact">
-            <div className="stat-card-val">{d.inversion}</div>
-            <div className="stat-card-label">Inversion total</div>
-          </div>
+        <div className="stats-grid anim-fade-up delay-2">
+          {d.stats.map(s => (
+            <div key={s.l} className="stat-box">
+              <div className="stat-box-label">{s.l}</div>
+              <div className="stat-box-value">{s.pf||''}{s.v}{s.sf||''}</div>
+              <div className="stat-box-sub">{s.s}</div>
+            </div>
+          ))}
         </div>
 
-        {/* Two-column panel */}
-        <div className="two-col-panel anim-fade-up delay-2">
-          <div className="panel">
-            <div className="panel-header"><span className="panel-title">Areas tematicas</span></div>
-            <div className="hbar-list">
-              {d.thematic.map(t => (
-                <div key={t.label} className="hbar-item">
-                  <div className="hbar-label">{t.label}</div>
-                  <div className="hbar-track"><div className="hbar-fill" style={{width:`${t.pct}%`}}></div></div>
-                  <div className="hbar-val">{t.pct}%</div>
+        {/* Radar chart */}
+        <div className="radar-chart-container anim-fade-up delay-3">
+          <div className="radar-chart-header"><span className="panel-title">Madurez del ecosistema</span></div>
+          <div className="radar-chart"><RadarChart d={d} /></div>
+        </div>
+
+        {/* Two-col charts */}
+        <div className="two-col">
+          <div className="panel anim-fade-up delay-3">
+            <div className="panel-header"><span className="panel-title">Distribucion por area tematica</span></div>
+            <div className="panel-body">
+              {d.thematic.map((b, i) => (
+                <div key={b.l} className="hbar">
+                  <span className="hbar-label">{b.l}</span>
+                  <div className="hbar-track"><div className="hbar-fill" style={{width:`${b.w}%`,animationDelay:`${0.3+i*0.1}s`}}></div></div>
+                  <span className="hbar-val">{b.v}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="panel">
+          <div className="panel anim-fade-up delay-4">
             <div className="panel-header"><span className="panel-title">Cadenas de valor</span></div>
-            <div className="hbar-list">
-              {d.chains.map(c => (
-                <div key={c.label} className="hbar-item">
-                  <div className="hbar-label">{c.label}</div>
-                  <div className="hbar-track"><div className="hbar-fill" style={{width:`${c.pct}%`,background:'#6366f1'}}></div></div>
-                  <div className="hbar-val">{c.pct}%</div>
+            <div className="panel-body">
+              {d.chains.map((b, i) => (
+                <div key={b.l} className="hbar">
+                  <span className="hbar-label">{b.l}</span>
+                  <div className="hbar-track"><div className="hbar-fill" style={{width:`${b.w}%`,animationDelay:`${0.35+i*0.1}s`}}></div></div>
+                  <span className="hbar-val">{b.v}</span>
                 </div>
               ))}
             </div>
@@ -305,53 +443,108 @@ export default function PaisPage() {
         </div>
 
         {/* Funding table */}
-        <div className="panel anim-fade-up delay-3">
-          <div className="panel-header"><span className="panel-title">Ultimas rondas de financiamiento</span></div>
-          <table className="data-table">
-            <thead>
-              <tr><th>Startup</th><th>Tipo</th><th>Monto</th><th>Fecha</th></tr>
-            </thead>
-            <tbody>
-              {d.funding.map(f => (
-                <tr key={f.name}>
-                  <td>{f.name}</td>
-                  <td><span className="funding-badge">{f.tipo}</span></td>
-                  <td><strong>{f.monto}</strong></td>
-                  <td style={{color:'var(--muted)'}}>{f.fecha}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="panel anim-fade-up delay-3" style={{marginBottom:'24px'}}>
+          <div className="panel-header"><span className="panel-title">Rondas de inversion recientes</span></div>
+          <div className="panel-body-flush">
+            <table className="data-table">
+              <thead><tr><th>Startup</th><th>Etapa</th><th>Inversor(es)</th><th className="num-col">Monto USD</th><th>Fecha</th></tr></thead>
+              <tbody>
+                {d.funding.map(f => (
+                  <tr key={f[0]}>
+                    <td style={{fontWeight:600}}>{f[0]}</td>
+                    <td><span className="area-pill">{f[1]}</span></td>
+                    <td>{f[2]}</td>
+                    <td className="num-col" style={{fontWeight:700}}>{f[3]}</td>
+                    <td style={{fontFamily:'var(--font-mono)',fontSize:'12px'}}>{f[4]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Priority zones table */}
-        <div className="panel anim-fade-up delay-4">
+        <div className="panel anim-fade-up" style={{animationDelay:'.3s'}}>
           <div className="panel-header">
-            <span className="panel-title">Zonas prioritarias</span>
-            <a href="/zonas" className="btn btn-ghost btn-sm">Ver todas</a>
+            <span className="panel-title">{d.zones.title}</span>
+            <a className="panel-action" href="/zonas">Ver diagnostico &rarr;</a>
           </div>
-          <table className="data-table">
-            <thead>
-              <tr><th>Zona</th><th>Actores</th><th>Cobertura</th><th>Accion</th></tr>
-            </thead>
-            <tbody>
-              {d.zones.map(z => (
-                <tr key={z.name}>
-                  <td>{z.name}</td>
-                  <td>{z.actores}</td>
-                  <td>
-                    <div style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
-                      <div className="bar-track" style={{minWidth:'80px'}}><div className="bar-fill" style={{width:z.cobertura,background:'var(--accent)'}}></div></div>
-                      {z.cobertura}
-                    </div>
-                  </td>
-                  <td><a href="/zonas" className="link">Ver zona</a></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="panel-body-flush">
+            <table className="data-table">
+              <thead><tr><th>Zona</th><th>Tipo</th><th className="num-col">Actores</th><th className="num-col">Cobertura</th><th>Razon</th></tr></thead>
+              <tbody>
+                {d.zones.rows.map(z => (
+                  <tr key={z[0]}>
+                    <td style={{fontWeight:600}}>{z[0]}</td>
+                    <td>{z[1]}</td>
+                    <td className="num-col">{z[2]}</td>
+                    <td className="num-col" style={{color:parseInt(z[3])<35?'var(--danger)':'var(--warning)',fontWeight:700}}>{z[3]}</td>
+                    <td style={{fontSize:'12px',color:'var(--muted)'}}>{z[4]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
+
+      {/* Export modal */}
+      {modalOpen && (
+        <div className="modal-overlay visible" onClick={() => setModalOpen(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Reporte del ecosistema</h3>
+              <button className="modal-close" onClick={() => setModalOpen(false)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <div className="report-section">
+                <h4>{tab.flag} {tab.name} — {d.phase}</h4>
+                {d.stats.map(s => (
+                  <div key={s.l} className="report-stat">
+                    <span>{s.l}</span>
+                    <span>{s.pf||''}{s.v}{s.sf||''}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-modal-close" onClick={() => setModalOpen(false)}>Cerrar</button>
+              <button className="btn-copy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                Copiar al portapapeles
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Actors sidebar toggle */}
+      <button
+        className={`actors-toggle${sidebarOpen ? ' shifted' : ''}`}
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+
+      {/* Actors sidebar */}
+      <aside className={`actors-sidebar${sidebarOpen ? ' open' : ''}`}>
+        <div className="actors-sidebar-header">
+          <h3>Actores clave</h3>
+          <button className="modal-close" onClick={() => setSidebarOpen(false)} style={{width:'28px',height:'28px'}}>&times;</button>
+        </div>
+        <div className="actors-list">
+          {(ACTORS[active] || []).map((a, i) => (
+            <div key={a.name} className="actor-card" style={{animationDelay:`${i*80}ms`}}>
+              <div className="actor-card-name">{a.name}</div>
+              <div className="actor-card-meta">
+                <span className={`actor-type-badge ${a.type}`}>{a.type}</span>
+                <span className="actor-confidence">{(a.conf*100).toFixed(0)}%</span>
+                <span className="actor-confidence-bar"><span className="actor-confidence-fill" style={{width:`${a.conf*100}%`}}></span></span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
     </AppLayout>
   )
 }
