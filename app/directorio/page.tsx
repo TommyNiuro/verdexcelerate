@@ -113,6 +113,32 @@ export default function DirectorioPage() {
 
   return (
     <AppLayout title="Directorio de actores">
+      {/* ── Topbar ── */}
+      <header className="topbar">
+        <div>
+          <div className="breadcrumb">
+            <a href="/dashboard">VerdeXcelerate</a>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <span>Directorio</span>
+          </div>
+          <h1>Directorio de actores</h1>
+        </div>
+        <div className="topbar-right">
+          <button className="btn-sm btn-accent" onClick={() => setShowAddModal(true)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar actor
+          </button>
+          <button className="btn-sm" onClick={() => setShowImportModal(true)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Importar
+          </button>
+          <button className="btn-sm" onClick={() => window.location.href='/configuracion'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar
+          </button>
+        </div>
+      </header>
+
       {/* ── Stats strip ── */}
       <div className="stats-strip anim-fade-up">
         <div className="stat-card">
