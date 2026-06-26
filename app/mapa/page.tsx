@@ -57,18 +57,20 @@ export default function MapaPage() {
       if (!mapEl) return
 
       map = L.map(mapEl, { zoomControl: false, attributionControl: true })
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '&copy; OpenStreetMap',
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
       }).addTo(map)
 
       // Marcadores
       const markers = CITY_POINTS.map(p => {
         const color = TYPE_COLOR[p.type] ?? '#00A79D'
+        const ini = p.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
         const icon = L.divIcon({
           className: 'vx-pin-wrap',
-          html: `<span class="vx-pin" style="background:${color}"></span>`,
-          iconSize: [16, 16], iconAnchor: [8, 8],
+          html: `<div class="vx-pin" style="background:${color}">${ini}</div>`,
+          iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16],
         })
         const m = L.marker([p.lat, p.lng], { icon, title: p.name }).addTo(map)
         m.bindPopup(`<strong>${p.name}</strong><br><span style="color:#7a8599;font-size:12px">${p.sub}</span>`)
@@ -78,7 +80,7 @@ export default function MapaPage() {
 
       // Encajar a la region
       const group = L.featureGroup(markers.map(m => m.marker))
-      map.fitBounds(group.getBounds().pad(0.25))
+      map.fitBounds(group.getBounds().pad(0.08), { maxZoom: 7, padding: [40, 40] })
       setTimeout(() => map && map.invalidateSize(), 200)
 
       const countEl = document.getElementById('mapActorCount')
@@ -183,7 +185,7 @@ export default function MapaPage() {
       on('zoomIn', () => map.zoomIn())
       on('zoomOut', () => map.zoomOut())
       on('resetMap', () => {
-        map.fitBounds(group.getBounds().pad(0.25))
+        map.fitBounds(group.getBounds().pad(0.08), { maxZoom: 7, padding: [40, 40] })
         document.getElementById('countryPanel')?.classList.remove('show')
       })
 
