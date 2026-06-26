@@ -2,9 +2,18 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { getActorCount, getZones } from '@/lib/queries'
 
 export default function Sidebar() {
   const path = usePathname()
+  const [actorCount, setActorCount] = useState<number | null>(null)
+  const [zoneCount, setZoneCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    getActorCount().then(setActorCount).catch(() => {})
+    getZones().then(z => setZoneCount(z.filter(x => x.is_priority).length)).catch(() => {})
+  }, [])
 
   const isActive = (href: string) => path.startsWith(href)
 
@@ -37,7 +46,7 @@ export default function Sidebar() {
             <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
           </svg>
           Directorio
-          <span className="sidebar-badge">2,847</span>
+          {actorCount != null && <span className="sidebar-badge">{actorCount.toLocaleString()}</span>}
         </Link>
         <Link href="/mapa" className={`sidebar-link${isActive('/mapa') ? ' active' : ''}`}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -65,7 +74,7 @@ export default function Sidebar() {
             <circle cx="12" cy="10" r="3"/>
           </svg>
           Zonas prioritarias
-          <span className="sidebar-badge">6</span>
+          {zoneCount != null && <span className="sidebar-badge">{zoneCount}</span>}
         </Link>
         <Link href="/brechas" className={`sidebar-link${isActive('/brechas') ? ' active' : ''}`}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">

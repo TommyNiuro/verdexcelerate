@@ -1,8 +1,18 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
+import { getDataQuality, getSourcesDetailed, getActorCount, type SourceRow } from '@/lib/queries';
 
 type GovTab = 'modelos' | 'calidad' | 'etica' | 'auditoria';
+
+type DQ = Awaited<ReturnType<typeof getDataQuality>>;
+
+const RISK_LABEL: Record<number, { label: string; cls: string; color: string }> = {
+  0: { label: 'Riesgo bajo',  cls: 'risk-low',  color: 'var(--success)' },
+  1: { label: 'Riesgo medio', cls: 'risk-med',  color: 'var(--warning)' },
+  2: { label: 'Riesgo medio', cls: 'risk-med',  color: 'var(--warning)' },
+  3: { label: 'Riesgo alto',  cls: 'risk-high', color: 'var(--danger)' },
+};
 
 const COMPLIANCE_INITIAL = {
   privacidad:     [true, true, true, false, false],
@@ -66,6 +76,20 @@ export default function GobernanzaPage() {
   const [biasGeo, setBiasGeo] = useState(100);
   const [biasR, setBiasR] = useState(100);
 
+  // Datos reales de Supabase
+  const [dq, setDq] = useState<DQ | null>(null);
+  const [sources, setSources] = useState<SourceRow[]>([]);
+  const [actorTotal, setActorTotal] = useState<number | null>(null);
+
+  useEffect(() => {
+    getDataQuality().then(setDq).catch(() => {});
+    getSourcesDetailed().then(setSources).catch(() => {});
+    getActorCount().then(setActorTotal).catch(() => {});
+  }, []);
+
+  const licensedCount = sources.filter(s => s.is_licensed).length;
+  const lowRiskCount = sources.filter(s => s.risk_tier <= 1).length;
+
   function toggleCheck(sec: keyof typeof compliance, idx: number) {
     const arr = [...compliance[sec]]; arr[idx] = !arr[idx];
     setCompliance({...compliance, [sec]: arr});
@@ -113,12 +137,12 @@ export default function GobernanzaPage() {
           <div>
             <div className="ai-status-row"><div className="ai-status-dot"></div><span className="ai-status-label">TRAZABILIDAD DE FUENTES ACTIVA</span></div>
             <h3>Cada dato es trazable a su fuente</h3>
-            <p>Los 114 actores del directorio incluyen su URL de origen y un nivel de confianza. Las 11 fuentes se gobiernan por licencia y nivel de riesgo (ver Fuentes). Las metricas de modelos de IA a continuacion son ilustrativas del roadmap, no de modelos en produccion.</p>
+            <p>Los {actorTotal ?? '...'} actores del directorio incluyen su URL de origen y un nivel de confianza. Las {sources.length || '...'} fuentes se gobiernan por licencia y nivel de riesgo (ver pestana Calidad de datos). Las metricas de modelos de IA a continuacion son ilustrativas del roadmap, no de modelos en produccion.</p>
           </div>
           <div className="ai-metrics">
-            <div className="ai-metric"><div className="ai-metric-val">99.2%</div><div className="ai-metric-label">Uptime</div></div>
-            <div className="ai-metric"><div className="ai-metric-val">89%</div><div className="ai-metric-label">Precision</div></div>
-            <div className="ai-metric"><div className="ai-metric-val">0.03</div><div className="ai-metric-label">Sesgo score</div></div>
+            <div className="ai-metric"><div className="ai-metric-val">{actorTotal ?? '...'}</div><div className="ai-metric-label">Actores trazables</div></div>
+            <div className="ai-metric"><div className="ai-metric-val">{dq ? `${dq.avgConfidence}%` : '...'}</div><div className="ai-metric-label">Confianza prom.</div></div>
+            <div className="ai-metric"><div className="ai-metric-val">{licensedCount}/{sources.length || '...'}</div><div className="ai-metric-label">Fuentes con licencia</div></div>
           </div>
         </div>
       </div>
@@ -133,6 +157,10 @@ export default function GobernanzaPage() {
 
       {/* TAB: Modelos IA */}
       <div className={`tab-content${tab==='modelos'?' active':''}`}>
+        <div className="roadmap-notice anim-fade-up" style={{display:'flex',alignItems:'center',gap:10,padding:'12px 16px',marginBottom:16,borderRadius:10,background:'rgba(139,92,246,.08)',border:'1px dashed rgba(139,92,246,.4)',fontSize:13,color:'var(--muted)'}}>
+          <span style={{flexShrink:0,fontWeight:700,fontSize:11,letterSpacing:.5,padding:'3px 8px',borderRadius:6,background:'rgba(139,92,246,.15)',color:'#8b5cf6'}}>ROADMAP</span>
+          <span>Los modelos de IA y sus metricas (F1, predicciones, A/B tests, latencia) son ilustrativos del roadmap, no de sistemas en produccion. Para datos verificables ver la pestana <strong>Calidad de datos</strong>.</span>
+        </div>
         <div className="gov-grid anim-fade-up delay-3">
           <div className="gov-card cat-model">
             <div className="gov-icon" style={{background:'rgba(139,92,246,.1)',color:'#8b5cf6'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
@@ -182,50 +210,95 @@ export default function GobernanzaPage() {
       {/* TAB: Calidad de datos */}
       <div className={`tab-content${tab==='calidad'?' active':''}`}>
         <div className="panel anim-fade-up">
-          <div className="panel-header"><span className="panel-title">Metricas de calidad de datos</span></div>
+          <div className="panel-header">
+            <span className="panel-title">Metricas de calidad de datos</span>
+            <span style={{fontSize:12,color:'var(--muted)'}}>Computadas del dataset real{dq ? ` (${dq.total} actores aprobados)` : ''}</span>
+          </div>
           <div className="ring-grid">
-            {[
-              {label:'Completitud', val:'90%', color:'var(--accent)', offset:20},
-              {label:'Consistencia', val:'92%', color:'#6366f1', offset:16},
-              {label:'Frescura', val:'85%', color:'#ec4899', offset:30},
-              {label:'Precision', val:'88%', color:'var(--warning)', offset:24},
-            ].map(r => (
+            {(dq ? [
+              {label:'Completitud', val:dq.completeness, color:'var(--accent)'},
+              {label:'Validacion humana', val:dq.validatedPct, color:'#6366f1'},
+              {label:'Frescura (90d)', val:dq.freshness, color:'#ec4899'},
+              {label:'Confianza prom.', val:dq.avgConfidence, color:'var(--warning)'},
+            ] : [
+              {label:'Completitud', val:0, color:'var(--accent)'},
+              {label:'Validacion humana', val:0, color:'#6366f1'},
+              {label:'Frescura (90d)', val:0, color:'#ec4899'},
+              {label:'Confianza prom.', val:0, color:'var(--warning)'},
+            ]).map(r => (
               <div key={r.label} className="ring-item">
                 <svg className="ring-svg" viewBox="0 0 80 80">
                   <circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" strokeWidth="6"/>
-                  <circle cx="40" cy="40" r="32" fill="none" stroke={r.color} strokeWidth="6" strokeDasharray="201" strokeDashoffset={r.offset} strokeLinecap="round" transform="rotate(-90 40 40)"/>
+                  <circle cx="40" cy="40" r="32" fill="none" stroke={r.color} strokeWidth="6" strokeDasharray="201" strokeDashoffset={Math.round(201*(1-r.val/100))} strokeLinecap="round" transform="rotate(-90 40 40)"/>
                 </svg>
                 <div className="ring-label">{r.label}</div>
-                <div className="ring-val" style={{color:r.color}}>{r.val}</div>
+                <div className="ring-val" style={{color:r.color}}>{r.val}%</div>
               </div>
             ))}
           </div>
         </div>
         <div className="panel anim-fade-up delay-1">
-          <div className="panel-header"><span className="panel-title">Campos con datos incompletos (top 10)</span></div>
+          <div className="panel-header"><span className="panel-title">Completitud por campo</span><span style={{fontSize:12,color:'var(--muted)'}}>Sobre {dq?.total ?? '...'} actores</span></div>
           <table className="data-table">
             <thead><tr><th>Campo</th><th>Registros totales</th><th>Completos</th><th>Vacios</th><th>Completitud</th></tr></thead>
             <tbody>
-              {[
-                {c:'CO2e estimado',t:'2,847',ok:'1,245',v:'1,602',p:'44%',vc:'var(--danger)'},
-                {c:'Rondas de financiamiento',t:'2,847',ok:'1,890',v:'957',p:'66%',vc:'var(--warning)'},
-                {c:'Datos de genero fundadores',t:'2,847',ok:'2,105',v:'742',p:'74%',vc:'var(--warning)'},
-                {c:'Cadena de valor',t:'2,847',ok:'2,234',v:'613',p:'78%',vc:''},
-                {c:'Sitio web',t:'2,847',ok:'2,345',v:'502',p:'82%',vc:''},
-                {c:'LinkedIn',t:'2,847',ok:'2,419',v:'428',p:'85%',vc:''},
-                {c:'Ubicacion exacta',t:'2,847',ok:'2,503',v:'344',p:'88%',vc:''},
-                {c:'Ano de fundacion',t:'2,847',ok:'2,561',v:'286',p:'90%',vc:''},
-                {c:'Tipo de actor',t:'2,847',ok:'2,704',v:'143',p:'95%',vc:''},
-                {c:'Pais',t:'2,847',ok:'2,832',v:'15',p:'99%',vc:''},
-              ].map(row => (
-                <tr key={row.c}>
-                  <td>{row.c}</td>
-                  <td className="num-col">{row.t}</td>
-                  <td className="num-col">{row.ok}</td>
-                  <td className="num-col" style={row.vc?{color:row.vc}:{}}>{row.v}</td>
-                  <td className="num-col">{row.p}</td>
-                </tr>
-              ))}
+              {dq && [
+                {c:'Sitio web', ok:dq.withWebsite, p:dq.websitePct},
+                {c:'Descripcion', ok:dq.withDesc, p:dq.descPct},
+                {c:'Pais', ok:dq.withCountry, p:dq.countryPct},
+                {c:'Validacion humana', ok:dq.validated, p:dq.validatedPct},
+                {c:'Area tematica', ok:dq.withTheme, p:dq.themePct},
+                {c:'Coordenadas (lat/lng)', ok:dq.withCoords, p:dq.coordsPct},
+                {c:'Ano de fundacion', ok:dq.withFounded, p:dq.foundedPct},
+                {c:'Cadena de valor', ok:dq.withChain, p:dq.chainPct},
+              ].sort((a,b)=>b.p-a.p).map(row => {
+                const vac = dq.total - row.ok;
+                const vc = row.p < 50 ? 'var(--danger)' : row.p < 80 ? 'var(--warning)' : '';
+                return (
+                  <tr key={row.c}>
+                    <td>{row.c}</td>
+                    <td className="num-col">{dq.total}</td>
+                    <td className="num-col">{row.ok}</td>
+                    <td className="num-col" style={vc?{color:vc}:{}}>{vac}</td>
+                    <td className="num-col">{row.p}%</td>
+                  </tr>
+                );
+              })}
+              {!dq && <tr><td colSpan={5} style={{textAlign:'center',color:'var(--muted)',padding:24}}>Cargando datos reales...</td></tr>}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Fuentes y cumplimiento (real, desde getSourcesDetailed) */}
+        <div className="panel anim-fade-up delay-2">
+          <div className="panel-header">
+            <span className="panel-title">Fuentes y cumplimiento</span>
+            <span style={{fontSize:12,color:'var(--muted)'}}>{sources.length ? `${licensedCount}/${sources.length} con licencia - ${lowRiskCount}/${sources.length} riesgo bajo/medio` : 'Cargando...'}</span>
+          </div>
+          <table className="data-table">
+            <thead><tr><th>Fuente</th><th>Tipo</th><th>Licencia</th><th>Nivel de riesgo</th><th>Cobertura</th></tr></thead>
+            <tbody>
+              {sources.map(s => {
+                const risk = RISK_LABEL[s.risk_tier] ?? RISK_LABEL[2];
+                return (
+                  <tr key={s.id}>
+                    <td>{s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer" style={{color:'var(--accent)'}}>{s.name}</a> : s.name}</td>
+                    <td style={{textTransform:'capitalize',color:'var(--muted)'}}>{(s.source_type||'').replace(/_/g,' ')}</td>
+                    <td>
+                      <span style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:12,fontWeight:600,padding:'2px 8px',borderRadius:6,background:s.is_licensed?'rgba(16,185,129,.1)':'rgba(148,163,184,.12)',color:s.is_licensed?'var(--success)':'var(--muted)'}}>
+                        {s.is_licensed ? 'Con licencia' : 'Sin licencia'}
+                      </span>
+                    </td>
+                    <td>
+                      <span style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:12,fontWeight:600,padding:'2px 8px',borderRadius:6,background:`color-mix(in srgb, ${risk.color} 12%, transparent)`,color:risk.color}}>
+                        <span style={{width:6,height:6,borderRadius:'50%',background:risk.color,display:'inline-block'}}></span>{risk.label} (T{s.risk_tier})
+                      </span>
+                    </td>
+                    <td style={{color:'var(--muted)',fontSize:13}}>{s.coverage || '-'}</td>
+                  </tr>
+                );
+              })}
+              {!sources.length && <tr><td colSpan={5} style={{textAlign:'center',color:'var(--muted)',padding:24}}>Cargando fuentes...</td></tr>}
             </tbody>
           </table>
         </div>
@@ -267,8 +340,12 @@ export default function GobernanzaPage() {
 
       {/* TAB: Registro de auditoria */}
       <div className={`tab-content${tab==='auditoria'?' active':''}`}>
+        <div className="roadmap-notice anim-fade-up" style={{display:'flex',alignItems:'center',gap:10,padding:'12px 16px',marginBottom:16,borderRadius:10,background:'rgba(139,92,246,.08)',border:'1px dashed rgba(139,92,246,.4)',fontSize:13,color:'var(--muted)'}}>
+          <span style={{flexShrink:0,fontWeight:700,fontSize:11,letterSpacing:.5,padding:'3px 8px',borderRadius:6,background:'rgba(139,92,246,.15)',color:'#8b5cf6'}}>ROADMAP</span>
+          <span>Eventos de auditoria ilustrativos de como se veria el log cuando los modelos de IA esten en produccion. La trazabilidad real disponible hoy esta en la pestana <strong>Calidad de datos</strong>.</span>
+        </div>
         <div className="panel anim-fade-up">
-          <div className="panel-header"><span className="panel-title">Registro de auditoria de IA</span><span style={{fontSize:12,color:'var(--muted)'}}>Ultimos 30 dias</span></div>
+          <div className="panel-header"><span className="panel-title">Registro de auditoria de IA</span><span style={{fontSize:12,color:'var(--muted)'}}>Ejemplo ilustrativo</span></div>
           <div>
             {[
               {bg:'rgba(16,185,129,.1)',c:'var(--success)',title:'Ciclo de actualizacion completado',desc:'Motor de actualizacion proceso 234 perfiles. 18 nuevos actores detectados, 45 actualizados, 2 marcados para revision manual.',time:'Hace 4h'},
@@ -296,8 +373,8 @@ export default function GobernanzaPage() {
       {/* FEATURE 1: Model Performance Dashboard */}
       <div className="model-perf-dashboard panel anim-fade-up">
         <div className="panel-header">
-          <span className="panel-title">Dashboard de rendimiento de modelos</span>
-          <span style={{fontSize:12,color:'var(--muted)'}}>Ultimas 12 semanas</span>
+          <span className="panel-title">Dashboard de rendimiento de modelos <span style={{fontSize:10,fontWeight:700,letterSpacing:.5,padding:'2px 7px',borderRadius:5,background:'rgba(139,92,246,.15)',color:'#8b5cf6',verticalAlign:'middle'}}>ROADMAP</span></span>
+          <span style={{fontSize:12,color:'var(--muted)'}}>Series ilustrativas</span>
         </div>
         <div className="panel-body">
           <div className="perf-charts">
@@ -345,8 +422,8 @@ export default function GobernanzaPage() {
       {/* FEATURE 2: A/B Tests */}
       <div className="ab-test-panel panel anim-fade-up">
         <div className="panel-header">
-          <span className="panel-title">Resultados de pruebas A/B</span>
-          <span style={{fontSize:12,color:'var(--muted)'}}>3 experimentos activos</span>
+          <span className="panel-title">Resultados de pruebas A/B <span style={{fontSize:10,fontWeight:700,letterSpacing:.5,padding:'2px 7px',borderRadius:5,background:'rgba(139,92,246,.15)',color:'#8b5cf6',verticalAlign:'middle'}}>ROADMAP</span></span>
+          <span style={{fontSize:12,color:'var(--muted)'}}>Ejemplo ilustrativo</span>
         </div>
         <div className="ab-grid">
           <div className="ab-card">
@@ -385,8 +462,8 @@ export default function GobernanzaPage() {
       {/* FEATURE 3: Bias Simulator */}
       <div className="bias-simulator panel anim-fade-up">
         <div className="panel-header">
-          <span className="panel-title">Simulador de correccion de sesgos</span>
-          <span style={{fontSize:12,color:'var(--muted)'}}>Ajuste interactivo</span>
+          <span className="panel-title">Simulador de correccion de sesgos <span style={{fontSize:10,fontWeight:700,letterSpacing:.5,padding:'2px 7px',borderRadius:5,background:'rgba(139,92,246,.15)',color:'#8b5cf6',verticalAlign:'middle'}}>ROADMAP</span></span>
+          <span style={{fontSize:12,color:'var(--muted)'}}>Ajuste interactivo (ilustrativo)</span>
         </div>
         <div className="bias-sim-body">
           <div className="bias-controls">

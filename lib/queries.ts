@@ -357,7 +357,7 @@ export async function getBenchmarks(opts?: { country_id?: number; metric?: strin
 export async function getDataQuality() {
   const { data, error } = await supabase
     .from('actors')
-    .select('type,country_id,website,description,short_pitch,founded_year,value_chain_ids,thematic_area_ids,confidence,human_validated,women_led,woman_ceo,updated_at')
+    .select('type,country_id,website,description,short_pitch,founded_year,lat,lng,value_chain_ids,thematic_area_ids,confidence,human_validated,women_led,woman_ceo,updated_at')
     .eq('status', 'aprobado')
   if (error) throw error
   const rows = (data || []) as any[]
@@ -367,6 +367,9 @@ export async function getDataQuality() {
   const withDesc = rows.filter(r => r.description).length
   const withChain = rows.filter(r => (r.value_chain_ids || []).length).length
   const withTheme = rows.filter(r => (r.thematic_area_ids || []).length).length
+  const withCountry = rows.filter(r => r.country_id).length
+  const withFounded = rows.filter(r => r.founded_year).length
+  const withCoords = rows.filter(r => r.lat != null && r.lng != null).length
   const validated = rows.filter(r => r.human_validated).length
   const womenLed = rows.filter(r => r.women_led || r.woman_ceo).length
   const confVals = rows.map(r => Number(r.confidence)).filter(c => !isNaN(c))
@@ -383,8 +386,11 @@ export async function getDataQuality() {
     total: rows.length,
     completeness,
     websitePct: pct(withWebsite), descPct: pct(withDesc),
+    countryPct: pct(withCountry), foundedPct: pct(withFounded), coordsPct: pct(withCoords),
     chainPct: pct(withChain), themePct: pct(withTheme),
     validatedPct: pct(validated), womenPct: pct(womenLed),
     avgConfidence: avgConf, freshness: fresh,
+    // conteos absolutos para tablas de completitud
+    withWebsite, withDesc, withCountry, withFounded, withCoords, withChain, withTheme, validated,
   }
 }
