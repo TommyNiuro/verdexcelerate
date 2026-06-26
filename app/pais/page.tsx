@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/AppLayout'
+import { getCountryProfile, getValueChains, getThematicAreas, getThematicCounts, getZones, getBenchmarks } from '@/lib/queries'
 
 type CountryKey = 'CO' | 'CR' | 'SV' | 'GT' | 'HN' | 'PA'
+const COUNTRY_ID: Record<CountryKey, number> = { CO: 1, CR: 2, SV: 3, GT: 4, HN: 5, PA: 6 }
+const BENCH_LABEL: Record<string, string> = {
+  inversion_agrifoodtech: 'Inversion AgriFoodTech', startups_estimadas: 'Startups estimadas',
+  rondas_inversion: 'Rondas de inversion', liderazgo_femenino_pct: 'Liderazgo femenino (VC)',
+  brecha_financiamiento_genero: 'Brecha de genero (VC)', poblacion_rural_pct: 'Poblacion rural',
+  pib_agricola_pct: 'PIB agricola',
+}
 
 const TABS: { key: CountryKey; flag: string; name: string }[] = [
   { key: 'CO', flag: '🇨🇴', name: 'Colombia' },
@@ -302,13 +310,60 @@ export default function PaisPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [toast, setToast] = useState('')
 
+  const [live, setLive] = useState<Partial<Record<CountryKey, typeof DATA[CountryKey]>>>({})
+
   // Deep-link: /pais?c=CO selecciona el pais
   useEffect(() => {
     const c = new URLSearchParams(window.location.search).get('c')
     if (c && TABS.some(t => t.key === c)) setActive(c as CountryKey)
   }, [])
 
-  const d = DATA[active]
+  // Carga del perfil real del pais activo desde Supabase
+  useEffect(() => {
+    if (live[active]) return
+    const cid = COUNTRY_ID[active]
+    Promise.all([getCountryProfile(cid), getValueChains(), getThematicAreas(), getThematicCounts(cid), getZones(), getBenchmarks({ country_id: cid })])
+      .then(([prof, chains, themes, themeCounts, zones, bench]) => {
+        const base = DATA[active]
+        const chainName: Record<number, string> = Object.fromEntries(chains.map(c => [c.id, c.name]))
+        const themeName: Record<number, string> = Object.fromEntries(themes.map(t => [t.id, t.name]))
+        const toBars = (counts: Record<number, number>, names: Record<number, string>) => {
+          const arr = Object.entries(counts).map(([id, v]) => ({ l: names[Number(id)] || `#${id}`, v })).filter(x => x.v > 0).sort((a, b) => b.v - a.v)
+          const max = Math.max(...arr.map(a => a.v), 1)
+          return arr.map(a => ({ l: a.l, v: a.v, w: Math.round(a.v / max * 100) }))
+        }
+        const t = prof.byType
+        const stats = [
+          { l: 'Startups', v: t.startup || 0, s: 'mapeadas en el pais' },
+          { l: 'Inversores', v: t.inversor || 0, s: 'fondos y angeles' },
+          { l: 'ESOs', v: t.eso || 0, s: 'aceleradoras e incubadoras' },
+          { l: 'Liderazgo femenino', v: prof.womenPct, s: 'del dataset capturado', sf: '%' },
+          { l: 'Actores totales', v: prof.total, s: 'organizaciones mapeadas' },
+        ]
+        const benchRows = bench.map(b => [
+          BENCH_LABEL[b.metric] || b.metric,
+          b.unit || '',
+          b.source_name || '',
+          b.value_text || (b.value != null ? String(b.value) : ''),
+          b.year != null ? String(b.year) : '',
+        ] as [string, string, string, string, string])
+        const zoneRows = zones.filter(z => z.country_id === cid).map(z => [
+          z.name, z.zone_type || 'Zona', '-', '-', z.rationale || '',
+        ] as [string, string, number | string, string, string])
+        const thematicBars = toBars(themeCounts, themeName)
+        const chainBars = toBars(prof.chainCounts, chainName)
+        const built = {
+          ...base, stats,
+          thematic: thematicBars.length ? thematicBars : base.thematic,
+          chains: chainBars.length ? chainBars : base.chains,
+          funding: benchRows,
+          zones: { title: zoneRows.length ? 'Zonas prioritarias' : 'Sin zonas prioritarias mapeadas', rows: zoneRows as any },
+        }
+        setLive(prev => ({ ...prev, [active]: built as any }))
+      }).catch(() => {})
+  }, [active, live])
+
+  const d = live[active] ?? DATA[active]
   const tab = TABS.find(t => t.key === active)!
 
   function showToast(msg: string) {
@@ -480,13 +535,15 @@ export default function PaisPage() {
 
         {/* Funding table */}
         <div className="panel anim-fade-up delay-3" style={{marginBottom:'24px'}}>
-          <div className="panel-header"><span className="panel-title">Rondas de inversion recientes</span></div>
+          <div className="panel-header"><span className="panel-title">Contexto de inversion y ecosistema (benchmarks)</span></div>
           <div className="panel-body-flush">
             <table className="data-table">
-              <thead><tr><th>Startup</th><th>Etapa</th><th>Inversor(es)</th><th className="num-col">Monto USD</th><th>Fecha</th></tr></thead>
+              <thead><tr><th>Indicador</th><th>Unidad</th><th>Fuente</th><th className="num-col">Valor</th><th>Ano</th></tr></thead>
               <tbody>
-                {d.funding.map(f => (
-                  <tr key={f[0]} style={{cursor:'pointer'}} title={`Buscar ${f[0]} en el directorio`} onClick={() => window.location.href = `/directorio?q=${encodeURIComponent(f[0])}`}>
+                {d.funding.length === 0 ? (
+                  <tr><td colSpan={5} style={{color:'var(--muted)',padding:'16px'}}>Sin benchmarks especificos para este pais. Ver indicadores regionales en el dashboard.</td></tr>
+                ) : d.funding.map((f, i) => (
+                  <tr key={f[0] + i}>
                     <td style={{fontWeight:600}}>{f[0]}</td>
                     <td><span className="area-pill">{f[1]}</span></td>
                     <td>{f[2]}</td>

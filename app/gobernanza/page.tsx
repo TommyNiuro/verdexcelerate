@@ -104,16 +104,16 @@ export default function GobernanzaPage() {
       </header>
       <div className="content">
       <div className="page-intro anim-fade-up">
-        <h2>Gobernanza y monitoreo de inteligencia artificial</h2>
-        <p>Sistema de gobernanza para los modelos de IA que alimentan el mapeo vivo: monitoreo de sesgos, calidad de datos, actualizaciones semi-automaticas y cumplimiento etico del ecosistema AgriTech.</p>
+        <h2>Gobernanza y calidad de los datos</h2>
+        <p>Gobernanza real del mapeo: cada actor conserva su fuente de origen y nivel de confianza, y las fuentes se clasifican por licencia y nivel de riesgo. La pestana Calidad refleja metricas computadas del dataset real. La automatizacion con modelos de IA (clasificacion, deteccion de sesgos) es parte del roadmap: las series de desempeno que se muestran abajo son ilustrativas, no de modelos en produccion.</p>
       </div>
 
       <div className="ai-banner anim-fade-up delay-1">
         <div className="ai-banner-content">
           <div>
-            <div className="ai-status-row"><div className="ai-status-dot"></div><span className="ai-status-label">SISTEMA IA OPERATIVO</span></div>
-            <h3>Motor de actualizacion semi-automatica</h3>
-            <p>3 modelos de IA activos monitoreando el ecosistema AgriTech en 6 paises. Ultimo ciclo de actualizacion: hace 4 horas. Proxima revision de sesgos programada para el 28 de junio.</p>
+            <div className="ai-status-row"><div className="ai-status-dot"></div><span className="ai-status-label">TRAZABILIDAD DE FUENTES ACTIVA</span></div>
+            <h3>Cada dato es trazable a su fuente</h3>
+            <p>Los 114 actores del directorio incluyen su URL de origen y un nivel de confianza. Las 11 fuentes se gobiernan por licencia y nivel de riesgo (ver Fuentes). Las metricas de modelos de IA a continuacion son ilustrativas del roadmap, no de modelos en produccion.</p>
           </div>
           <div className="ai-metrics">
             <div className="ai-metric"><div className="ai-metric-val">99.2%</div><div className="ai-metric-label">Uptime</div></div>

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AppLayout from '@/components/AppLayout'
+import { getRegionalKpis } from '@/lib/queries'
 
 type Tab = 'brechas' | 'oportunidades' | 'genero' | 'recomendaciones'
 
@@ -38,6 +39,8 @@ export default function BrechasPage() {
   const [tab, setTab] = useState<Tab>('brechas')
   const [planOpen, setPlanOpen] = useState(false)
   const [crossOpen, setCrossOpen] = useState(false)
+  const [gen, setGen] = useState({ womenPct: 0, womenLed: 0 })
+  useEffect(() => { getRegionalKpis().then(k => setGen({ womenPct: k.womenPct, womenLed: k.womenLed })).catch(() => {}) }, [])
   const [catFilter, setCatFilter] = useState<string | null>(null)
   const [xref, setXref] = useState<{ type: 'brecha' | 'zona'; id: string } | null>(null)
   const [toast, setToast] = useState('')
@@ -241,10 +244,10 @@ export default function BrechasPage() {
         {/* TAB: Genero */}
         <div className={`tab-content${tab === 'genero' ? ' active' : ''}`}>
           <div className="summary-row" style={{gridTemplateColumns:'repeat(4,1fr)'}}>
-            <div className="summary-card cat-genero"><div className="summary-label">Liderazgo femenino actual</div><div className="summary-val" style={{color:'#ec4899'}}>18%</div><div className="summary-sub">CEO/cofundadora mujer</div></div>
-            <div className="summary-card cat-genero"><div className="summary-label">Meta programa aceleracion</div><div className="summary-val" style={{color:'var(--accent)'}}>40%</div><div className="summary-sub">startups con lid. femenino</div></div>
-            <div className="summary-card cat-genero"><div className="summary-label">Brecha financiamiento</div><div className="summary-val" style={{color:'var(--danger)'}}>3.2x</div><div className="summary-sub">menor acceso vs. hombres</div></div>
-            <div className="summary-card cat-genero"><div className="summary-label">Startups lideradas por mujeres</div><div className="summary-val" style={{color:'#6366f1'}}>512</div><div className="summary-sub">identificadas en 6 paises</div></div>
+            <div className="summary-card cat-genero"><div className="summary-label">Liderazgo femenino (dataset)</div><div className="summary-val" style={{color:'#ec4899'}}>{gen.womenPct}%</div><div className="summary-sub">de los actores mapeados</div></div>
+            <div className="summary-card cat-genero"><div className="summary-label">Meta del programa</div><div className="summary-val" style={{color:'var(--accent)'}}>40%</div><div className="summary-sub">startups con lid. femenino</div></div>
+            <div className="summary-card cat-genero"><div className="summary-label">Deals VC a mujeres</div><div className="summary-val" style={{color:'var(--danger)'}}>16%</div><div className="summary-sub">LATAM (LAVCA, 2025)</div></div>
+            <div className="summary-card cat-genero"><div className="summary-label">Actores lideradas por mujeres</div><div className="summary-val" style={{color:'#6366f1'}}>{gen.womenLed}</div><div className="summary-sub">en el mapeo capturado</div></div>
           </div>
           <div className="panel">
             <div className="panel-header"><span className="panel-title">Liderazgo femenino por pais</span></div>
