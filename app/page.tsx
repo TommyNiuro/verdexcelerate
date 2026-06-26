@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import CommandPalette from '@/components/CommandPalette'
 import HealthBadge from '@/components/HealthBadge'
+import { getRegionalKpis, getActorCount } from '@/lib/queries'
 
 // ── Count-up hook ──
 function useCountUp(target: number, delay = 0, duration = 2000) {
@@ -38,13 +39,16 @@ function MetaStat({ target, delay, prefix = '', suffix = '', comma = false, labe
 
 // ── Search data ──
 type SearchItem = { name: string; category: string; href: string }
+// Actores reales (verificados, en el directorio). Busqueda completa en /directorio.
 const SEARCH: SearchItem[] = [
-  { name: 'AgroTech Labs', category: 'Actores', href: '/directorio' },
-  { name: 'CafeDigital S.A.', category: 'Actores', href: '/directorio' },
-  { name: 'BioHarvest Innovation', category: 'Actores', href: '/directorio' },
-  { name: 'Colombia', category: 'Paises', href: '/pais' },
-  { name: 'Costa Rica', category: 'Paises', href: '/pais' },
-  { name: 'Honduras', category: 'Paises', href: '/pais' },
+  { name: 'Frubana', category: 'Actores', href: '/directorio?q=Frubana' },
+  { name: 'Siembra Viva', category: 'Actores', href: '/directorio?q=Siembra%20Viva' },
+  { name: 'Anacafe', category: 'Actores', href: '/directorio?q=Anacafe' },
+  { name: 'Zamorano', category: 'Actores', href: '/directorio?q=Zamorano' },
+  { name: 'EARTH University', category: 'Actores', href: '/directorio?q=EARTH' },
+  { name: 'Colombia', category: 'Paises', href: '/pais?c=CO' },
+  { name: 'Costa Rica', category: 'Paises', href: '/pais?c=CR' },
+  { name: 'Honduras', category: 'Paises', href: '/pais?c=HN' },
   { name: 'Dashboard regional', category: 'Secciones', href: '/dashboard' },
   { name: 'Mapa geografico', category: 'Secciones', href: '/mapa' },
   { name: 'Brechas y oportunidades', category: 'Secciones', href: '/brechas' },
@@ -52,25 +56,26 @@ const SEARCH: SearchItem[] = [
   { name: 'Zonas prioritarias', category: 'Secciones', href: '/zonas' },
 ]
 
+// Hechos reales del dataset y las fuentes (sin marcas de tiempo ficticias).
 const PULSE = [
-  { text: <>Ultimo actor agregado: <strong>AgroTech Labs</strong></>, time: 'hace 3 min' },
-  { text: <>Modelo IA actualizado: <strong>Clasificador v2.1</strong></>, time: 'hace 12 min' },
-  { text: <>Nueva fuente integrada: <strong>DANE Colombia</strong></>, time: 'hace 28 min' },
-  { text: <>Actor verificado: <strong>CafeDigital S.A.</strong></>, time: 'hace 45 min' },
-  { text: <>Pipeline completado: <strong>Scraping Crunchbase</strong></>, time: 'hace 1h' },
-  { text: <>Reporte generado: <strong>Brechas Honduras Q2</strong></>, time: 'hace 2h' },
+  { text: <>Actores reales mapeados en los 6 paises: <strong>114</strong></>, time: 'dataset' },
+  { text: <>Fuentes de datos documentadas: <strong>11</strong></>, time: 'fuentes' },
+  { text: <>Cadena con mas actores: <strong>Cafe</strong></>, time: 'cadenas' },
+  { text: <>Pais con mayor cobertura: <strong>Colombia</strong></>, time: 'cobertura' },
+  { text: <>Benchmarks externos citados: <strong>20</strong></>, time: 'contexto' },
+  { text: <>Inversion AgrifoodTech LATAM 2022: <strong>USD 1.7B</strong> (AgFunder)</>, time: 'AgFunder' },
 ]
 
 const SCREENS = [
   { href: '/login', tag: 'Autenticacion', title: 'Login / Onboarding', desc: 'Inicio de sesion con Google, GitHub o correo. Panel de marca TechnoServe con cifras del ecosistema.', icon: <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></> },
   { href: '/dashboard', tag: 'Vista principal', title: 'Dashboard regional', desc: 'Vista comparativa de los 6 paises con KPIs, cobertura digital, distribucion de actores y actividad reciente.', icon: <><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></> },
-  { href: '/directorio', tag: '2,847 actores', title: 'Directorio de actores', desc: 'Buscador interactivo con filtros por tipo, pais, cadena de valor y status. Tarjetas con nivel de confianza IA.', icon: <><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></> },
+  { href: '/directorio', tag: 'Actores reales', title: 'Directorio de actores', desc: 'Buscador interactivo con filtros por tipo, pais, cadena de valor y status. Tarjetas con nivel de confianza IA.', icon: <><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></> },
   { href: '/mapa', tag: '6 paises', title: 'Mapa geografico', desc: 'Mapa interactivo con puntos por actor, panel lateral de busqueda y filtros por tipo.', icon: <><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></> },
   { href: '/pais', tag: 'Colombia (ejemplo)', title: 'Perfil de ecosistema', desc: 'Perfil detallado por pais con KPIs, distribucion tematica, cadenas de valor, rondas de inversion y zonas.', icon: <><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></> },
   { href: '/zonas', tag: '6 zonas', title: 'Zonas prioritarias', desc: 'Diagnostico de 6 zonas de alta vulnerabilidad con brechas criticas, cobertura y analisis de genero.', icon: <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></> },
-  { href: '/brechas', tag: '38 brechas identificadas', title: 'Brechas y oportunidades', desc: 'Analisis de brechas criticas por categoria, oportunidades de innovacion, diagnostico de genero y recomendaciones.', icon: <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>, iconBg: 'rgba(239,68,68,.08)', iconColor: '#ef4444' },
-  { href: '/fuentes', tag: '18 fuentes activas', title: 'Fuentes de datos', desc: 'Rastreo de entrevistas, bases de datos, encuestas, web scraping y monitoreo IA. Pipeline en tiempo real.', icon: <><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></>, iconBg: 'rgba(99,102,241,.08)', iconColor: '#6366f1' },
-  { href: '/gobernanza', tag: '3 modelos activos', title: 'Gobernanza IA', desc: 'Monitoreo de modelos de IA, deteccion de sesgos de genero, calidad de datos, auditoria y cumplimiento etico.', icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>, iconBg: 'rgba(139,92,246,.08)', iconColor: '#8b5cf6' },
+  { href: '/brechas', tag: 'Brechas y benchmarks', title: 'Brechas y oportunidades', desc: 'Analisis de brechas criticas por categoria, oportunidades de innovacion, diagnostico de genero y recomendaciones.', icon: <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>, iconBg: 'rgba(239,68,68,.08)', iconColor: '#ef4444' },
+  { href: '/fuentes', tag: '11 fuentes', title: 'Fuentes de datos', desc: 'Rastreo de entrevistas, bases de datos, encuestas, web scraping y monitoreo IA. Pipeline en tiempo real.', icon: <><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></>, iconBg: 'rgba(99,102,241,.08)', iconColor: '#6366f1' },
+  { href: '/gobernanza', tag: 'Calidad de datos', title: 'Gobernanza IA', desc: 'Monitoreo de modelos de IA, deteccion de sesgos de genero, calidad de datos, auditoria y cumplimiento etico.', icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>, iconBg: 'rgba(139,92,246,.08)', iconColor: '#8b5cf6' },
   { href: '/configuracion', tag: 'Admin panel', title: 'Configuracion', desc: 'Perfil de usuario, configuracion de plataforma, auto-registro, gestion de equipo, API keys e integraciones.', icon: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09"/></>, iconBg: 'rgba(245,158,11,.08)', iconColor: '#f59e0b' },
 ]
 
@@ -80,6 +85,14 @@ export default function Home() {
   const [fading, setFading] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [meta, setMeta] = useState({ actores: 0, paises: 6, cadenas: 9, fuentes: 11 })
+
+  // Cifras reales del dataset
+  useEffect(() => {
+    Promise.all([getRegionalKpis(), getActorCount()])
+      .then(([k, count]) => setMeta(m => ({ ...m, actores: count || k.total, paises: k.countries || 6, cadenas: k.chains || 9 })))
+      .catch(() => {})
+  }, [])
 
   // Rotating pulse
   useEffect(() => {
@@ -164,10 +177,10 @@ export default function Home() {
           </div>
 
           <div className="hero-meta">
-            <MetaStat target={2847} delay={0} comma label="actores mapeados" />
-            <MetaStat target={6} delay={200} label="paises" />
-            <MetaStat target={9} delay={400} label="cadenas de valor" />
-            <MetaStat target={147} delay={600} prefix="$" suffix="M" label="inversion rastreada" />
+            <MetaStat target={meta.actores} delay={0} comma label="actores mapeados" />
+            <MetaStat target={meta.paises} delay={200} label="paises" />
+            <MetaStat target={meta.cadenas} delay={400} label="cadenas de valor" />
+            <MetaStat target={meta.fuentes} delay={600} label="fuentes de datos" />
           </div>
         </div>
       </section>

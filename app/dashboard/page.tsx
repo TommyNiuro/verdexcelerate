@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import AppLayout from '@/components/AppLayout'
+import { getDashboardStats, getRegionalKpis, getDataQuality, getBenchmarks } from '@/lib/queries'
 
 // ── Counter animation ──────────────────────────────────────────────
 function useCountUp(target: number, duration = 1500) {
@@ -47,27 +48,91 @@ function CountCard({
 const COUNTRIES_ORDER = ['co', 'cr', 'gt', 'hn', 'sv', 'pa'] as const
 type CountryKey = typeof COUNTRIES_ORDER[number]
 
-const COUNTRY_DATA: Record<CountryKey, {
+type CountryDatum = {
   name: string; flag: string; total: number
   startupPct: number; investorPct: number; esoPct: number
-  startups: number; investors: number; femLead: number
+  startups: number; investors: number; esos: number; femLead: number
   phase: string; phaseCls: string; inversionM: number; cobertura: number
-}> = {
-  co: { name: 'Colombia',    flag: '🇨🇴', total: 1024, startupPct: 68, investorPct: 15, esoPct: 8, startups: 486, investors: 127, femLead: 18, phase: 'Maduro',      phaseCls: 'phase-maduro',      inversionM: 68, cobertura: 84 },
-  cr: { name: 'Costa Rica',  flag: '🇨🇷', total: 487,  startupPct: 42, investorPct: 12, esoPct: 6, startups: 198, investors: 64,  femLead: 22, phase: 'Emergente',   phaseCls: 'phase-emergente',   inversionM: 28, cobertura: 79 },
-  gt: { name: 'Guatemala',   flag: '🇬🇹', total: 389,  startupPct: 30, investorPct: 8,  esoPct: 5, startups: 147, investors: 38,  femLead: 14, phase: 'Crecimiento', phaseCls: 'phase-crecimiento', inversionM: 17, cobertura: 71 },
-  hn: { name: 'Honduras',    flag: '🇭🇳', total: 341,  startupPct: 26, investorPct: 7,  esoPct: 4, startups: 132, investors: 29,  femLead: 12, phase: 'Crecimiento', phaseCls: 'phase-crecimiento', inversionM: 12, cobertura: 68 },
-  sv: { name: 'El Salvador', flag: '🇸🇻', total: 318,  startupPct: 22, investorPct: 6,  esoPct: 3, startups: 118, investors: 31,  femLead: 16, phase: 'Crecimiento', phaseCls: 'phase-crecimiento', inversionM: 12, cobertura: 66 },
-  pa: { name: 'Panama',      flag: '🇵🇦', total: 288,  startupPct: 20, investorPct: 8,  esoPct: 3, startups: 162, investors: 42,  femLead: 20, phase: 'Emergente',   phaseCls: 'phase-emergente',   inversionM: 10, cobertura: 74 },
 }
-const MAX_TOTAL = 1024
 
-const REGIONAL = { actores: 2847, startups: 1243, inversion: 147, cobertura: 78 }
+const PHASE_LABEL: Record<string, { phase: string; phaseCls: string }> = {
+  maduro: { phase: 'Maduro', phaseCls: 'phase-maduro' },
+  emergente: { phase: 'Emergente', phaseCls: 'phase-emergente' },
+  crecimiento: { phase: 'Crecimiento', phaseCls: 'phase-crecimiento' },
+}
+const FLAG: Record<CountryKey, string> = { co:'🇨🇴', cr:'🇨🇷', gt:'🇬🇹', hn:'🇭🇳', sv:'🇸🇻', pa:'🇵🇦' }
+const NAME: Record<CountryKey, string> = { co:'Colombia', cr:'Costa Rica', gt:'Guatemala', hn:'Honduras', sv:'El Salvador', pa:'Panama' }
+const PHASE_BY_KEY: Record<CountryKey, string> = { co:'maduro', cr:'emergente', gt:'crecimiento', hn:'crecimiento', sv:'crecimiento', pa:'emergente' }
+
+// Estado inicial vacio (se llena con datos reales de Supabase en el efecto)
+const COUNTRY_INIT: Record<CountryKey, CountryDatum> = Object.fromEntries(
+  COUNTRIES_ORDER.map(k => [k, {
+    name: NAME[k], flag: FLAG[k], total: 0, startupPct: 0, investorPct: 0, esoPct: 0,
+    startups: 0, investors: 0, esos: 0, femLead: 0, ...PHASE_LABEL[PHASE_BY_KEY[k]], inversionM: 0, cobertura: 0,
+  }])
+) as Record<CountryKey, CountryDatum>
+
+const REGIONAL_INIT = { actores: 0, startups: 0, inversion: 0, cobertura: 0 }
 
 export default function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | CountryKey>('all')
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifRead, setNotifRead] = useState(false)
+  const [COUNTRY_DATA, setCountryData] = useState(COUNTRY_INIT)
+  const [REGIONAL, setRegional] = useState(REGIONAL_INIT)
+  const [dq, setDq] = useState({ score: 0, total: 0, completeness: 0, freshness: 0, avgConfidence: 0, validatedPct: 0, womenPct: 0 })
+  const [coverage, setCoverage] = useState([
+    { label: 'Completitud', pct: 0, color: 'var(--accent)' },
+    { label: 'Validado', pct: 0, color: 'var(--accent)' },
+    { label: 'Con website', pct: 0, color: 'var(--accent)' },
+    { label: 'Con cadena', pct: 0, color: 'var(--warning)' },
+    { label: 'Confianza', pct: 0, color: 'var(--accent)' },
+    { label: 'Lid. femenino', pct: 0, color: 'var(--danger)' },
+  ])
+
+  // Carga de datos reales desde Supabase
+  useEffect(() => {
+    const isoKey: Record<string, CountryKey> = { CO: 'co', CR: 'cr', GT: 'gt', HN: 'hn', SV: 'sv', PA: 'pa' }
+    const cidByKey: Record<CountryKey, number> = { co: 1, cr: 2, sv: 3, gt: 4, hn: 5, pa: 6 }
+    Promise.all([getDashboardStats(), getRegionalKpis(), getDataQuality(), getBenchmarks({ metric: 'inversion_agrifoodtech' })])
+      .then(([ds, kpi, dq, inv]) => {
+        const next: Record<CountryKey, CountryDatum> = { ...COUNTRY_INIT }
+        const regionalTotal = kpi.total || 1
+        const invByCountry: Record<number, number> = {}
+        for (const b of inv) if (b.country_id && b.value != null) invByCountry[b.country_id] = Number(b.value)
+        for (const row of ds) {
+          const k = isoKey[(row as any).iso2]; if (!k) continue
+          const total = (row as any).total || 0
+          next[k] = {
+            ...next[k], total, startups: (row as any).startups, investors: (row as any).inversores, esos: (row as any).esos,
+            startupPct: total ? Math.round((row as any).startups / total * 100) : 0,
+            investorPct: total ? Math.round((row as any).inversores / total * 100) : 0,
+            esoPct: total ? Math.round((row as any).esos / total * 100) : 0,
+            femLead: total ? Math.round((row as any).lideradas_mujer / total * 100) : 0,
+            inversionM: invByCountry[cidByKey[k]] || 0,
+            cobertura: Math.round(total / regionalTotal * 100),
+          }
+        }
+        setCountryData(next)
+        const regionalInv = inv.find(b => b.country_id == null)?.value
+        setRegional({ actores: kpi.total, startups: kpi.startups, inversion: regionalInv ? Math.round(Number(regionalInv)) : 0, cobertura: dq.completeness })
+        setDq({
+          score: Math.round((dq.completeness + dq.validatedPct + dq.freshness + dq.avgConfidence) / 4),
+          total: dq.total, completeness: dq.completeness, freshness: dq.freshness,
+          avgConfidence: dq.avgConfidence, validatedPct: dq.validatedPct, womenPct: dq.womenPct,
+        })
+        setCoverage([
+          { label: 'Completitud', pct: dq.completeness, color: 'var(--accent)' },
+          { label: 'Validado', pct: dq.validatedPct, color: 'var(--accent)' },
+          { label: 'Con website', pct: dq.websitePct, color: 'var(--accent)' },
+          { label: 'Con cadena', pct: dq.chainPct, color: 'var(--warning)' },
+          { label: 'Confianza', pct: dq.avgConfidence, color: 'var(--accent)' },
+          { label: 'Lid. femenino', pct: dq.womenPct, color: 'var(--danger)' },
+        ])
+      }).catch(() => {})
+  }, [])
+
+  const MAX_TOTAL = Math.max(...COUNTRIES_ORDER.map(k => COUNTRY_DATA[k].total), 1)
 
   const view = activeFilter === 'all' ? null : COUNTRY_DATA[activeFilter]
   const stats = view
@@ -77,8 +142,8 @@ export default function DashboardPage() {
   const cards = [
     {
       label: 'Actores mapeados', target: stats.actores,
-      delta: view ? `${view.flag} ${view.name}` : '+312 este mes',
-      deltaClass: view ? 'delta-neutral' : 'delta-up', iconClass: 'teal',
+      delta: view ? `${view.flag} ${view.name}` : 'en 6 paises',
+      deltaClass: 'delta-neutral', iconClass: 'teal',
       sparkPath: 'M0 35 Q10 30 20 28 T40 22 T60 18 T80 10 T100 5',
       sparkFill: 'M0 35 Q10 30 20 28 T40 22 T60 18 T80 10 T100 5 V40 H0Z',
       sparkColor: 'var(--accent)',
@@ -86,25 +151,25 @@ export default function DashboardPage() {
     },
     {
       label: 'Startups AgrifoodTech', target: stats.startups,
-      delta: view ? `${view.phase}` : '+89 nuevas',
-      deltaClass: view ? 'delta-neutral' : 'delta-up', iconClass: 'blue',
+      delta: view ? `${view.phase}` : 'del dataset',
+      deltaClass: 'delta-neutral', iconClass: 'blue',
       sparkPath: 'M0 30 Q15 28 25 24 T50 20 T75 12 T100 8',
       sparkFill: 'M0 30 Q15 28 25 24 T50 20 T75 12 T100 8 V40 H0Z',
       sparkColor: '#3b82f6',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>,
     },
     {
-      label: view ? 'Inversion estimada' : 'Inversion total rastreada', target: stats.inversion, prefix: '$', suffix: 'M',
-      delta: 'USD acumulado', deltaClass: 'delta-neutral', iconClass: 'purple',
+      label: view ? 'Inversion AgriFoodTech' : 'Inversion AgriFoodTech LATAM', target: stats.inversion, prefix: '$', suffix: 'M',
+      delta: view ? 'benchmark externo' : 'AgFunder, 2022 (LATAM)', deltaClass: 'delta-neutral', iconClass: 'purple',
       sparkPath: 'M0 32 Q20 30 30 25 T55 22 T80 15 T100 10',
       sparkFill: 'M0 32 Q20 30 30 25 T55 22 T80 15 T100 10 V40 H0Z',
       sparkColor: '#8b5cf6',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>,
     },
     {
-      label: 'Cobertura digital', target: stats.cobertura, suffix: '%',
-      delta: view ? 'cobertura del pais' : '+5pp vs. mes pasado',
-      deltaClass: view ? 'delta-neutral' : 'delta-up', iconClass: 'amber',
+      label: view ? 'Participacion regional' : 'Completitud de datos', target: stats.cobertura, suffix: '%',
+      delta: view ? 'del total mapeado' : 'calidad del dataset',
+      deltaClass: 'delta-neutral', iconClass: 'amber',
       sparkPath: 'M0 28 Q10 26 20 24 T45 20 T65 16 T85 12 T100 8',
       sparkFill: 'M0 28 Q10 26 20 24 T45 20 T65 16 T85 12 T100 8 V40 H0Z',
       sparkColor: '#f59e0b',
@@ -259,19 +324,12 @@ export default function DashboardPage() {
 
           <div className="panel anim-fade-up delay-6">
             <div className="panel-header">
-              <span className="panel-title">Cobertura digital</span>
-              <a href="/brechas" className="panel-action">Memo completo</a>
+              <span className="panel-title">Calidad del dataset</span>
+              <a href="/gobernanza" className="panel-action">Gobernanza</a>
             </div>
             <div className="panel-body">
               <div className="coverage-grid">
-                {[
-                  { label: 'Startups',     pct: 82, color: 'var(--accent)' },
-                  { label: 'Inversores',   pct: 75, color: 'var(--accent)' },
-                  { label: 'ESOs',         pct: 68, color: 'var(--accent)' },
-                  { label: 'Asoc. rurales',pct: 41, color: 'var(--warning)' },
-                  { label: 'Zonas prior.', pct: 38, color: 'var(--warning)' },
-                  { label: 'Lid. femenino',pct: 29, color: 'var(--danger)' },
-                ].map(({ label, pct, color }) => {
+                {coverage.map(({ label, pct, color }) => {
                   const circ = 97.5
                   const offset = circ - (circ * pct / 100)
                   return (
@@ -332,12 +390,12 @@ export default function DashboardPage() {
             </div>
             <div className="panel-body-flush">
               {[
-                {dot:'dot-green',href:'/gobernanza',text:<><strong>312 actores</strong> clasificados automaticamente por Gemini 2.5 Flash</>,time:'hace 2h'},
-                {dot:'dot-blue', href:'/fuentes',text:<>Scraper <strong>F6S</strong> completo &mdash; 48 nuevas startups en Costa Rica</>,time:'hace 4h'},
-                {dot:'dot-yellow',href:'/gobernanza',text:<><strong>23 registros</strong> pendientes de validacion humana (confidence &lt; 0.6)</>,time:'hace 6h'},
-                {dot:'dot-green',href:'/fuentes',text:<>Pipeline de dedup ejecutado &mdash; <strong>17 duplicados</strong> fusionados</>,time:'hace 8h'},
-                {dot:'dot-blue', href:'/configuracion',text:<>Autorregistro: <strong>AgroTech SV</strong> solicito inclusion desde El Salvador</>,time:'hace 12h'},
-                {dot:'dot-green',href:'/brechas',text:<>Memo de cobertura actualizado &mdash; Chapman N&#770; = 2,980 startups estimadas</>,time:'hace 1d'},
+                {dot:'dot-green',href:'/directorio',text:<><strong>{REGIONAL.actores} actores</strong> reales mapeados en los 6 paises</>,time:'dataset'},
+                {dot:'dot-blue', href:'/fuentes',text:<><strong>11 fuentes</strong> de datos documentadas (Crunchbase, Dealroom, IDB, LinkedIn y mas)</>,time:'fuentes'},
+                {dot:'dot-green',href:'/directorio',text:<>Cada actor incluye su <strong>fuente de origen</strong> y nivel de confianza</>,time:'trazabilidad'},
+                {dot:'dot-blue', href:'/pais',text:<><strong>Colombia</strong> concentra el mayor numero de actores ({COUNTRY_DATA.co.total})</>,time:'cobertura'},
+                {dot:'dot-yellow',href:'/brechas',text:<>Inversion AgrifoodTech LATAM 2022: <strong>USD 1.7B</strong> (AgFunder)</>,time:'benchmark'},
+                {dot:'dot-green',href:'/gobernanza',text:<>Dataset validado por humano y con cadenas de valor asignadas</>,time:'calidad'},
               ].map(({dot,href,text,time},i) => (
                 <a key={i} href={href} className="activity-item" style={{textDecoration:'none',color:'inherit',cursor:'pointer'}}>
                   <div className={`activity-dot ${dot}`}></div>
@@ -359,16 +417,16 @@ export default function DashboardPage() {
             {[
               { cls:'insight-green', icn:'ig', href:'/pais',
                 icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
-                text:<><strong>Colombia</strong> lidera con 36% de actores. Su ecosistema maduro genera efecto de red.</> },
+                text:<><strong>Colombia</strong> lidera el mapeo con {COUNTRY_DATA.co.total} actores. Su ecosistema maduro genera efecto de red.</> },
               { cls:'insight-blue', icn:'ib', href:'/pais',
                 icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
-                text:<><strong>Costa Rica</strong> muestra el mayor crecimiento mensual (+18%). 48 startups nuevas este mes.</> },
+                text:<><strong>Costa Rica</strong> es el segundo ecosistema mejor cubierto ({COUNTRY_DATA.cr.total} actores), con base agroindustrial exportadora.</> },
               { cls:'insight-amber', icn:'ia', href:'/brechas',
                 icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-                text:<>Brecha de genero: solo 29% liderazgo femenino. Meta TOR: 40%.</> },
+                text:<>Brecha de genero: solo 16% de los deals VC de LATAM van a startups lideradas por mujeres (LAVCA, 2025). Meta del programa: 40%.</> },
               { cls:'insight-red', icn:'ir', href:'/gobernanza',
                 icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>,
-                text:<>23 registros con confianza &lt; 0.6 requieren validacion humana urgente.</> },
+                text:<>Cada actor del directorio incluye su fuente y nivel de confianza, trazables en Gobernanza.</> },
             ].map(({ cls, icn, icon, text, href }) => (
               <a key={cls} href={href} className={`insight-item ${cls}`} style={{textDecoration:'none',color:'inherit',cursor:'pointer'}}>
                 <div className={`insight-icon ${icn}`}>{icon}</div>
@@ -382,15 +440,14 @@ export default function DashboardPage() {
         <div className="pipeline-monitor anim-fade-up" id="pipelineSection">
           <div className="pipeline-header">
             <div className="pipeline-header-title">Pipeline de datos</div>
-            <span className="pipeline-timestamp"><span className="live-dot"></span> Ultima ejecucion: hace 2h</span>
+            <span className="pipeline-timestamp"><span className="live-dot"></span> Flujo de captura a publicacion</span>
           </div>
           <div className="pipeline-flow">
             {([
-              { name:'Scraping',        count:48,   status:'running',  label:'Activo',   href:'/fuentes' },
-              { name:'Clasificacion IA', count:312,  status:'running',  label:'Activo',   href:'/gobernanza' },
-              { name:'Deduplicacion',   count:17,   status:'complete', label:'Completo', href:'/gobernanza' },
-              { name:'Validacion',      count:23,   status:'running',  label:'Activo',   href:'/gobernanza' },
-              { name:'Publicacion',     count:2847, status:'complete', label:'Completo', href:'/directorio' },
+              { name:'Captura (fuentes)', count:11,              status:'complete', label:'11 fuentes', href:'/fuentes' },
+              { name:'Clasificacion',     count:REGIONAL.actores, status:'complete', label:'Completo',  href:'/gobernanza' },
+              { name:'Validacion humana', count:REGIONAL.actores, status:'complete', label:'Completo',  href:'/gobernanza' },
+              { name:'Publicacion',       count:REGIONAL.actores, status:'complete', label:'Completo',  href:'/directorio' },
             ] as const).map(({ name, count, status, label, href }, i) => (
               <span key={name} style={{display:'contents'}}>
                 <a className="pipeline-stage" href={href} style={{textDecoration:'none',color:'inherit',cursor:'pointer'}} title={`Ir a ${name}`}>
@@ -401,7 +458,7 @@ export default function DashboardPage() {
                   <div className="pipeline-stage-name">{name}</div>
                   <div className="pipeline-stage-count">{count.toLocaleString()}</div>
                 </a>
-                {i < 4 && (
+                {i < 3 && (
                   <div className="pipeline-arrow">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><polyline points="9 18 15 12 9 6"/></svg>
                   </div>
@@ -415,14 +472,14 @@ export default function DashboardPage() {
         <div className="grid-1-1">
           <div className="tor-goals panel anim-fade-up delay-2">
             <div className="panel-header">
-              <span className="panel-title">Metas TOR</span>
+              <span className="panel-title">Metas del programa</span>
               <a href="/brechas" className="panel-action">Ver detalle →</a>
             </div>
             {[
-              { label:'Entrevistas realizadas',  fraction:'42 / 60',    pct:70, cls:'fill-green'   },
-              { label:'Alianzas formales',        fraction:'3 / 5',      pct:60, cls:'fill-warning' },
-              { label:'Cobertura digital',        fraction:'78% / 85%',  pct:92, cls:'fill-green'   },
-              { label:'Liderazgo femenino',       fraction:'29% / 40%',  pct:73, cls:'fill-warning' },
+              { label:'Actores mapeados',     fraction:`${REGIONAL.actores} / 200`,        pct: Math.min(Math.round(REGIONAL.actores / 200 * 100), 100), cls:'fill-green'   },
+              { label:'Paises cubiertos',      fraction:'6 / 6',                            pct:100, cls:'fill-green'   },
+              { label:'Completitud de datos',  fraction:`${dq.completeness}% / 90%`,        pct: Math.min(Math.round(dq.completeness / 90 * 100), 100), cls:'fill-warning' },
+              { label:'Liderazgo femenino',    fraction:`${dq.womenPct}% / 40%`,            pct: Math.min(Math.round(dq.womenPct / 40 * 100), 100), cls:'fill-warning' },
             ].map(({ label, fraction, pct, cls }) => (
               <div key={label} className="tor-goal-item">
                 <div className="tor-goal-top">
@@ -450,21 +507,21 @@ export default function DashboardPage() {
                     className="dq-fill" cx="60" cy="60" r="54"
                     fill="none" stroke="var(--success)" strokeWidth="8" strokeLinecap="round"
                     strokeDasharray={339.292}
-                    strokeDashoffset={339.292 * (1 - 0.87)}
+                    strokeDashoffset={339.292 * (1 - dq.score / 100)}
                   />
                 </svg>
                 <div className="dq-text">
-                  <div className="dq-number">87</div>
+                  <div className="dq-number">{dq.score}</div>
                   <div className="dq-label">de 100</div>
                 </div>
               </div>
             </div>
             <div className="dq-mini-grid">
               {[
-                { label:'Completitud', value:'94%' },
-                { label:'Frescura',    value:'82%' },
-                { label:'Precision',   value:'91%' },
-                { label:'Cobertura',   value:'78%' },
+                { label:'Completitud', value:`${dq.completeness}%` },
+                { label:'Frescura',    value:`${dq.freshness}%` },
+                { label:'Confianza',   value:`${dq.avgConfidence}%` },
+                { label:'Validado',    value:`${dq.validatedPct}%` },
               ].map(({ label, value }) => (
                 <div key={label} className="dq-mini">
                   <div className="dq-mini-value">{value}</div>
