@@ -486,7 +486,7 @@ export default function PaisPage() {
               <thead><tr><th>Startup</th><th>Etapa</th><th>Inversor(es)</th><th className="num-col">Monto USD</th><th>Fecha</th></tr></thead>
               <tbody>
                 {d.funding.map(f => (
-                  <tr key={f[0]}>
+                  <tr key={f[0]} style={{cursor:'pointer'}} title={`Buscar ${f[0]} en el directorio`} onClick={() => window.location.href = `/directorio?q=${encodeURIComponent(f[0])}`}>
                     <td style={{fontWeight:600}}>{f[0]}</td>
                     <td><span className="area-pill">{f[1]}</span></td>
                     <td>{f[2]}</td>
