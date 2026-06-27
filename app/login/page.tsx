@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { getActorCount } from '@/lib/queries'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -11,6 +12,11 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [actorCount, setActorCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    getActorCount().then(setActorCount).catch(() => {})
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -56,7 +62,7 @@ export default function LoginPage() {
         </div>
 
         <div className="float-badge float-badge-1">
-          <span className="float-badge-num">312</span>
+          <span className="float-badge-num">{actorCount ?? '—'}</span>
           <span className="float-badge-label">actores mapeados</span>
         </div>
         <div className="float-badge float-badge-2">
@@ -66,11 +72,11 @@ export default function LoginPage() {
 
         <div className="brand-stats">
           <div className="brand-stat">
-            <div className="brand-stat-num">2,847</div>
+            <div className="brand-stat-num">{actorCount ?? '—'}</div>
             <div className="brand-stat-label">Actores</div>
           </div>
           <div className="brand-stat">
-            <div className="brand-stat-num">9</div>
+            <div className="brand-stat-num">6</div>
             <div className="brand-stat-label">Paises</div>
           </div>
           <div className="brand-stat">

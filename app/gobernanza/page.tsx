@@ -181,7 +181,7 @@ export default function GobernanzaPage() {
             <div className="gov-title">Motor de actualizacion de perfiles</div>
             <div className="gov-desc">Actualiza semi-automaticamente perfiles de actores cruzando datos de multiples fuentes (Crunchbase, LinkedIn, registros oficiales).</div>
             <div className="gov-status status-warn"><span style={{width:6,height:6,borderRadius:'50%',background:'var(--warning)',display:'inline-block'}}></span>Revision pendiente</div>
-            <div className="gov-meta"><span>Accuracy: 84%</span><span>Revisar antes de Jul 1</span><span>2,847 perfiles</span></div>
+            <div className="gov-meta"><span>Accuracy: 84%</span><span>Revisar antes de Jul 1</span><span>Perfiles del directorio</span></div>
           </div>
           <div className="gov-card cat-data">
             <div className="gov-icon" style={{background:'var(--accent-soft)',color:'var(--accent)'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
@@ -333,7 +333,7 @@ export default function GobernanzaPage() {
             <div className="gov-title">Privacidad y consentimiento</div>
             <div className="gov-desc">Todos los datos personales requieren consentimiento explicito. Auto-registro incluye opt-in para uso de IA en clasificacion y recomendaciones.</div>
             <div className="gov-status status-ok"><span style={{width:6,height:6,borderRadius:'50%',background:'var(--success)',animation:'dotPulse 2s ease-in-out infinite',display:'inline-block'}}></span>100% consentido</div>
-            <div className="gov-meta"><span>2,847 consentimientos</span><span>0 solicitudes de eliminacion</span></div>
+            <div className="gov-meta"><span>Consentimiento por actor</span><span>0 solicitudes de eliminacion</span></div>
           </div>
         </div>
       </div>

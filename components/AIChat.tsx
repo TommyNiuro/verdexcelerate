@@ -1,30 +1,93 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import {
+  getRegionalKpis, getZones, getCountryProfile, getDataQuality,
+  getSourcesDetailed, COUNTRY_BY_ID,
+} from '@/lib/queries'
 
 type Msg = { role: 'bot' | 'user'; text: string }
 
-function answer(q: string): string {
+type KB = {
+  kpis: Awaited<ReturnType<typeof getRegionalKpis>>
+  zones: Awaited<ReturnType<typeof getZones>>
+  quality: Awaited<ReturnType<typeof getDataQuality>>
+  sources: number
+  co: Awaited<ReturnType<typeof getCountryProfile>>
+  cr: Awaited<ReturnType<typeof getCountryProfile>>
+}
+
+function zoneList(zones: KB['zones']): string {
+  const priority = zones.filter(z => z.is_priority)
+  if (!priority.length) return 'No hay zonas prioritarias registradas todavia.'
+  const names = priority.map(z => {
+    const c = z.country_id != null ? COUNTRY_BY_ID[z.country_id]?.name : null
+    return c ? `${z.name} (${c})` : z.name
+  })
+  return `Hay ${priority.length} zonas prioritarias registradas: ${names.join(', ')}.`
+}
+
+function answer(q: string, kb: KB | null): string {
+  if (!kb) return 'Estoy cargando la base de conocimiento, dame un segundo y vuelve a preguntar.'
   const l = q.toLowerCase()
-  if (l.includes('brecha')) return 'Hay 38 brechas identificadas. Las mas criticas son financiamiento (12) y conectividad (8), concentradas en La Guajira, Morazan y Alta Verapaz.'
-  if (l.includes('colombia')) return 'Colombia lidera con 1,024 actores (68% startups). La Guajira y Sucre son zonas prioritarias con baja cobertura (28% y 34%).'
-  if (l.includes('zona')) return 'Hay 6 zonas prioritarias de alta vulnerabilidad. Las de menor cobertura: La Guajira (28%), Morazan (31%) y Alta Verapaz (34%).'
-  if (l.includes('genero') || l.includes('género') || l.includes('mujer')) return 'La diversidad de genero del ecosistema es 34%. Es la metrica de salud mas baja y una brecha estrategica priorizada.'
-  return 'Base de conocimiento activa: 2,847 actores en 6 paises, $147M rastreados, cobertura digital 78%.'
+
+  if (l.includes('brecha')) {
+    const dq = kb.quality
+    return `Las brechas de datos hoy, segun el dataset capturado (${dq.total} actores aprobados): ${100 - dq.websitePct}% sin sitio web, ${100 - dq.coordsPct}% sin coordenadas y ${100 - dq.validatedPct}% sin validacion humana. En participacion, las iniciativas lideradas por mujeres son el ${kb.kpis.womenPct}% (meta TOR 40%).`
+  }
+
+  if (l.includes('colombia')) {
+    const co = kb.co
+    const startups = co.byType['startup'] || 0
+    const base = `Colombia tiene ${co.total} actores aprobados (${startups} startups), con ${co.womenPct}% liderados por mujeres.`
+    if (l.includes('cr') || l.includes('costa')) {
+      const cr = kb.cr
+      const crStartups = cr.byType['startup'] || 0
+      return `${base} Costa Rica tiene ${cr.total} actores aprobados (${crStartups} startups), con ${cr.womenPct}% liderados por mujeres.`
+    }
+    return base
+  }
+
+  if (l.includes('zona')) return zoneList(kb.zones)
+
+  if (l.includes('genero') || l.includes('género') || l.includes('mujer')) {
+    return `La participacion de iniciativas lideradas por mujeres es ${kb.kpis.womenPct}% (${kb.kpis.womenLed} de ${kb.kpis.total} actores aprobados). Sigue por debajo de la meta TOR de 40%.`
+  }
+
+  const k = kb.kpis
+  return `Base de conocimiento activa: ${k.total} actores aprobados en ${k.countries} paises, ${k.chains} cadenas de valor y ${kb.sources} fuentes mapeadas.`
 }
 
 export default function AIChat() {
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
+  const [kb, setKb] = useState<KB | null>(null)
+  const loadedRef = useRef(false)
   const [messages, setMessages] = useState<Msg[]>([
     { role: 'bot', text: 'Hola, soy el asistente IA de VerdeXcelerate. Puedo responder preguntas sobre el ecosistema AgrifoodTech, brechas, actores y cobertura.' },
   ])
+
+  useEffect(() => {
+    if (!open || loadedRef.current) return
+    loadedRef.current = true
+    ;(async () => {
+      try {
+        const [kpis, zones, quality, sourcesRows, co, cr] = await Promise.all([
+          getRegionalKpis(), getZones(), getDataQuality(), getSourcesDetailed(),
+          getCountryProfile(1), getCountryProfile(2),
+        ])
+        setKb({ kpis, zones, quality, sources: sourcesRows.length, co, cr })
+      } catch {
+        loadedRef.current = false
+      }
+    })()
+  }, [open])
 
   function send() {
     if (!input.trim()) return
     const q = input
     setMessages(m => [...m, { role: 'user', text: q }])
     setInput('')
-    setTimeout(() => setMessages(m => [...m, { role: 'bot', text: answer(q) }]), 900)
+    setTimeout(() => setMessages(m => [...m, { role: 'bot', text: answer(q, kb) }]), 600)
   }
 
   return (
